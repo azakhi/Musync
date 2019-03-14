@@ -43,3 +43,6 @@ jspm_packages/
 
 # next.js build output
 .next
+
+# IDE related folders
+.idea/
