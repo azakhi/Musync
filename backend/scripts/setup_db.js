@@ -1,6 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-const config = require('./../config.js');
+const config = require('../config.js');
 
 const clear = process.argv.includes('clear');
 console.log("Clear tables : " + clear);
@@ -12,7 +12,7 @@ const url = user ? `mongodb://${user}:${password}@${config.db.host}:${config.db.
 const client = new MongoClient(url, { useNewUrlParser: true });
 
 //Count active db operations
-var opCounter = 0;
+let opCounter = 0;
 
 opCounter++;
 client.connect(function(err) {
