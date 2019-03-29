@@ -7,13 +7,15 @@ import Link from "@material-ui/core/Link";
 
 export default function footer() {
   const brands = [
-    {name: "facebook", url: "#"},
-    {name: "twitter", url: "#"},
-    {name: "instagram", url: "#"},
-    {name: "linkedin", url: "#"}];
+    {name: "facebook", url: "#facebook"},
+    {name: "twitter", url: "#twitter"},
+    {name: "instagram", url: "#instagram"},
+    {name: "linkedin", url: "#linkedin"}];
   
+  let id = 0;
   const brandLinks = brands.map(brand => {
-    return generateBrandLink(brand.name, brand.url);
+    id++;
+    return generateBrandLink(brand.name, brand.url, id);
   });
   
   return (
@@ -23,9 +25,9 @@ export default function footer() {
   );
 }
 
-function generateBrandLink(brand, url) {
+function generateBrandLink(brand, url, id) {
   return (
-    <Link href={url} style={{margin: "10px"}}>
+    <Link href={url} style={{margin: "10px"}} key={id}>
       <FontAwesomeIcon icon={["fab", brand]} size="lg"/>
     </Link>
   );

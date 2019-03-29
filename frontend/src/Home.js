@@ -2,33 +2,32 @@ import React, {Component} from "react";
 
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardMedia from "@material-ui/core/CardMedia";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import footer from "./Footer";
 import {Link} from "@material-ui/core";
+import { placeCard, PlaceCardTypes } from "./Place/PlaceCard";
 
 
 class Home extends Component {
   render() {
-    const mainLocation = {
+    const mainPlace = {
+      id: 1,
       name: "Sun Brothers",
       image: "https://b.zmtcdn.com/data/pictures/6/6001836/cae7f24481e1128ac4070a67c26d4ba8_featured_v2.jpg",
       genres: ["Rock", "Metal"],
       currentSong: "Iron Maiden - Dance of Death"
     };
     
-    const otherLocations = [
+    const otherPlaces = [
       {
+        id: 2,
         name: "Blue Jay",
         genres: ["Pop"],
         currentSong: "Taylor Swift - Shake it up"
       },
       {
+        id: 3,
         name: "Mozart Cafe",
         genres: ["Classic"],
         currentSong: "Beethoven - Symphony No:9 in D minor"
@@ -56,31 +55,31 @@ class Home extends Component {
         </Grid>
         
         <Grid container item xs={11}>
-          {locationCard(mainLocation)}
+          {placeCard(mainPlace, PlaceCardTypes.HomeViewPrimary)}
         </Grid>
         
         <Grid container item xs={10} spacing={8} justify="center">
           <Typography gutterBottom align="center">
-            {`Are you not in ${mainLocation.name}? Try these ones.`}
+            {`Are you not in ${mainPlace.name}? Try these ones.`}
           </Typography>
           <br/>
           
-          {otherLocations.map(location => locationCard(location))}
+          {otherPlaces.map(place => placeCard(place, PlaceCardTypes.HomeViewSecondary))}
         </Grid>
         
-        <Grid item xs={12} justify="center">
+        <Grid item xs={12}>
           <Typography gutterBottom align="center">
-            <Link href="#">
+            <Link href="#login-with-spotify">
               Login with your Spotify account
             </Link>
           </Typography>
           <Typography gutterBottom align="center">
-            <Link href="#">
+            <Link href="#login-as-host">
               Login as a Host
             </Link>
           </Typography>
         </Grid>
-        
+  
         <Grid item xs={12}>
           {footer()}
         </Grid>
@@ -88,45 +87,6 @@ class Home extends Component {
       </Grid>
     );
   }
-}
-
-
-function locationCard(props) {
-  const {name, image, genres, currentSong} = props;
-  const isMain = image;
-  
-  return (
-    <Grid item xs={12}>
-      <Card square elevation={isMain ? 2 : 1}>
-        {isMain && <CardMedia component="img"
-                              alt={name + " image"}
-                              image={image}
-                              title={name + " image"}/>}
-        
-        <CardContent>
-          <Typography variant="h5">
-            {name}
-          </Typography>
-          <Typography>
-            {"Genres: " + genres.join(", ")}
-            <br/> <br/>
-  
-            <FontAwesomeIcon icon="music"/>
-            {" Now Playing: " + currentSong}
-          </Typography>
-        </CardContent>
-        
-        <CardActions style={{justifyContent: 'center'}}>
-          <Button color="primary"
-                  size="small"
-                  variant={isMain ? "contained" : "text"}>
-            I am here!
-          </Button>;
-        </CardActions>
-      </Card>
-    </Grid>
-  
-  );
 }
 
 export default Home;
