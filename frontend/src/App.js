@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Route, Switch} from "react-router-dom";
 
 import './stylesheet/App.css';
-import Place from "./Place/Place";
+import Place from "./place/Place";
 import User from "./User";
 import Home from "./Home";
 import NotFound from "./NotFound";

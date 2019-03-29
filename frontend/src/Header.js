@@ -1,9 +1,9 @@
 import React from "react";
 
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
 
 
 export default function header(props) {

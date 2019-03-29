@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import Grid from "@material-ui/core/Grid";
 import footer from "../Footer";
 import header from "../Header";
-import {placeCard, PlaceCardTypes} from "./PlaceCard";
+import {placeCard, PlaceCardTypes} from "./placeCard";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
@@ -16,7 +16,7 @@ import IconButton from "@material-ui/core/IconButton";
 
 class Place extends Component {
   render() {
-    const location = {
+    const currentPlace = {
       id: 1,
       name: "Sun Brothers",
       image: "https://b.zmtcdn.com/data/pictures/6/6001836/cae7f24481e1128ac4070a67c26d4ba8_featured_v2.jpg",
@@ -36,7 +36,7 @@ class Place extends Component {
         {header({isPlaceHeader: true})}
         
         <Grid container item xs={11}>
-          {placeCard(location, PlaceCardTypes.PlaceView)}
+          {placeCard(currentPlace, PlaceCardTypes.PlaceView)}
         </Grid>
         
         <Grid item xs={12} style={{textAlign: 'center'}}>
@@ -47,7 +47,7 @@ class Place extends Component {
           <List dense>
             {generatePlayQueue()}
           </List>
-          
+          <br/>
           <Button variant="contained"
                   color="primary"
                   style={{marginBottom: "50px"}}
@@ -77,7 +77,7 @@ function generatePlayQueue(){
   let counter = 0;
   return songs.map(song => {
     counter++;
-    return <ListItem key={counter}>
+    return <ListItem key={counter} disableGutters divider>
       <IconButton color="secondary" onClick={()=> console.log("Add " + song.name)}>
         <FontAwesomeIcon  icon="plus" size="xs"/>
       </IconButton>

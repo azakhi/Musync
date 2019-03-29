@@ -1,12 +1,11 @@
 import React, {Component} from "react";
 
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
-import footer from "./Footer";
+import Grid from "@material-ui/core/Grid";
 import {Link} from "@material-ui/core";
-import { placeCard, PlaceCardTypes } from "./Place/PlaceCard";
+import Typography from "@material-ui/core/Typography";
+import footer from "./Footer";
+import { placeCard, PlaceCardTypes } from "./place/placeCard";
 
 
 class Home extends Component {
