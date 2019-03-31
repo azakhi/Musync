@@ -46,3 +46,7 @@ jspm_packages/
 
 # IDE related folders
 .idea/
+
+# package-lock.json
+backend/package-lock.json
+frontend/package-lock.json
