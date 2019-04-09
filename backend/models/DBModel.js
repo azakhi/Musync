@@ -14,12 +14,12 @@ class DBModel {
     }
   }
   
-  get _dbObject() {
-    throw "DB object creator should be implemented!";
-  }
-  
   _parseObject(obj) {
     throw "Parser should be implemented!";
+  }
+  
+  get dbObject() {
+    throw "DB object creator should be implemented!";
   }
   
   get collection() {
@@ -34,20 +34,14 @@ class DBModel {
     return this._isDirty;
   }
   
-  commitChanges() {
+  async commitChanges() {
+    this._isDirty = false;
     if (this._id == "") {
-      DBManager.db.collection(this.collection).insertOne(this._dbObject, function(err, res) {
-        if (err) {
-          throw err;
-        }
-      });
+      let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
+      this._id = result.insertedId;
     }
     else {
-      DBManager.db.collection(this.collection).updateOne({_id: this._id}, {$set: this._dbObject}, function(err, res) {
-        if (err) {
-          throw err;
-        }
-      });
+      await DBManager.db.collection(this.collection).updateOne({_id: this._id}, {$set: this.dbObject}).catch((err) => { throw err });
     }
   }
   
