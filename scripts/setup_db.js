@@ -18,6 +18,7 @@ function setupDatabase() {
   // Create collections
   createCollection(DBManager.db, "user");
   createCollection(DBManager.db, "place");
+  createCollection(DBManager.db, "genres");
 }
   
 function createCollection(db, name) {

@@ -4,12 +4,16 @@ const DBManager = require("./DBManager");
 const ModelManager = require("./ModelManager");
 const DBModel = require("./DBModel");
 
-class User extends DBModel {
+class Genre extends DBModel {
   constructor(obj) {
     super(obj);
     
     this._parseObject(obj);
     ModelManager.register(this);
+  }
+  
+  get _dbObject() {
+    return {name: this.name};
   }
   
   _parseObject(obj) {
@@ -32,8 +36,8 @@ class User extends DBModel {
   }
   
   static get collection() {
-    return "user";
+    return "genres";
   }
 }
 
-module.exports = User;
+module.exports = Genre;
