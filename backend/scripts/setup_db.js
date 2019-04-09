@@ -1,33 +1,25 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const config = require('../config.js');
+const DBManager = require('../models/DBManager');
 
 const clear = process.argv.includes('clear');
 console.log("Clear tables : " + clear);
 
-const user = encodeURIComponent(config.db.user);
-const password = encodeURIComponent(config.db.pass);
+if (DBManager.isConnected) {
+  setupDatabase();
+}
+else {
+  DBManager.connect(setupDatabase);
+}
 
-const url = user ? `mongodb://${user}:${password}@${config.db.host}:${config.db.port}/` : `mongodb://${config.db.host}:${config.db.port}/`;
-const client = new MongoClient(url, { useNewUrlParser: true });
-
-//Count active db operations
 let opCounter = 0;
-
-opCounter++;
-client.connect(function(err) {
-  assert.equal(null, err);
-  console.log("Connected to server\n");
-
-  const db = client.db(config.db.name);
-  
+function setupDatabase() {
   // Create collections
-  createCollection(db, "user");
-  createCollection(db, "place");
+  createCollection(DBManager.db, "user");
+  createCollection(DBManager.db, "place");
+}
   
-  opFinishCallback();
-});
-
 function createCollection(db, name) {
   opCounter++;
   db.createCollection(name, function(err, res) {
@@ -54,6 +46,6 @@ function clearCollection(db, name) {
 function opFinishCallback() {
   opCounter--;
   if (opCounter <= 0) {
-    client.close();
+    process.exit();
   }
 }
