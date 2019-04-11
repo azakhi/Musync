@@ -7,6 +7,7 @@ const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const apiRouter = require('./routes/api');
+const placeController = require('./routes/PlaceController');
 
 const DBManager = require("./models/DBManager");
 DBManager.connect(function(){});
@@ -36,6 +37,7 @@ app.use(function(req, res, next) {
 //app.use('/', indexRouter);
 //app.use('/users', usersRouter);
 app.use('/api', apiRouter);
+app.use('/place', placeController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
