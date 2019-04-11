@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "start:dev": "cross-env NODE_ENV=dev node ./bin/www",
+    "start:dev": "cross-env NODE_ENV=dev nodemon ./bin/www",
     "start:test": "cross-env NODE_ENV=test node ./bin/www",
     "setup_db": "node ./scripts/setup_db.js",
     "setup_db:dev": "cross-env NODE_ENV=dev node ./scripts/setup_db.js",
@@ -19,5 +19,8 @@
     "jade": "~1.11.0",
     "mongodb": "^3.1.13",
     "morgan": "~1.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.11"
   }
 }

@@ -28,3 +28,4 @@ npm start                   Start application in environment currently set (if n
 npm run start:dev           Start application in 'dev' environment
 npm run start:test          Start application in 'test' environment
 ```
+Run the application in 'dev' mode to hot reload the changes as you make.
