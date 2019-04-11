@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const models = require("../models/modelExporter");
+const models = require("../models/ModelExporter");
 
 
 // Get a Place with given name
@@ -8,6 +8,9 @@ router.get('/', getPlace);
 
 // Create a new Place
 router.post('/', createNewPlace);
+
+// Get closest Places to a location
+router.post('/closest', findClosestPlaces);
 
 
 async function getPlace(req, res, next) {
@@ -22,7 +25,7 @@ async function getPlace(req, res, next) {
   res.send(JSON.stringify(result));
 }
 
-async function createNewPlace(req, res, next){
+async function createNewPlace(req, res, next) {
   const body = req.body;
   const {placeName, userId, latitude, longitude, spotifyInfo,
     isPermanent, district, city, country} = body;
@@ -90,6 +93,80 @@ async function createNewPlace(req, res, next){
   
   await place.commitChanges();
   res.send(JSON.stringify(place));
+}
+
+async function findClosestPlaces(req, res, next) {
+  if(!req.body || !req.body.latitude || !req.body.longitude){
+    res.status(400).send('Error: Missing information!');
+    return;
+  }
+  
+  const distance = 10; // Arbitrary distance for now
+  const boundingBox = calculateBoundingBox(req.body, distance);
+  const {minLat, maxLat, minLon, maxLon} = boundingBox;
+
+  const query = {
+    latitude: {$gt: minLat, $lt: maxLat},
+    longitude: {$gt: minLon, $lt: maxLon}
+  };
+  const closePlaces = await models.Place.find(query);
+  
+  // Calculate distances of each candidate Place
+  for(const place of closePlaces){
+    const location = {latitude: place._latitude, longitude: place._longitude};
+    place.distance = calculateDistanceInKm(req.body, location);
+  }
+  res.send(JSON.stringify(closePlaces));
+}
+
+// Used the formulation given in following page
+// http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates
+function calculateBoundingBox(location, distance){
+  const lat = degToRad(location.latitude);
+  const lon = degToRad(location.longitude);
+  const earthRadius = 6371;
+  // Angular radius
+  const r = distance / earthRadius;
+  
+  const minLat = lat - r;
+  const maxLat = lat + r;
+  
+  const latDelta = Math.asin(Math.sin(r) / Math.cos(lat));
+  const minLon = lon - latDelta;
+  const maxLon = lon + latDelta;
+  
+  return {
+    minLat: radToDeg(minLat),
+    maxLat: radToDeg(maxLat),
+    minLon: radToDeg(minLon),
+    maxLon: radToDeg(maxLon)
+  };
+}
+
+// Haversine formula to calculate crow-fly distance
+// https://stackoverflow.com/a/27943
+function calculateDistanceInKm(location1, location2){
+  const {latitude: lat1, longitude: lon1} = location1;
+  const {latitude: lat2, longitude: lon2} = location2;
+  const earthRadius = 6371;
+  
+  const diffLat = degToRad(lat2 - lat1);
+  const diffLon = degToRad(lon2 - lon1);
+  
+  const a = Math.sin(diffLat/2) * Math.sin(diffLat/2)
+    + Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2))
+    * Math.sin(diffLon/2) * Math.sin(diffLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  
+  return earthRadius * c;
+}
+
+function degToRad(deg) {
+  return deg * (Math.PI/180);
+}
+
+function radToDeg(rad){
+  return (rad * 180) / Math.PI;
 }
 
 
