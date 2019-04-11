@@ -69,7 +69,7 @@ class Place extends DBModel {
   }
   
   set name(value) {
-    if (this._name != value) {
+    if (this._name !== value) {
       this._name = value;
       this._isDirty = true;
     }
@@ -80,7 +80,7 @@ class Place extends DBModel {
   }
   
   set spotifyConnection(value) {
-    if (this._spotifyConnection != value) {
+    if (this._spotifyConnection !== value) {
       if (value instanceof SpotifyConnection) {
         this._spotifyConnection = value;
         this._isDirty = true;
@@ -97,7 +97,7 @@ class Place extends DBModel {
   }
   
   set pin(value) {
-    if (this._pin != value && !isNaN(value)) {
+    if (this._pin !== value && !isNaN(value)) {
       this._pin = value;
       this._isDirty = true;
     }
@@ -116,7 +116,7 @@ class Place extends DBModel {
   }
   
   set playlist(value) {
-    if (this._playlist != value) {
+    if (this._playlist !== value) {
       if (value instanceof Playlist) {
         this._playlist = value;
         this._isDirty = true;
@@ -137,7 +137,7 @@ class Place extends DBModel {
   }
   
   set owner(value) {
-    if (this._owner != value) {
+    if (this._owner !== value) {
       this._owner = value;
       this._isDirty = true;
     }
@@ -148,7 +148,7 @@ class Place extends DBModel {
   }
   
   set latitude(value) {
-    if (this._latitude != value && !isNaN(value)) {
+    if (this._latitude !== value && !isNaN(value)) {
       this._latitude = value;
       this._isDirty = true;
     }
@@ -159,7 +159,7 @@ class Place extends DBModel {
   }
   
   set longitude(value) {
-    if (this._longitude != value && !isNaN(value)) {
+    if (this._longitude !== value && !isNaN(value)) {
       this._longitude = value;
       this._isDirty = true;
     }
@@ -170,7 +170,7 @@ class Place extends DBModel {
   }
   
   set district(value) {
-    if (this._district != value) {
+    if (this._district !== value) {
       this._district = value;
       this._isDirty = true;
     }
@@ -181,7 +181,7 @@ class Place extends DBModel {
   }
   
   set city(value) {
-    if (this._city != value) {
+    if (this._city !== value) {
       this._city = value;
       this._isDirty = true;
     }
@@ -192,7 +192,7 @@ class Place extends DBModel {
   }
   
   set country(value) {
-    if (this._country != value) {
+    if (this._country !== value) {
       this._country = value;
       this._isDirty = true;
     }
@@ -203,7 +203,7 @@ class Place extends DBModel {
   }
   
   set isPermanent(value) {
-    if (this._isPermanent != value) {
+    if (this._isPermanent !== value) {
       this._isPermanent = !!value;
       this._isDirty = true;
     }
