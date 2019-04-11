@@ -5,7 +5,7 @@ class SpotifyConnection {
     assert.ok(SpotifyConnection.isValidValue(obj), "Invalid SpotifyConnection object");
     this._accessToken = obj.accessToken;
     this._refreshToken = obj.refreshToken;
-    this._expiressIn = Number(obj.expiressIn);
+    this._expiresIn = Number(obj.expiresIn);
   }
   
   get accessToken() {
@@ -16,20 +16,20 @@ class SpotifyConnection {
     return this._refreshToken;
   }
   
-  get expiressIn() {
-    return this._expiressIn;
+  get expiresIn() {
+    return this._expiresIn;
   }
   
   get dbObject() {
     return {
       accessToken: this.accessToken,
       refreshToken: this.refreshToken,
-      expiressIn: this.expiressIn,
+      expiresIn: this.expiresIn,
     };
   }
   
   static isValidValue(value) {
-    return !!value && !!value.accessToken && !!value.refreshToken && !isNaN(value.expiressIn);
+    return !!value && !!value.accessToken && !!value.refreshToken && !isNaN(value.expiresIn);
   }
 }
 

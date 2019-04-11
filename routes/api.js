@@ -60,7 +60,7 @@ router.get('/place/add', function(req, res, next) {
       let spotifyConnection = new models.SpotifyConnection({
         accessToken: "accessToken",
         refreshToken: "refreshToken",
-        expiressIn: 0
+        expiresIn: 0
       });
       
       let user = new models.User({
