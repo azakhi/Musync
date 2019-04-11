@@ -24,10 +24,10 @@ async function getPlace(req, res, next) {
 
 async function createNewPlace(req, res, next){
   const body = req.body;
-  const {placeName, userId, latitude, longitude,
+  const {placeName, userId, latitude, longitude, spotifyInfo,
     isPermanent, district, city, country} = body;
   
-  if(!placeName || !userId || !latitude || !longitude){
+  if(!placeName || !userId || !latitude || !longitude || !spotifyInfo){
     res.status(400).send('Error: Missing information!');
     return;
   }
@@ -48,19 +48,19 @@ async function createNewPlace(req, res, next){
     }
   }
   
-  // TODO: Get the data from request
+  const {id, uri, name, description,
+    accessToken, refreshToken, expiresIn} = spotifyInfo;
   let spotifyItem = new models.SpotifyItem({
-    id: "id",
-    uri: "uri",
-    name: "name",
-    description: "description"
+    id: id,
+    uri: uri,
+    name: name,
+    description: description
   });
   
-  // TODO: Get the data from request
   let spotifyConnection = new models.SpotifyConnection({
-    accessToken: "accessToken",
-    refreshToken: "refreshToken",
-    expiresIn: 0
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    expiresIn: expiresIn
   });
   
   let playlist = new models.Playlist({
