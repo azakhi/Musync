@@ -29,7 +29,7 @@ class Genre extends DBModel {
   }
   
   set name(value) {
-    if (this._name != value) {
+    if (this._name !== value) {
       this._name = value;
       this._isDirty = true;
     }
