@@ -78,7 +78,7 @@ router.get('/place/add', function(req, res, next) {
         songRecords: [song],
         owner: user.id,
         latitude: 35.678,
-        longtitude: 35.678,
+        longitude: 35.678,
         district: "Bilkent",
         city: "Ankara",
         country: "Turkey",
