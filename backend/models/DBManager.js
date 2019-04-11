@@ -22,7 +22,7 @@ class DBManager {
     this._mongoClient = new MongoClient(url, { useNewUrlParser: true });
     
     this._mongoClient.connect(function(err) {
-      assert.equal(null, err);
+      assert.strictEqual(null, err);
       callback();
     });
   }
