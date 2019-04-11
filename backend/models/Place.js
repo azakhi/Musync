@@ -26,7 +26,7 @@ class Place extends DBModel {
     this._songRecords = (!!obj && Array.isArray(obj.songRecords)) ? obj.songRecords : [];
     this._owner = (!!obj && !!obj.owner) ? obj.owner : "";
     this._latitude = (!!obj && !isNaN(obj.latitude)) ? obj.latitude : -1;
-    this._longtitude = (!!obj && !isNaN(obj.longtitude)) ? obj.longtitude : -1;
+    this._longitude = (!!obj && !isNaN(obj.longitude)) ? obj.longitude : -1;
     this._district = (!!obj && !!obj.district) ? obj.district : "";
     this._city = (!!obj && !!obj.city) ? obj.city : "";
     this._country = (!!obj && !!obj.country) ? obj.country : "";
@@ -55,7 +55,7 @@ class Place extends DBModel {
       songRecords: songRecords,
       owner: this.owner,
       latitude: this.latitude,
-      longtitude: this.longtitude,
+      longitude: this.longitude,
       district: this.district,
       city: this.city,
       country: this.country,
@@ -154,13 +154,13 @@ class Place extends DBModel {
     }
   }
 
-  get longtitude() {
-    return this._longtitude;
+  get longitude() {
+    return this._longitude;
   }
   
-  set longtitude(value) {
-    if (this._longtitude != value && !isNaN(value)) {
-      this._longtitude = value;
+  set longitude(value) {
+    if (this._longitude != value && !isNaN(value)) {
+      this._longitude = value;
       this._isDirty = true;
     }
   }
