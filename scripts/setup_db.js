@@ -24,7 +24,7 @@ function setupDatabase() {
 function createCollection(db, name) {
   opCounter++;
   db.createCollection(name, function(err, res) {
-    assert.equal(null, err);
+    assert.strictEqual(null, err);
     console.log("'" + name + "' collection created\n");
     
     if (clear) {
@@ -38,7 +38,7 @@ function createCollection(db, name) {
 function clearCollection(db, name) {
   opCounter++;
   db.collection(name).deleteMany({}, function(err, res) {
-    assert.equal(null, err);
+    assert.strictEqual(null, err);
     console.log("'" + name + "' collection cleared\n");
     opFinishCallback()
   });
