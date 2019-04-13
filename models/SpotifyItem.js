@@ -1,41 +1,13 @@
 const assert = require('assert');
+const DBObjectBase = require("./DBObjectBase");
+const DBBasicTypes = require("./DBBasicTypes");
 
-class SpotifyItem {
-  constructor(obj) {
-    assert.ok(SpotifyItem.isValidValue(obj), "Invalid SpotifyItem object");
-    this._id = obj.id;
-    this._uri = obj.uri;
-    this._name = obj.name;
-    this._description = obj.description;
-  }
-  
-  get id() {
-    return this._id;
-  }
-  
-  get uri() {
-    return this._uri;
-  }
-  
-  get name() {
-    return this._name;
-  }
-  
-  get description() {
-    return this._description;
-  }
-  
-  get dbObject() {
-    return {
-      id: this.id,
-      uri: this.uri,
-      name: this.name,
-      description: this.description,
-    };
-  }
-  
-  static isValidValue(value) {
-    return !!value && !!value.id && !!value.uri && !!value.name && !!value.description;
+class SpotifyItem extends DBObjectBase {
+  _initialize() {
+    this.id = new DBBasicTypes.DBString(true, "");
+    this.uri = new DBBasicTypes.DBString(true, "");
+    this.name = new DBBasicTypes.DBString(true, "");
+    this.description = new DBBasicTypes.DBString(true, "");
   }
 }
 
