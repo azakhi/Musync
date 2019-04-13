@@ -4,6 +4,7 @@ const spotifyConnection = require('../models/SpotifyConnection');
 
 const models = require("../models/ModelExporter");
 var request = require('request');
+var querystring = require('querystring');
 
 
 class SpotifyController{
@@ -92,7 +93,7 @@ class SpotifyController{
       }
     });
 }
-static async playSong (spotifyConnect,playlist) {
+static async playSong(spotifyConnect,playlist) {
 
   var options = {
     url: 'https://api.spotify.com/v1/me/player/play',
@@ -113,6 +114,59 @@ static async playSong (spotifyConnect,playlist) {
         console.log("error");
     }
   });
+}
+static async searchSong(spotifyConnect) {
+  console.log(spotifyConnect.accessToken);
+  console.log('https://api.spotify.com/v1/search?'+querystring.stringify({
+    q: 'Under Pressure',
+    type: 'track',
+    
+  }));
+  var options = {
+    url: 'https://api.spotify.com/v1/search?'+querystring.stringify({
+      q: 'Under Pressure',
+      type: 'track',
+      
+    }),
+   headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken ,
+   'Content-Type': 'application/json'
+  },
+   json: true
+  };  
+  var result="";
+  await  request.get(options, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      result=body;
+      console.log(body);
+      console.log(response.statusCode);
+        
+    }else{
+        console.log("error");
+    }
+  });
+  return result;
+}
+static async getLibrary(spotifyConnect) {
+  
+  var options = {
+    url: 'https://api.spotify.com/v1/me/tracks',
+    headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken ,
+   'Content-Type': 'application/json'
+  },
+   json: true
+  };  
+  var result="";
+  await  request.get(options, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      result=body;
+      console.log(body);
+      console.log(response.statusCode);
+        
+    }else{
+        console.log("error");
+    }
+  });
+  return result;
 }
 }
 module.exports =  SpotifyController;
