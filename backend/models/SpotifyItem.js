@@ -2,7 +2,7 @@ const assert = require('assert');
 
 class SpotifyItem {
   constructor(obj) {
-    assert.ok(SpotifyItem.isValidValue(obj), "Invalid SpotifyItem object");
+    
     this._id = obj.id;
     this._uri = obj.uri;
     this._name = obj.name;
