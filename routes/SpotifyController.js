@@ -2,7 +2,7 @@
 
 const spotifyConnection = require('../models/SpotifyConnection');
 
-const models = require("../models/ModelExporter");
+const models = require("../models/Models");
 var request = require('request');
 var querystring = require('querystring');
 
