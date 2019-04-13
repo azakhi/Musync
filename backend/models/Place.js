@@ -1,12 +1,11 @@
 const assert = require('assert');
 
-const DBManager = require("./DBManager");
 const ModelManager = require("./ModelManager");
-const DBModel = require("./DBModel");
+const ModelBase = require("./ModelBase");
 const SpotifyConnection = require("./SpotifyConnection");
 const Playlist = require("./Playlist");
 
-class Place extends DBModel {
+class Place extends ModelBase {
   constructor(obj) {
     super(obj);
     

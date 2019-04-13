@@ -1,10 +1,9 @@
 const assert = require('assert');
 
-const DBManager = require("./DBManager");
 const ModelManager = require("./ModelManager");
-const DBModel = require("./DBModel");
+const ModelBase = require("./ModelBase");
 
-class User extends DBModel {
+class User extends ModelBase {
   constructor(obj) {
     super(obj);
     

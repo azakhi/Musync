@@ -1,7 +1,5 @@
 const assert = require('assert');
 
-const DBManager = require("./DBManager");
-
 class ModelManager {
   constructor() {
     this._registeredModels = [];
