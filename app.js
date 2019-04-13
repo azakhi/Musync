@@ -9,6 +9,7 @@ const usersRouter = require('./routes/users');
 const apiRouter = require('./routes/api');
 const placeController = require('./routes/PlaceController');
 
+
 const DBManager = require("./models/DBManager");
 DBManager.connect(function(){});
 const ModelManager = require("./models/ModelManager");
@@ -39,6 +40,7 @@ app.use(function(req, res, next) {
 app.use('/api', apiRouter);
 app.use('/place', placeController);
 
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -52,7 +54,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send('error');
 });
 
 module.exports = app;

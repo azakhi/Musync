@@ -7,6 +7,7 @@ class SpotifyConnection extends DBObjectBase {
     this.accessToken = new DBBasicTypes.DBString(true, "");
     this.refreshToken = new DBBasicTypes.DBString(true, "");
     this.expiresIn = new DBBasicTypes.DBNumber(true, 0);
+    this.userId = new DBBasicTypes.DBString(true, "");
   }
 }
 
