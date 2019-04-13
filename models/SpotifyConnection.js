@@ -2,12 +2,16 @@ const assert = require('assert');
 
 class SpotifyConnection {
   constructor(obj) {
-    assert.ok(SpotifyConnection.isValidValue(obj), "Invalid SpotifyConnection object");
+    
     this._accessToken = obj.accessToken;
     this._refreshToken = obj.refreshToken;
     this._expiresIn = Number(obj.expiresIn);
+    this._userId = obj.userId;
   }
-  
+  get userId() {
+    return this._userId;
+  }
+
   get accessToken() {
     return this._accessToken;
   }
@@ -19,7 +23,7 @@ class SpotifyConnection {
   get expiresIn() {
     return this._expiresIn;
   }
-  
+
   get dbObject() {
     return {
       accessToken: this.accessToken,
