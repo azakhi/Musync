@@ -36,7 +36,7 @@ async function createNewPlace(req, res, next) {
   }
   
   // Find Place owner
-  let user = await models.User.findOne({id: userId});
+  let user = await models.User.findOne({_id: userId});
   if(!user){
     res.status(400).send('Error: Invalid user id!');
     return;
@@ -47,7 +47,7 @@ async function createNewPlace(req, res, next) {
   if(Array.isArray(body.genres)){
     for(const genreName of body.genres){
       let genre = await models.Genre.findOne({name: genreName});
-      genres.push(genre.id);
+      genres.push(genre._id);
     }
   }
   
@@ -75,7 +75,7 @@ async function createNewPlace(req, res, next) {
   
   let place = new models.Place({
     name: placeName,
-    owner: user.id,
+    owner: user._id,
     pin: 1994,
     playlist: playlist,
     genres: genres,

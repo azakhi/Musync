@@ -1,33 +1,74 @@
 const assert = require('assert');
 
 const DBManager = require("./DBManager");
+const DBObjectBase = require("./DBObjectBase");
+const ModelManager = require("./ModelManager");
 
 class ModelBase {
   constructor(obj) {
-    if (!!obj && !!obj._id) {
-      this._id = obj._id;
-      this._isDirty = false;
-    }
-    else { // New database entry
-      this._id = "";
+    if (!obj || !obj._id) { // New database entry
       this._isDirty = true;
     }
+    
+    this._initialize();
+    this._parseObject(obj);
+    ModelManager.register(this);
+    
+    return new Proxy(this, this);
+  }
+  
+  _initialize() {
+    assert.ok(false, "Initializer should be implemented!");
   }
   
   _parseObject(obj) {
-    throw "Parser should be implemented!";
+    if (!obj) {
+      return;
+    }
+    
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        assert.ok(this[key] instanceof DBObjectBase, "Unknown field: " + key);
+        this[key].value = obj[key];
+      }
+    }
+  }
+  
+  get (target, prop) {
+    if (this[prop] instanceof DBObjectBase) {
+      return this[prop].value;
+    }
+    
+    return this[prop];
+  }
+  
+  set (target, prop, val) {
+    if (this[prop] instanceof DBObjectBase) {
+      if (this[prop].value !== val) {
+        this[prop].value = val;
+        this._isDirty = true;
+      }
+    }
+    else {
+      this[prop] = val;
+    }
+    
+    return true;
   }
   
   get dbObject() {
-    throw "DB object creator should be implemented!";
+    let obj = {};
+    for (var key in this) {
+      if (this.hasOwnProperty(key) && this[key] instanceof DBObjectBase) {
+        obj[key] = this[key].value;
+      }
+    }
+    
+    return obj;
   }
   
   get collection() {
     return this.constructor.collection;
-  }
-  
-  get id() {
-    return this._id;
   }
   
   get isDirty() {
@@ -36,7 +77,8 @@ class ModelBase {
   
   async commitChanges() {
     this._isDirty = false;
-    if (this._id == "") {
+    if (this._id === null) {
+      console.log(this.dbObject);
       let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
       this._id = result.insertedId;
     }
@@ -46,7 +88,7 @@ class ModelBase {
   }
   
   static get collection() {
-    throw "Collection name should be overriden by child!";
+    assert.ok(false, "Collection name should be overriden by child!");
   }
   
   static async findOne(query) {
