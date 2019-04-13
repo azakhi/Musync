@@ -5,12 +5,12 @@ const spotifyConnection = require('../models/SpotifyConnection');
 const models = require("../models/ModelExporter");
 var request = require('request');
 
-var access_token = "BQCbM8hjQ0yZlu8BrsdqKjrXFAk9Z9q4Ymo5ek7XRyETJPQF46U0QWTPkclsrZH8SfUUIgJpmq9tcGR4oRPLoAJrjQfqw8k-d3CO1gOAEuoCIdCAGxBkp1cAkBUxpGPIJT5uceVl0PD9Mu0Ms4lx64ALB5UmKAs7UcC-WH7DU2dATttb4aaADC_iRXe2Qcw5U7eH1NT8Mt9WTjQikptK2oVou367nAAzCggwDmr-cQE1bEI_axAMwqhh4884Kv9niiuLJ-Q0Pm8YZAoJWxMb";
+
 class SpotifyController{
   constructor(){
   }
   static async createPlaylist(spotifyConnect) {
-    console.log("girdik"+spotifyConnect.userId+spotifyConnect.accessToken);
+    
     var options = {
         url: 'https://api.spotify.com/v1/users/'+spotifyConnect.userId+'/playlists',
         body: JSON.stringify({
@@ -39,11 +39,11 @@ class SpotifyController{
 
     });
     
-    console.log("burada");
+ 
   
 }
   static async addSong(spotifyConnect,playlist,song) {
-    console.log(song.id+"  "+playlist.id);
+
     var songUri = 'spotify:track:'+song.id;
     var options = {
       url: 'https://api.spotify.com/v1/playlists/'+playlist.id+'/tracks',
@@ -93,7 +93,7 @@ class SpotifyController{
     });
 }
 static async playSong (spotifyConnect,playlist) {
-  var access_token = "BQC2ro8mwKQAMXrmdlzOmo1ztGXqAYIE5gpYvc8JYX7UWfDIAMs3vVLzsfq_ub0QEaVYGM_NZw4FdJ04amduYiryxy5jCDYAPx2Kl8Y5i8uhZ18hX40sMBWlAFLtweTGP_9EOf83Y_YhGuaQU-shcLn3Qm8TtBtJYsvzk2k2B92z2JVuvTM6KY_24xjngYKSb0X2-UHojF9D7xhMD0PqUy7RNGE8ANGvUK5OjdMH2HK1FESjVwXVs0VOr5pH9fRWeVVf558R4o7QdBW2zT16";
+
   var options = {
     url: 'https://api.spotify.com/v1/me/player/play',
     body: JSON.stringify({
