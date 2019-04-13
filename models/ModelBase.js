@@ -2,7 +2,7 @@ const assert = require('assert');
 
 const DBManager = require("./DBManager");
 
-class DBModel {
+class ModelBase {
   constructor(obj) {
     if (!!obj && !!obj._id) {
       this._id = obj._id;
@@ -67,4 +67,4 @@ class DBModel {
   }
 }
 
-module.exports = DBModel;
+module.exports = ModelBase;
