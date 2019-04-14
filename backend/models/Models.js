@@ -4,6 +4,7 @@ const Genre = require("./Genre");
 const Location = require("./Location");
 const Place = require("./Place");
 const Playlist = require("./Playlist");
+const RequestedSong = require("./RequestedSong");
 const Song = require("./Song");
 const SongRecord = require("./SongRecord");
 const SpotifyConnection = require("./SpotifyConnection");
@@ -18,6 +19,7 @@ module.exports = {
   Location,
   Place,
   Playlist,
+  RequestedSong,
   Song,
   SongRecord,
   SpotifyConnection,
