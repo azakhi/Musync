@@ -7,20 +7,20 @@ const Location = require("./Location");
 
 class User extends ModelBase {
   _initialize() {
-    this._id = new DBBasicTypes.DBObjectID(true, null);
-    this.name = new DBBasicTypes.DBString(true, "");
-    this.lastLogin = new DBBasicTypes.DBDate(true, Date.now());
-    this.points = new DBBasicTypes.DBNumber(true, 0);
+    this._id = new DBBasicTypes.DBObjectID(null);
+    this.name = new DBBasicTypes.DBString("");
+    this.lastLogin = new DBBasicTypes.DBDate(Date.now());
+    this.points = new DBBasicTypes.DBNumber(0);
     this.location = new Location();
-    this.visitedPlaces = new DBBasicTypes.DBArray(true, []);
-    this.requestedSongs = new DBBasicTypes.DBArray(true, []);
-    this.isRegistered = new DBBasicTypes.DBBoolean(true, false);
+    this.visitedPlaces = new DBBasicTypes.DBArray([]);
+    this.requestedSongs = new DBBasicTypes.DBArray([]);
+    this.isRegistered = new DBBasicTypes.DBBoolean(false);
     this.spotifyConnection = new SpotifyConnection();
-    this.email = new DBBasicTypes.DBString(true, "");
-    this.password = new DBBasicTypes.DBString(true, "");
-    this.premiumEnd = new DBBasicTypes.DBDate(true, null);
-    this.premiumTier = new DBBasicTypes.DBNumber(true, 0);
-    this.places = new DBBasicTypes.DBArray(true, []);
+    this.email = new DBBasicTypes.DBString("");
+    this.password = new DBBasicTypes.DBString("");
+    this.premiumEnd = new DBBasicTypes.DBDate(null);
+    this.premiumTier = new DBBasicTypes.DBNumber(0);
+    this.places = new DBBasicTypes.DBArray([]);
   }
   
   static get collection() {

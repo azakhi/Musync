@@ -4,11 +4,11 @@ const DBBasicTypes = require("./DBBasicTypes");
 
 class Location extends DBObjectBase {
   _initialize() {
-    this.latitude = new DBBasicTypes.DBNumber(true, 0);
-    this.longitude = new DBBasicTypes.DBNumber(true, 0);
-    this.district = new DBBasicTypes.DBString(true, "");
-    this.city = new DBBasicTypes.DBString(true, "");
-    this.country = new DBBasicTypes.DBString(true, "");
+    this.latitude = new DBBasicTypes.DBNumber(0);
+    this.longitude = new DBBasicTypes.DBNumber(0);
+    this.district = new DBBasicTypes.DBString("");
+    this.city = new DBBasicTypes.DBString("");
+    this.country = new DBBasicTypes.DBString("");
   }
 }
 

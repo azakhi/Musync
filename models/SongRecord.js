@@ -5,7 +5,7 @@ const Song = require("./Song");
 
 class SongRecord extends DBObjectBase {
   _initialize() {
-    this.listenCount = new DBBasicTypes.DBNumber(true, 0);
+    this.listenCount = new DBBasicTypes.DBNumber(0);
     this.song = new Song();
   }
 }

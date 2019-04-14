@@ -5,8 +5,8 @@ const ModelBase = require("./ModelBase");
 
 class Genre extends ModelBase {
   _initialize() {
-    this._id = new DBBasicTypes.DBObjectID(true, null);
-    this.name = new DBBasicTypes.DBString(true, "");
+    this._id = new DBBasicTypes.DBObjectID(null);
+    this.name = new DBBasicTypes.DBString("");
   }
   
   static get collection() {
