@@ -3,11 +3,12 @@ const DBObjectBase = require("./DBObjectBase");
 const DBBasicTypes = require("./DBBasicTypes");
 const Song = require("./Song");
 
-class SongRecord extends DBObjectBase {
+class RequestedSong extends DBObjectBase {
   _initialize() {
-    this.listenCount = new DBBasicTypes.DBNumber(0);
     this.song = new Song();
+    this.date = new DBBasicTypes.DBDate(Date.now());
+    this.place = new DBBasicTypes.DBObjectID(null);
   }
 }
 
-module.exports = SongRecord;
+module.exports = RequestedSong;

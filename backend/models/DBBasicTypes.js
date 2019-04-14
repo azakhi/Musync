@@ -3,14 +3,6 @@ const ObjectID = require('mongodb').ObjectID;
 const DBObjectBase = require("./DBObjectBase");
 
 class DBBasicType extends DBObjectBase {
-  constructor(hasDefaultValue = false, defaultValue = null) {
-    super();
-    if (hasDefaultValue) {
-      assert.ok(this.constructor.isValidValue(defaultValue), "Invalid default value");
-      this.value = defaultValue;
-    }
-  }
-  
   _initialize() {
     // Override error
   }
@@ -45,20 +37,12 @@ class DBBasicType extends DBObjectBase {
 }
 
 class DBString extends DBBasicType {
-  constructor(hasDefaultValue = false, defaultValue = "") {
-    super(hasDefaultValue, defaultValue);
-  }
-  
   static isValidValue(value) {
     return typeof value === 'string';
   }
 }
 
 class DBNumber extends DBBasicType {
-  constructor(hasDefaultValue = false, defaultValue = 0) {
-    super(hasDefaultValue, defaultValue);
-  }
-  
   static convert(value) {
     return Number(value);
   }
@@ -69,10 +53,6 @@ class DBNumber extends DBBasicType {
 }
 
 class DBBoolean extends DBBasicType {
-  constructor(hasDefaultValue = false, defaultValue = false) {
-    super(hasDefaultValue, defaultValue);
-  }
-  
   static convert(value) {
     return !!value;
   }
@@ -83,10 +63,6 @@ class DBBoolean extends DBBasicType {
 }
 
 class DBArray extends DBBasicType {
-  constructor(hasDefaultValue = false, defaultValue = []) {
-    super(hasDefaultValue, defaultValue);
-  }
-
   get value() {
     assert.ok(typeof this._value !== undefined, "Variable is not initialized!");
     
@@ -113,12 +89,18 @@ class DBArray extends DBBasicType {
 }
 
 class DBObjectID extends DBBasicType {
-  constructor(hasDefaultValue = false, defaultValue = null) {
-    super(hasDefaultValue, defaultValue);
+  static isValidValue(value) {
+    return value instanceof ObjectID || value === null;
+  }
+}
+
+class DBDate extends DBBasicType {
+  static convert(value) {
+    return new Date(value);
   }
   
   static isValidValue(value) {
-    return value instanceof ObjectID || value === null;
+    return !isNaN(DBDate.convert(value).getTime());
   }
 }
 
@@ -128,4 +110,5 @@ module.exports = {
   DBBoolean,
   DBArray,
   DBObjectID,
+  DBDate,
 };
