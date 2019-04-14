@@ -122,10 +122,25 @@ class DBObjectID extends DBBasicType {
   }
 }
 
+class DBDate extends DBBasicType {
+  constructor(hasDefaultValue = false, defaultValue = null) {
+    super(hasDefaultValue, defaultValue);
+  }
+  
+  static convert(value) {
+    return new Date(value);
+  }
+  
+  static isValidValue(value) {
+    return !isNaN(DBDate.convert(value).getTime());
+  }
+}
+
 module.exports = {
   DBString,
   DBNumber,
   DBBoolean,
   DBArray,
   DBObjectID,
+  DBDate,
 };

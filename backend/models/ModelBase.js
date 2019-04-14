@@ -78,7 +78,6 @@ class ModelBase {
   async commitChanges() {
     this._isDirty = false;
     if (this._id === null) {
-      console.log(this.dbObject);
       let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
       this._id = result.insertedId;
     }

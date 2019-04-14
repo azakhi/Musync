@@ -4,6 +4,7 @@ const DBBasicTypes = require("./DBBasicTypes");
 const ModelBase = require("./ModelBase");
 const SpotifyConnection = require("./SpotifyConnection");
 const Playlist = require("./Playlist");
+const Location = require("./Location");
 
 class Place extends ModelBase {
   _initialize() {
@@ -16,11 +17,7 @@ class Place extends ModelBase {
     this.playlist = new Playlist();
     this.songRecords = new DBBasicTypes.DBArray(true, []);
     this.owner = new DBBasicTypes.DBObjectID(true, null);
-    this.latitude = new DBBasicTypes.DBNumber(true, 0);
-    this.longitude = new DBBasicTypes.DBNumber(true, 0);
-    this.district = new DBBasicTypes.DBString(true, "");
-    this.city = new DBBasicTypes.DBString(true, "");
-    this.country = new DBBasicTypes.DBString(true, "");
+    this.location = new Location();
     this.isPermanent = new DBBasicTypes.DBBoolean(true, false);
     this.genres = new DBBasicTypes.DBArray(true, []);
   }
