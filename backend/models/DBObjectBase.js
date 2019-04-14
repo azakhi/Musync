@@ -1,8 +1,12 @@
 const assert = require('assert');
 
 class DBObjectBase {
-  constructor () {
+  constructor (initialValue) {
     this._initialize();
+    if (initialValue !== undefined) {
+      this.value = initialValue;
+    }
+    
     return new Proxy(this, this);
   }
   

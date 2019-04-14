@@ -5,9 +5,9 @@ const SpotifyItem = require("./SpotifyItem");
 
 class Playlist extends DBObjectBase {
   _initialize() {
-    this.songs = new DBBasicTypes.DBArray(true, []);
-    this.currentSong = new DBBasicTypes.DBNumber(true, -1);
-    this.currentSongStartTime = new DBBasicTypes.DBNumber(true, -1);
+    this.songs = new DBBasicTypes.DBArray([]);
+    this.currentSong = new DBBasicTypes.DBNumber(-1);
+    this.currentSongStartTime = new DBBasicTypes.DBNumber(-1);
     this.spotifyPlaylist = new SpotifyItem();
   }
 }

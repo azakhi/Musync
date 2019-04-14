@@ -8,18 +8,18 @@ const Location = require("./Location");
 
 class Place extends ModelBase {
   _initialize() {
-    this._id = new DBBasicTypes.DBObjectID(true, null);
-    this.name = new DBBasicTypes.DBString(true, "");
+    this._id = new DBBasicTypes.DBObjectID(null);
+    this.name = new DBBasicTypes.DBString("");
     this.spotifyConnection = new SpotifyConnection();
-    this.pin = new DBBasicTypes.DBNumber(true, 0);
-    this.votedSongs = new DBBasicTypes.DBArray(true, []);
-    this.votes = new DBBasicTypes.DBArray(true, []);
+    this.pin = new DBBasicTypes.DBNumber(0);
+    this.votedSongs = new DBBasicTypes.DBArray([]);
+    this.votes = new DBBasicTypes.DBArray([]);
     this.playlist = new Playlist();
-    this.songRecords = new DBBasicTypes.DBArray(true, []);
-    this.owner = new DBBasicTypes.DBObjectID(true, null);
+    this.songRecords = new DBBasicTypes.DBArray([]);
+    this.owner = new DBBasicTypes.DBObjectID(null);
     this.location = new Location();
-    this.isPermanent = new DBBasicTypes.DBBoolean(true, false);
-    this.genres = new DBBasicTypes.DBArray(true, []);
+    this.isPermanent = new DBBasicTypes.DBBoolean(false);
+    this.genres = new DBBasicTypes.DBArray([]);
   }
   
   static get collection() {
