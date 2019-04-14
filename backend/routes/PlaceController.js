@@ -36,7 +36,7 @@ async function createNewPlace(req, res, next) {
   }
   
   // Find Place owner
-  let user = await models.User.findOne({_id: userId});
+  let user = await models.User.findOne({_id: new models.ObjectID(userId)});
   if(!user){
     res.status(400).send('Error: Invalid user id!');
     return;
@@ -73,6 +73,14 @@ async function createNewPlace(req, res, next) {
     spotifyPlaylist: spotifyItem
   });
   
+  let location = new models.Location({
+    latitude: latitude,
+    longitude: longitude,
+    district: district,
+    city: city,
+    country: country,
+  });
+  
   let place = new models.Place({
     name: placeName,
     owner: user._id,
@@ -83,11 +91,7 @@ async function createNewPlace(req, res, next) {
     votedSongs: [],
     songRecords: [],
     spotifyConnection: spotifyConnection,
-    latitude: latitude,
-    longitude: longitude,
-    district: district,
-    city: city,
-    country: country,
+    location: location,
     isPermanent: isPermanent ? isPermanent : true,
   });
   
@@ -106,8 +110,8 @@ async function findClosestPlaces(req, res, next) {
   const {minLat, maxLat, minLon, maxLon} = boundingBox;
 
   const query = {
-    latitude: {$gt: minLat, $lt: maxLat},
-    longitude: {$gt: minLon, $lt: maxLon}
+    "location.latitude": {$gt: minLat, $lt: maxLat},
+    "location.longitude": {$gt: minLon, $lt: maxLon}
   };
   const closePlaces = await models.Place.find(query);
   
