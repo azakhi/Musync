@@ -23,7 +23,7 @@ class DBBasicType extends DBObjectBase {
   
   set value(value) {
     value = this.constructor.convert(value);
-    assert.ok(this.constructor.isValidValue(value), "Invalid value!");
+    assert.ok(this.isValidValue(value), "Invalid value!");
     this._value = value;
   }
   
@@ -43,12 +43,23 @@ class DBString extends DBBasicType {
 }
 
 class DBNumber extends DBBasicType {
+  _initialize(initialValue, minValue, maxValue) {
+    minValue = DBNumber.convert(minValue);
+    maxValue = DBNumber.convert(maxValue);
+    this._min = (!isNaN(minValue)) ? minValue : Number.NEGATIVE_INFINITY;
+    this._max = (!isNaN(maxValue)) ? maxValue : Number.POSITIVE_INFINITY;
+  }
+  
+  isValidValue(value) {
+    return DBNumber.isValidValue(value, this._min, this._max);
+  }
+  
   static convert(value) {
     return Number(value);
   }
   
-  static isValidValue(value) {
-    return !isNaN(DBNumber.convert(value));
+  static isValidValue(value, minValue = Number.NEGATIVE_INFINITY, maxValue = Number.POSITIVE_INFINITY) {
+    return !isNaN(value) && value >= minValue && value <= maxValue;
   }
 }
 
@@ -63,28 +74,63 @@ class DBBoolean extends DBBasicType {
 }
 
 class DBArray extends DBBasicType {
+  _initialize(initialValue, type) {
+    this._type = (type !== undefined) ? type : null;
+  }
+  
   get value() {
     assert.ok(typeof this._value !== undefined, "Variable is not initialized!");
     
     let arr = [];
-    this._value.forEach(function(value, index, array) {
-      if (value instanceof DBObjectBase) {
-        arr[index] = value.value;
+    this._value.forEach(function(item, index, array) {
+      if (item instanceof DBObjectBase) {
+        arr[index] = item.value;
       }
       else {
-        arr[index] = value;
+        arr[index] = item;
       }
     });
     
     return arr;
   }
   
-  set value(value) { // JS requires getter and setter to be overriden at the same time
-    super.value = value;
+  set value(value) {
+    assert.ok(this.isValidValue(value), "Invalid value!");
+    
+    let arr = [];
+    let type = this._type;
+    value.forEach(function(item, index, array) {
+      if (item instanceof type) {
+        arr[index] = item;
+      }
+      else {
+        arr[index] = new type(item);
+      }
+    });
+    
+    this._value = arr;
   }
   
-  static isValidValue(value) {
-    return Array.isArray(value);
+  isValidValue(value) {
+    return DBArray.isValidValue(value, this._type);
+  }
+  
+  static isValidValue(value, type = null) {
+    if (!Array.isArray(value)) {
+      return false;
+    }
+    
+    if (type === null) {
+      return true;
+    }
+    
+    for (let item of value) {
+      if (!(item instanceof type) && (!(type.prototype instanceof DBObjectBase) || !type.isValidValue(item))) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 }
 
