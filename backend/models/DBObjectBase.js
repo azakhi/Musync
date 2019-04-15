@@ -1,8 +1,8 @@
 const assert = require('assert');
 
 class DBObjectBase {
-  constructor (initialValue) {
-    this._initialize();
+  constructor (initialValue, ...args) {
+    this._initialize(initialValue, ...args);
     if (initialValue !== undefined) {
       this.value = initialValue;
     }
@@ -49,7 +49,7 @@ class DBObjectBase {
       val = val.value;
     }
     
-    assert.ok(this.constructor.isValidValue(val), "Invalid value!");
+    assert.ok(this.isValidValue(val), "Invalid value!");
     
     for (var key in val) {
       if (val.hasOwnProperty(key)) {
@@ -61,6 +61,10 @@ class DBObjectBase {
         }
       }
     }
+  }
+  
+  isValidValue(value) {
+    return this.constructor.isValidValue(value);
   }
   
   static isValidValue(value) {
