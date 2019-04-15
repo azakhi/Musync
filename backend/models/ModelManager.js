@@ -11,9 +11,7 @@ class ModelManager {
   
   commitChanges() {
     for(let i = 0; i < this._registeredModels.length; i++) {
-      if(this._registeredModels[i].isDirty) {
-        this._registeredModels[i].commitChanges();
-      }
+      this._registeredModels[i].commitChanges();
     }
     
     this._registeredModels = [];
