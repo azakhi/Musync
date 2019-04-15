@@ -10,6 +10,8 @@ class ModelBase {
       this._isDirty = true;
     }
     
+    this._isDeleted = false;
+    this._isMarkedForDelete = false;
     this._initialize();
     this._parseObject(obj);
     ModelManager.register(this);
@@ -43,6 +45,8 @@ class ModelBase {
   }
   
   set (target, prop, val) {
+    assert.ok(!this._isDeleted, "Trying to modify a deleted model!");
+    
     if (this[prop] instanceof DBObjectBase) {
       if (this[prop].value !== val) {
         this[prop].value = val;
@@ -54,6 +58,14 @@ class ModelBase {
     }
     
     return true;
+  }
+  
+  get isMarkedForDelete() {
+    return this._isMarkedForDelete;
+  }
+  
+  set isMarkedForDelete(value) {
+    this._isMarkedForDelete = !!value;
   }
   
   get dbObject() {
@@ -76,13 +88,25 @@ class ModelBase {
   }
   
   async commitChanges() {
-    this._isDirty = false;
-    if (this._id === null) {
-      let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
-      this._id = result.insertedId;
+    if (this._isDeleted) {
+      return;
     }
-    else {
-      await DBManager.db.collection(this.collection).updateOne({_id: this._id}, {$set: this.dbObject}).catch((err) => { throw err });
+    
+    if (this._isMarkedForDelete) {
+      if (this._id !== null) {
+        await DBManager.db.collection(this.collection).deleteOne({_id: this._id});
+        this._isDeleted = true;
+      }
+    }
+    else if (this._isDirty) {
+      this._isDirty = false;
+      if (this._id === null) {
+        let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
+        this._id = result.insertedId;
+      }
+      else {
+        await DBManager.db.collection(this.collection).updateOne({_id: this._id}, {$set: this.dbObject}).catch((err) => { throw err });
+      }
     }
   }
   
@@ -105,6 +129,16 @@ class ModelBase {
     }
     
     return models;
+  }
+  
+  static async deleteOne(query) {
+    let result = await DBManager.db.collection(this.collection).deleteOne(query);
+    return !!result;
+  }
+  
+  static async deleteMany(query) {
+    let result = await DBManager.db.collection(this.collection).deleteMany(query);
+    return !!result;
   }
 }
 
