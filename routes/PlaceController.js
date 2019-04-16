@@ -92,7 +92,7 @@ async function createNewPlace(req, res, next) {
     songRecords: [],
     spotifyConnection: spotifyConnection,
     location: location,
-    isPermanent: isPermanent ? isPermanent : true,
+    isPermanent: !!isPermanent,
   });
   
   await place.commitChanges();
@@ -117,15 +117,19 @@ async function findClosestPlaces(req, res, next) {
   
   // Calculate distances of each candidate Place
   for(const place of closePlaces){
-    const location = {latitude: place._latitude, longitude: place._longitude};
+    const location = {latitude: place.location.latitude, longitude: place.location.longitude};
     place.distance = calculateDistanceInKm(req.body, location);
   }
+  
+  // Sort by distances before send
+  closePlaces.sort(compareDistances);
+  
   res.send(JSON.stringify(closePlaces));
 }
 
 // Used the formulation given in following page
 // http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates
-function calculateBoundingBox(location, distance){
+function calculateBoundingBox(location, distance) {
   const lat = degToRad(location.latitude);
   const lon = degToRad(location.longitude);
   const earthRadius = 6371;
@@ -149,7 +153,7 @@ function calculateBoundingBox(location, distance){
 
 // Haversine formula to calculate crow-fly distance
 // https://stackoverflow.com/a/27943
-function calculateDistanceInKm(location1, location2){
+function calculateDistanceInKm(location1, location2) {
   const {latitude: lat1, longitude: lon1} = location1;
   const {latitude: lat2, longitude: lon2} = location2;
   const earthRadius = 6371;
@@ -169,8 +173,17 @@ function degToRad(deg) {
   return deg * (Math.PI/180);
 }
 
-function radToDeg(rad){
+function radToDeg(rad) {
   return (rad * 180) / Math.PI;
+}
+
+function compareDistances(place1, place2) {
+  if(place1.distance < place2.distance)
+    return -1;
+  else if(place1.distance > place2.distance)
+    return 1;
+  else
+    return 0;
 }
 
 
