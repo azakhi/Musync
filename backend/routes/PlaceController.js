@@ -6,12 +6,14 @@ const models = require("../models/Models");
 // Get a Place with given name
 router.get('/', getPlace);
 
+// Get playlist of a place
+router.get('/playlist', getPlaylistOfPlace);
+
 // Create a new Place
 router.post('/', createNewPlace);
 
 // Get closest Places to a location
 router.post('/closest', findClosestPlaces);
-
 
 async function getPlace(req, res, next) {
   let result;
@@ -23,6 +25,21 @@ async function getPlace(req, res, next) {
   }
   
   res.send(JSON.stringify(result));
+}
+
+async function getPlaylistOfPlace(req, res, next) {
+  if(!req.query.name){
+    res.status(400).send('Error: Missing information!');
+    return;
+  }
+  
+  result = await models.Place.findOne({name: req.query.name});
+  if (result) {
+    res.send(JSON.stringify(result.playlist));
+  }
+  else {
+    res.send("Couldn't find place");
+  }
 }
 
 async function createNewPlace(req, res, next) {
