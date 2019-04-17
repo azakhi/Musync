@@ -8,7 +8,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import {Link} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import header from "./Header";
+import Header from "./Header";
 
 
 class User extends Component {
@@ -39,11 +39,9 @@ class User extends Component {
             direction="row"
             justify="center"
             spacing={32}
-            style={{marginTop: "2%"}}
-      >
+            style={{marginTop: "2%"}}>
         
-        
-        {header({isPlaceHeader: false})}
+        <Header isPlaceHeader={false}/>
         
         <Grid item xs={10}>
           <Typography variant="h5">

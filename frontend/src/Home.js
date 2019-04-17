@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Grid from "@material-ui/core/Grid";
 import {Link} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import footer from "./Footer";
-import { placeCard, PlaceCardTypes } from "./place/placeCard";
+import Footer from "./Footer";
+import PlaceCard, {PlaceCardTypes} from "./place/PlaceCard";
 
 
 class Home extends Component {
@@ -39,7 +39,6 @@ class Home extends Component {
             direction="column"
             justify="center"
             spacing={32}>
-        
         <br/>
         
         <Grid item xs={10}>
@@ -54,7 +53,7 @@ class Home extends Component {
         </Grid>
         
         <Grid container item xs={11}>
-          {placeCard(mainPlace, PlaceCardTypes.HomeViewPrimary)}
+          <PlaceCard place={mainPlace} type={PlaceCardTypes.HomeViewPrimary}/>
         </Grid>
         
         <Grid container item xs={10} spacing={8} justify="center">
@@ -63,29 +62,41 @@ class Home extends Component {
           </Typography>
           <br/>
           
-          {otherPlaces.map(place => placeCard(place, PlaceCardTypes.HomeViewSecondary))}
+          {renderOtherPlaces(otherPlaces)}
+          
         </Grid>
         
         <Grid item xs={12}>
           <Typography gutterBottom align="center">
-            <Link href="#login-with-spotify">
-              Login with your Spotify account
+            <Link href="/login">
+              Login
             </Link>
           </Typography>
           <Typography gutterBottom align="center">
-            <Link href="#login-as-host">
-              Login as a Host
+            <Link href="/signup">
+              Create an account
             </Link>
           </Typography>
         </Grid>
-  
-        <Grid item xs={12}>
-          {footer()}
-        </Grid>
+        
+        <Footer/>
       
       </Grid>
     );
   }
+}
+
+function renderOtherPlaces(otherPlaces) {
+  let counter = 0;
+  
+  return otherPlaces.map(place => {
+    counter++;
+    const key = 'placeCard_' + counter;
+    
+    return <PlaceCard place={place}
+                      type={PlaceCardTypes.HomeViewSecondary}
+                      key={key}/>
+  });
 }
 
 export default Home;
