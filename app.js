@@ -9,6 +9,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const apiRouter = require('./routes/api');
 const placeController = require('./routes/PlaceController');
+const userController = require('./routes/UserController');
 
 
 const DBManager = require("./models/DBManager");
@@ -46,6 +47,7 @@ app.use(function(req, res, next) {
 //app.use('/users', usersRouter);
 app.use('/api', apiRouter);
 app.use('/place', placeController);
+app.use('/user', userController);
 
 
 // catch 404 and forward to error handler
