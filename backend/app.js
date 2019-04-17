@@ -30,7 +30,7 @@ app.use(session({
   secret: 'needs to be changed',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false /*till https*/ }
 }));
 
 app.use(function(req, res, next) {
