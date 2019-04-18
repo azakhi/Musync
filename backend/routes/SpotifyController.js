@@ -194,11 +194,31 @@ static async getLibrary(spotifyConnect) {
         expiresIn: r.expires_in,
       });
       
-      return spotifyConnection;
+      let userObject = await SpotifyController.getCurrentUser(spotifyConnection);
+      if (userObject.id) {
+        spotifyConnection.userId = userObject.id;
+        return spotifyConnection;
+      }
+      
+      return { error: true, response: {spotifyConnection, userObject}};
     }
-    else {
-      return r;
+    
+    return { error: true, response: r};
+  }
+  
+  static async getCurrentUser(spotifyConnection) {
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) {
+      return {error: "Invalid spotify connection"};
     }
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/me',
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
   }
 }
 module.exports =  SpotifyController;
