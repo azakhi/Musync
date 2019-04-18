@@ -3,11 +3,11 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const session = require('express-session')
+const session = require('express-session');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const apiRouter = require('./routes/api');
+const MainController = require('./routes/MainController');
 const placeController = require('./routes/PlaceController');
 const userController = require('./routes/UserController');
 
@@ -45,9 +45,9 @@ app.use(function(req, res, next) {
 
 //app.use('/', indexRouter);
 //app.use('/users', usersRouter);
-app.use('/api', apiRouter);
 app.use('/place', placeController);
 app.use('/user', userController);
+app.use('/', MainController);
 
 
 // catch 404 and forward to error handler
