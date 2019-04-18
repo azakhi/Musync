@@ -31,7 +31,8 @@ app.use(session({
   secret: 'needs to be changed',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false /*till https*/ }
+  cookie: { secure: false /*till https*/ },
+  maxAge: Date.now() + (60 * 60 * 1000),
 }));
 
 app.use(function(req, res, next) {
