@@ -33,7 +33,19 @@ async function getUser(req, res, next) {
     }
     
     if (req.session && req.session.userId === req.query.userId) {
-      res.json(user);
+      res.json({
+        _id: user._id,
+        name: user.name,
+        points: user.points,
+        visitedPlaces: user.visitedPlaces,
+        requestedSongs: user.requestedSongs,
+        isRegistered: user.isRegistered,
+        isSpotifyConnected: !!(user.spotifyConnection.accessToken),
+        email: user.email,
+        premiumEnd: user.premiumEnd,
+        premiumTier: user.premiumTier,
+        places: user.places,
+      });
     }
     else { // send limited information
       res.json({
@@ -120,6 +132,7 @@ async function loginWithSpotify(req, res, next) {
   }
   
   if (user) {
+    user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
     req.session.spotifyConnection = false; // No need to keep storing it.
     res.json({ // No need to send anything else. Let frontend redirect
@@ -157,6 +170,7 @@ async function loginWithCredentials(req, res, next) {
   });
   
   if (user) {
+    user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
@@ -179,7 +193,7 @@ async function updateUser(req, res, next) {
     return;
   }
   
-  const {name, email, password, newPassword} = req.body;
+  const {name, email, password, newPassword, location} = req.body;
   
   if(!name && !email && !newPassword) {
     res.json({ // Nothing to change
@@ -214,6 +228,7 @@ async function updateUser(req, res, next) {
   if (name) user.name = name;
   if (email) user.email = email;
   if (newPassword) user.password = crypto.createHash('md5').update(newPassword + passwordSalt).digest('hex');
+  if (location && models.Location.isValidValue(location)) user.location = location;
   
   let err = null;
   try {
