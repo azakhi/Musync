@@ -15,7 +15,7 @@ router.get('/spotify', async function(req, res, next) {
     );
   }
   else {
-    res.send("Spotify connection is successful");
+    res.send("Spotify connection is successful. You can close this tab now.");
   }
 });
 
