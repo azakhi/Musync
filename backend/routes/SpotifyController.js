@@ -3,8 +3,9 @@
 const spotifyConnection = require('../models/SpotifyConnection');
 
 const models = require("../models/Models");
-var request = require('request');
+var request = require('request-promise-native');
 var querystring = require('querystring');
+const config = require('../config.js');
 
 
 class SpotifyController{
@@ -168,6 +169,37 @@ static async getLibrary(spotifyConnect) {
   });
   return result;
 }
+
+  static async getSpotifyConnection(code, redirectUri) {
+    let options = {
+      url: 'https://accounts.spotify.com/api/token',
+      headers: {
+       'Content-Type': 'application/x-www-form-urlencoded '
+      },
+      form: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: redirectUri,
+        client_id: config.spotify.clientID,
+        client_secret: config.spotify.clientSecret,
+      }
+    };
+    
+    let r = await request.post(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    if (r.access_token) {
+      let spotifyConnection = new models.SpotifyConnection({
+        accessToken: r.access_token,
+        refreshToken: r.refresh_token,
+        expiresIn: r.expires_in,
+      });
+      
+      return spotifyConnection;
+    }
+    else {
+      return r;
+    }
+  }
 }
 module.exports =  SpotifyController;
 

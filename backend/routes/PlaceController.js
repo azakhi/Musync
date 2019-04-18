@@ -16,46 +16,53 @@ router.post('/', createNewPlace);
 router.post('/closest', findClosestPlaces);
 
 async function getPlace(req, res, next) {
-  let result;
-  if (!req.query.name) {
-    result = await models.Place.find({});
-  }
-  else {
+  let result = {};
+  if (req.query.name) {
     result = await models.Place.findOne({name: req.query.name});
   }
+  else if (req.session && req.session.placeId && models.ObjectID.isValid(req.session.placeId)) {
+    result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
+  }
   
-  res.send(JSON.stringify(result));
+  res.json(result);
 }
 
 async function getPlaylistOfPlace(req, res, next) {
-  if(!req.query.name){
-    res.status(400).send('Error: Missing information!');
-    return;
+  let result = {};
+  let placeId = req.query.placeId ? req.query.placeId : 
+    (req.session && req.session.placeId) ? req.session.placeId : "";
+    
+  if (models.ObjectID.isValid(placeId)) {
+    result = await models.Place.findOne({_id: new models.ObjectID(placeId)});
   }
   
-  result = await models.Place.findOne({name: req.query.name});
-  if (result) {
-    res.send(JSON.stringify(result.playlist));
-  }
-  else {
-    res.send("Couldn't find place");
-  }
+  res.json(result ? result.playlist : result);
 }
 
 async function createNewPlace(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    res.status(400).send('Error: User authentication required');
+  }
+  
+  if (!models.ObjectID.isValid(req.session.userId)) {
+    req.session.destroy();
+    res.status(400).send('Error: Authentication is invalid. Please login again');
+  }
+  
   const body = req.body;
-  const {placeName, userId, latitude, longitude, spotifyInfo,
+  const {placeName, latitude, longitude, spotifyInfo,
     isPermanent, district, city, country} = body;
   
-  if(!placeName || !userId || !latitude || !longitude || !spotifyInfo){
+  if(!placeName || !latitude || !longitude || !spotifyInfo){
     res.status(400).send('Error: Missing information!');
     return;
   }
   
   // Find Place owner
-  let user = await models.User.findOne({_id: new models.ObjectID(userId)});
+  let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
   if(!user){
-    res.status(400).send('Error: Invalid user id!');
+    req.session.destroy();
+    res.status(400).send('Error: Authentication is invalid. Please login again');
     return;
   }
   

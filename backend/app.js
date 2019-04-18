@@ -3,11 +3,13 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const session = require('express-session');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const apiRouter = require('./routes/api');
+const MainController = require('./routes/MainController');
 const placeController = require('./routes/PlaceController');
+const userController = require('./routes/UserController');
 
 
 const DBManager = require("./models/DBManager");
@@ -25,6 +27,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: 'needs to be changed',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false /*till https*/ },
+  maxAge: Date.now() + (60 * 60 * 1000),
+}));
 
 app.use(function(req, res, next) {
   res.on("finish", function() {
@@ -37,8 +46,9 @@ app.use(function(req, res, next) {
 
 //app.use('/', indexRouter);
 //app.use('/users', usersRouter);
-app.use('/api', apiRouter);
 app.use('/place', placeController);
+app.use('/user', userController);
+app.use('/', MainController);
 
 
 // catch 404 and forward to error handler
