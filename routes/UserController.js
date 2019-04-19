@@ -17,7 +17,9 @@ router.get('/logout', logoutUser);
 
 async function checkConnection(req, res, next) {
   res.json({
-    connection: !!(req.session && req.session.spotifyConnection && models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection)))
+    isLoggedIn: !!req.session && !!req.session.userId,
+    isSpotifyRegistered: !!req.session && !!req.session.userId && !!req.session.isSpotifyRegistered,
+    hasSpotifyConnection: !!(req.session && req.session.spotifyConnection && models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))),
   });
 }
 
@@ -100,6 +102,7 @@ async function registerUser(req, res, next) {
 
   if (user._id) {
     req.session.userId = user._id.toHexString();
+    req.session.isSpotifyRegistered = !!user.spotifyConnection && !!user.spotifyConnection.accessToken;
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
     });
@@ -134,6 +137,7 @@ async function loginWithSpotify(req, res, next) {
   if (user) {
     user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
+    req.session.isSpotifyRegistered = true;
     req.session.spotifyConnection = false; // No need to keep storing it.
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
@@ -172,6 +176,7 @@ async function loginWithCredentials(req, res, next) {
   if (user) {
     user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
+    req.session.isSpotifyRegistered = !!user.spotifyConnection && !!user.spotifyConnection.accessToken;
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
     });
