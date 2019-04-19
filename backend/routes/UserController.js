@@ -14,6 +14,7 @@ router.get('/login', loginWithSpotify);
 router.post('/login', loginWithCredentials);
 router.post('/update', updateUser);
 router.get('/logout', logoutUser);
+router.get('/connectspotify', connectSpotify);
 
 async function checkConnection(req, res, next) {
   res.json({
@@ -261,6 +262,36 @@ async function logoutUser(req, res, next) {
   res.json({
     success: true,
   });
+}
+
+async function connectSpotify(req, res, next) {
+  if (!req.session || !req.session.userId || !models.ObjectID.isValid(req.session.userId)) {
+    if (req.session) {
+        req.session.destroy();
+    }
+    
+    res.status(400).send('Error: User authentication required');
+    return;
+  }
+  
+  if (!req.session || !req.session.spotifyConnection
+  || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection)) || !req.session.spotifyConnection.userId) {
+    res.status(400).send('Error: No valid connection information');
+    return;
+  }
+  
+  let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+  
+  if (user) {
+    user.spotifyConnection = JSON.parse(req.session.spotifyConnection);
+    req.session.isSpotifyRegistered = true;
+    res.json({ // No need to send anything else. Let frontend redirect
+      success: true,
+    });
+    return;
+  }
+  
+  res.status(400).send('Error: No such user');
 }
 
 // Taken from https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
