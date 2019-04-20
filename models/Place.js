@@ -24,6 +24,19 @@ class Place extends ModelBase {
     this.genres = new DBBasicTypes.DBArray([], DBBasicTypes.DBObjectID);
   }
   
+  get publicInfo() {
+    return {
+      _id : this._id.value,
+      name: this.name.value,
+      isSpotifyConnected: !!this.spotifyConnection && !!this.spotifyConnection.accessToken,
+      votedSongs: this.votedSongs.value,
+      votes: this.votes.value,
+      currentlyPlaying: this.playlist.currentlyPlaying,
+      songRecords: this.songRecords.value,
+      location: this.location.value,
+    };
+  }
+  
   static get collection() {
     return "place";
   }
