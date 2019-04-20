@@ -20,10 +20,19 @@ async function getPlace(req, res, next) {
   if (req.query.name) {
     result = await models.Place.findOne({name: req.query.name});
   }
+  else if (req.query.placeId) {
+    if (!models.ObjectID.isValid(req.query.placeId)) {
+      res.status(400).send('Error: Invalid place ID');
+      return;
+    }
+    
+    result = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
+  }
   else if (req.session && req.session.placeId && models.ObjectID.isValid(req.session.placeId)) {
     result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
   }
   
+  result = result ? result.publicInfo : result;
   res.json(result);
 }
 
@@ -148,7 +157,12 @@ async function findClosestPlaces(req, res, next) {
   // Sort by distances before send
   closePlaces.sort(compareDistances);
   
-  res.send(JSON.stringify(closePlaces));
+  let publicInfos = [];
+  for (const place of closePlaces) {
+    publicInfos.push(place.publicInfo);
+  }
+  
+  res.json(publicInfos);
 }
 
 // Used the formulation given in following page
