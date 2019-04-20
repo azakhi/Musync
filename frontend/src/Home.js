@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Grid from "@material-ui/core/Grid";
 import {Link} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import Footer from "./Footer";
+import Footer from "./utils/Footer";
 import PlaceCard, {PlaceCardTypes} from "./place/PlaceCard";
 
 
@@ -73,7 +73,7 @@ class Home extends Component {
             </Link>
           </Typography>
           <Typography gutterBottom align="center">
-            <Link href="/signup">
+            <Link href="/sign-up">
               Create an account
             </Link>
           </Typography>

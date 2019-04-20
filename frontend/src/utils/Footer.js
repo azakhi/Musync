@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome/index'
+import Grid from "@material-ui/core/Grid/index";
+import Link from "@material-ui/core/Link/index";
 
 
 class Footer extends Component{
@@ -26,7 +26,11 @@ class Footer extends Component{
     });
   
     return (
-      <Grid item xs={12} style={style}>
+      <Grid container
+            item
+            xs={12}
+            justify="center"
+            style={style}>
         {brandLinks}
       </Grid>
     );

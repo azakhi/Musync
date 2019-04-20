@@ -1,0 +1,1 @@
+export const SERVER_DOMAIN = "localhost:1234";

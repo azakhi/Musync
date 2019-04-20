@@ -1,12 +1,13 @@
 import React, {Component} from "react";
+import axios from "axios";
 
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Footer from "./Footer";
-
+import Grid from "@material-ui/core/Grid/index";
+import Typography from "@material-ui/core/Typography/index";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import TextField from "@material-ui/core/TextField/index";
+import Button from "@material-ui/core/Button/index";
+import Footer from "../utils/Footer";
+import {SERVER_DOMAIN} from "../config";
 
 class SignUp extends Component {
   
@@ -14,25 +15,35 @@ class SignUp extends Component {
     super(props);
     
     this.state = {
-      emailValue: "",
-      passwordValue: ""
+      name: "",
+      email: "",
+      password: ""
     };
   }
   
-  handleEmailChange(event) {
+  handleInputChange(event) {
     this.setState({
-      emailValue: event.target.value
+      [event.target.id]: event.target.value
     });
-    
-    console.log(event.target.value);
   }
   
-  handlePasswordChange(event) {
-    this.setState({
-      passwordValue: event.target.value
-    });
+  handleSubmit(event) {
+    const url = SERVER_DOMAIN + "/register";
+    const body = {
+      name: this.state.name,
+      email: this.state.email,
+      password: this.state.password
+    };
     
-    console.log(event.target.value);
+    axios.post(url, body)
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.log(error)
+      });
+    
+    event.preventDefault();
   }
   
   render() {
@@ -58,27 +69,31 @@ class SignUp extends Component {
         
         <Grid item xs={12} style={{textAlign: "center"}}>
           <Typography variant="h5"
-                      color="textPrimary"
-                      align="left">
+                      color="textPrimary">
             Create an account
           </Typography>
           
-          <form style={{textAlign: "center"}}>
+          <form onSubmit={event => this.handleSubmit(event)}>
+            <TextField required
+                       id="name"
+                       label="Name"
+                       onChange={event => this.handleInputChange(event)}
+                       margin="dense"/>
+            <br/>
             <TextField required
                        id="email"
                        label="Email"
-                       autoComplete="current-email"
-                       onChange={e => this.handleEmailChange(e)}
-                       margin="normal"/>
+                       onChange={event => this.handleInputChange(event)}
+                       margin="dense"/>
             <br/>
             <TextField required
                        id="password"
                        label="Password"
                        type="password"
-                       autoComplete="current-password"
-                       onChange={e => this.handlePasswordChange(e)}
-                       margin="normal"/>
+                       onChange={event => this.handleInputChange(event)}
+                       margin="dense"/>
             <br/>
+            
             <Button variant="text"
                     color="primary"
                     type="submit">

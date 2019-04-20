@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
-import Typography from "@material-ui/core/Typography";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome/index'
+import Grid from "@material-ui/core/Grid/index";
+import Link from "@material-ui/core/Link/index";
+import Typography from "@material-ui/core/Typography/index";
 
 
 class Header extends Component {

@@ -1,14 +1,16 @@
 import React, {Component} from 'react';
 
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Grid from "@material-ui/core/Grid";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Grid from "@material-ui/core/Grid/index";
+import List from "@material-ui/core/List/index";
+import ListItem from "@material-ui/core/ListItem/index";
+import ListItemIcon from "@material-ui/core/ListItemIcon/index";
+import ListItemText from "@material-ui/core/ListItemText/index";
 import {Link} from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
-import Header from "./Header";
+import Typography from "@material-ui/core/Typography/index";
+import Header from "../utils/Header";
+import Footer from "../utils/Footer";
+import Button from "@material-ui/core/Button/index";
 
 
 class User extends Component {
@@ -33,6 +35,11 @@ class User extends Component {
         {name: "Bohemian Rhapsody", artistName: "Queen", placeName: "Ot"}]
     };
     
+    const buttonStyle = {
+      display: "inline-block",
+      margin: "5px"
+    };
+    
     return (
       <Grid container
             alignItems="center"
@@ -41,7 +48,7 @@ class User extends Component {
             spacing={32}
             style={{marginTop: "2%"}}>
         
-        <Header isPlaceHeader={false}/>
+        <Header/>
         
         <Grid item xs={10}>
           <Typography variant="h5">
@@ -80,21 +87,31 @@ class User extends Component {
           </List>
         </Grid>
         
-        <Grid item xs={12}>
-          <Typography gutterBottom align="center">
-            <Link href="#spotify-account">
-              Spotify Account
-            </Link>
-            {" | "}
-            <Link href="#settings">
-              Settings
-            </Link>
-            {" | "}
+        <Grid item xs={12} style={{textAlign: "center"}}>
+          <Button href="/create-place"
+                  variant="contained"
+                  color="primary"
+                  style={buttonStyle}>
+            <FontAwesomeIcon icon="plus"/>&nbsp;
+            Create a new Place
+          </Button>
+          <br/>
+          <Button href="/settings"
+                  variant="contained"
+                  color="primary"
+                  style={buttonStyle}>
+            <FontAwesomeIcon icon="sliders-h"/>&nbsp;
+            Settings
+          </Button>
+          
+          <Typography gutterBottom align="center" style={{marginTop: "10px"}}>
             <Link href="#logout">
-              Logout
+              Log out
             </Link>
           </Typography>
         </Grid>
+        
+        <Footer/>
         
       </Grid>
     );
