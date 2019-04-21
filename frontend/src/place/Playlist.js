@@ -10,10 +10,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 
 class Playlist extends Component {
-  constructor(props) {
-    super(props);
-  }
-  
   render() {
     const {songs} = this.props;
   

@@ -7,10 +7,6 @@ import Typography from "@material-ui/core/Typography/index";
 
 
 class Header extends Component {
-  constructor(props) {
-    super(props);
-  }
-  
   render() {
     const {isPlaceHeader} = this.props;
     const iconStyle = {

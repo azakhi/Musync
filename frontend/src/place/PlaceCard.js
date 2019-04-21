@@ -11,10 +11,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 
 class PlaceCard extends Component {
-  constructor(props) {
-    super(props);
-  }
-  
   render() {
     const {place, type} = this.props;
     const {id, name, image, genres, currentSong} = place;
