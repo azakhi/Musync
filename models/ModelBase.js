@@ -93,19 +93,19 @@ class ModelBase {
     }
     
     if (this._isMarkedForDelete) {
-      if (this._id !== null) {
-        await DBManager.db.collection(this.collection).deleteOne({_id: this._id});
+      if (this._id.value !== null) {
+        await DBManager.db.collection(this.collection).deleteOne({_id: this._id.value});
         this._isDeleted = true;
       }
     }
     else if (this._isDirty) {
       this._isDirty = false;
-      if (this._id === null) {
+      if (this._id.value === null) {
         let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
-        this._id = result.insertedId;
+        this._id.value = result.insertedId;
       }
       else {
-        await DBManager.db.collection(this.collection).updateOne({_id: this._id}, {$set: this.dbObject}).catch((err) => { throw err });
+        await DBManager.db.collection(this.collection).updateOne({_id: this._id.value}, {$set: this.dbObject}).catch((err) => { throw err });
       }
     }
   }
