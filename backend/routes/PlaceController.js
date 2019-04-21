@@ -18,56 +18,25 @@ router.post('/', createNewPlace);
 router.post('/closest', findClosestPlaces);
 
 async function getPlace(req, res, next) {
-  let result = {};
-  if (req.query.name) {
-    result = await models.Place.findOne({name: req.query.name});
-  }
-  else if (req.query.placeId) {
-    if (!models.ObjectID.isValid(req.query.placeId)) {
-      res.status(400).send('Error: Invalid place ID');
-      return;
-    }
-    
-    result = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
-  }
-  else if (req.session && req.session.placeId && models.ObjectID.isValid(req.session.placeId)) {
-    result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
   }
   
-  result = result ? result.publicInfo : result;
+  result = result.result;
+  result = (req.session.userId && result.owner.toHexString() === req.session.userId) ? result.dbObject : result.publicInfo;
   res.json(result);
 }
 
 async function getPlaylistOfPlace(req, res, next) {
-  let result = {};
-  if (!req.query.placeId && !req.session.placeId) {
-    res.json({});
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
     return;
   }
   
-  if (req.query.placeId) {
-    if (!models.ObjectID.isValid(req.query.placeId)) {
-      res.status(400).send('Error: Invalid place ID');
-      return;
-    }
-    else {
-      result = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
-    }
-  }
-  else if (!models.ObjectID.isValid(req.session.placeId)) {
-    req.session.destroy();
-    res.status(400).send('Error: Invalid session place ID');
-    return;
-  }
-  else {
-      result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
-  }
-    
-  if (!result) {
-    res.status(400).send('Error: No such place');
-    return;
-  }
-  
+  result = result.result;
   if (!result.spotifyConnection || !result.spotifyConnection.accessToken) {
     res.status(400).send('Error: No spotify account is connected to Place');
     return;
@@ -123,6 +92,8 @@ async function getPlaylistOfPlace(req, res, next) {
       let playlist = new models.Playlist({
         songs: songs,
         spotifyPlaylist: spotifyPlaylist,
+        currentSong: 0,
+        currentSongStartTime: 0,
       });
       
       result.playlist = playlist;
@@ -251,6 +222,48 @@ async function findClosestPlaces(req, res, next) {
   }
   
   res.json(publicInfos);
+}
+
+async function getPlaceRecord(req) {
+  let result = {};
+  if (!req.query.placeId && !req.body.placeId && !req.session.placeId) {
+    return {
+      result: false,
+      error: "Missing information",
+    };
+  }
+  
+  if (req.query.placeId || req.body.placeId) {
+    let placeId = (req.query.placeId) ? req.query.placeId : req.body.placeId;
+    if (!models.ObjectID.isValid(placeId)) {
+      return {
+        result: false,
+        error: "Invalid place ID",
+      };
+    }
+    else {
+      result = await models.Place.findOne({_id: new models.ObjectID(placeId)});
+    }
+  }
+  else if (!models.ObjectID.isValid(req.session.placeId)) {
+    req.session.destroy();
+    return {
+      result: false,
+      error: "Invalid session place ID",
+    };
+  }
+  else {
+    result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
+  }
+    
+  if (!result) {
+    return {
+      result: false,
+      error: "No such place",
+    };
+  }
+  
+  return { result: result };
 }
 
 // Used the formulation given in following page
