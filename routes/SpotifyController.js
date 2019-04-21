@@ -191,7 +191,7 @@ static async getLibrary(spotifyConnect) {
       let spotifyConnection = new models.SpotifyConnection({
         accessToken: r.access_token,
         refreshToken: r.refresh_token,
-        expiresIn: r.expires_in,
+        expiresIn: new Date(Date.now() + Number(r.expires_in) * 1000),
       });
       
       let userObject = await SpotifyController.getCurrentUser(spotifyConnection);
@@ -201,6 +201,36 @@ static async getLibrary(spotifyConnect) {
       }
       
       return { error: true, response: {spotifyConnection, userObject}};
+    }
+    
+    return { error: true, response: r};
+  }
+  
+  static async refreshSpotifyConnection(spotifyConnection) {
+    let options = {
+      url: 'https://accounts.spotify.com/api/token',
+      headers: {
+       'Content-Type': 'application/x-www-form-urlencoded '
+      },
+      form: {
+        grant_type: "refresh_token",
+        refresh_token: spotifyConnection.refreshToken,
+        client_id: config.spotify.clientID,
+        client_secret: config.spotify.clientSecret,
+      }
+    };
+    
+    let r = await request.post(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    if (r.access_token) {
+      let sc = new models.SpotifyConnection({
+        accessToken: r.access_token,
+        refreshToken: spotifyConnection.refreshToken,
+        expiresIn: new Date(Date.now() + Number(r.expires_in) * 1000),
+        userId: spotifyConnection.userId,
+      });
+      
+      return sc;
     }
     
     return { error: true, response: r};
