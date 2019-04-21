@@ -2,14 +2,14 @@ import React, {Component} from "react";
 import axios from "axios";
 
 import Button from "@material-ui/core/Button/index";
+import Chip from "@material-ui/core/Chip";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Grid from "@material-ui/core/Grid/index";
 import TextField from "@material-ui/core/TextField/index";
 import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Footer from "../utils/Footer";
-import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../config";
-import Chip from "@material-ui/core/Chip";
+import {generateSpotifyAuthURL, getCurrentURL, getURLParamVal, SERVER_DOMAIN} from "../config";
 
 
 class SignUp extends Component {
@@ -17,11 +17,39 @@ class SignUp extends Component {
   constructor(props) {
     super(props);
     
+    const {cookies, history} = props;
+    const {redirected, accessGiven, stateParam, code} = handleSpotifyRedirection(cookies);
+    
+    if(redirected && accessGiven){
+      const url = SERVER_DOMAIN + "/callback?code=" + code;
+      axios.get(url)
+        .then(response => {
+          this.setState({
+            loading: false,
+            spotifyDenied: false,
+            success: true
+          });
+  
+          setTimeout(() => {
+            history.push('/');
+          }, 2000);
+        })
+        .catch(error => {
+          this.setState({
+            loading: false,
+            spotifyDenied: true,
+            stateParam: generateStateParamCookie(cookies)
+          });
+        });
+    }
+    
     this.state = {
       name: "",
       email: "",
       password: "",
-      loading: false,
+      stateParam: stateParam,
+      loading: redirected && accessGiven,
+      spotifyDenied: redirected && !accessGiven,
       success: false,
       error: false
     };
@@ -73,10 +101,10 @@ class SignUp extends Component {
   }
   
   render() {
-    const {loading, error, errorMsg, success} = this.state;
+    const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
-    const spotifyAuthURL = generateSpotifyAuthURL();
+    const spotifyAuthURL = generateSpotifyAuthURL(getCurrentURL(), stateParam);
     
     return (
       <Grid container
@@ -155,11 +183,16 @@ class SignUp extends Component {
           <Button variant="contained"
                   color="primary"
                   href={spotifyAuthURL}
-                  disabled={loading}>
+                  disabled={loading}
+                  style={{marginBottom: "2%"}}>
             <FontAwesomeIcon icon={["fab", "spotify"]} size="lg"/>&nbsp;
             Spotify
           </Button>
           
+          {spotifyDenied && <Chip label="Please grant us Spotify access, we will behave"
+                                  icon={errorIcon}
+                                  color="secondary"
+                                  variant="outlined"/>}
         </Grid>
         
         <Footer style={{position: "fixed", bottom: "5%"}}/>
@@ -171,3 +204,41 @@ class SignUp extends Component {
 }
 
 export default SignUp;
+
+function handleSpotifyRedirection(cookies) {
+  const code = getURLParamVal("code");
+  const error = getURLParamVal("error");
+  const state  = getURLParamVal("state");
+  
+  let redirected = false;
+  let accessGiven = false;
+  const confirmState = checkStateParamCookie(state, cookies);
+  if(error && confirmState){
+    redirected = true;
+  }
+  else if(code && confirmState){
+    redirected = true;
+    accessGiven = true;
+  }
+  
+  let stateParam = null;
+  if(!redirected || redirected && !accessGiven)
+    stateParam = generateStateParamCookie(cookies);
+  
+  return {
+    redirected: redirected,
+    accessGiven: accessGiven,
+    stateParam: stateParam,
+    code: code
+  };
+}
+
+function generateStateParamCookie(cookies) {
+  const state = Math.random().toString(36).substring(2, 15);
+  cookies.set('state_param', state, { path: '/sign-up' });
+  return state;
+}
+
+function checkStateParamCookie(state, cookies) {
+  return state && cookies.get('state_param') === state;
+}
