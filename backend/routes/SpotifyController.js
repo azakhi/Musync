@@ -319,6 +319,20 @@ static async getLibrary(spotifyConnect) {
     r = JSON.parse(r);
     return r;
   }
+  
+  static async getCurrentlyPlaying(spotifyConnection) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/me/player/currently-playing',
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
 }
 module.exports =  SpotifyController;
 

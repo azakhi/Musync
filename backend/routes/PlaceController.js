@@ -17,6 +17,8 @@ router.post('/', createNewPlace);
 // Get closest Places to a location
 router.post('/closest', findClosestPlaces);
 
+router.get('/playback', getPlaybackInfo);
+
 async function getPlace(req, res, next) {
   let result = await getPlaceRecord(req);
   if (!result.result) {
@@ -42,66 +44,14 @@ async function getPlaylistOfPlace(req, res, next) {
     return;
   }
   
-  // acquire playlist if not exists
   if (!result.playlist || !result.playlist.spotifyPlaylist || !result.playlist.spotifyPlaylist.id) {
-    // First check if account already has one with the name
-    let lists = await spotifyController.getPlaylists(result.spotifyConnection);
-    if (!lists.items) {
-      console.log(lists);
-      res.status(400).send('Error: Could not get playlists of account');
+    let playlist = await getOrCreateSpotifyPlaylist(result.spotifyConnection);
+    if (!playlist.result) {
+      res.status(400).send('Error: ' + playlist.error);
       return;
     }
     
-    let pl = {};
-    for (let list of lists.items) {
-      if (list.name == config.spotify.playlistName) {
-        pl = list;
-        break;
-      }
-    }
-    
-    if (pl.id) {
-      pl = await spotifyController.getPlaylist(result.spotifyConnection, pl.id);
-    }
-    else { // Create if not
-      pl = await spotifyController.createPlaylist(result.spotifyConnection, config.spotify.playlistName, config.spotify.playlistDecription);
-    }
-    
-    if (pl.id) {
-      let songs = [];
-      for (let track of pl.tracks.items) {
-        let spotifyItem = new models.SpotifyItem({
-          id: track.track.id,
-          uri: track.track.uri,
-          name: track.track.name,
-        });
-        let song = new models.Song({
-          name: track.track.name,
-          duration: track.track.duration_ms,
-          spotifySong: spotifyItem,
-        });
-        songs.push(song);
-      }
-      
-      let spotifyPlaylist = new models.SpotifyItem({
-        id: pl.id,
-        uri: pl.uri,
-        name: pl.name,
-        description: pl.description,
-      });
-      let playlist = new models.Playlist({
-        songs: songs,
-        spotifyPlaylist: spotifyPlaylist,
-        currentSong: 0,
-        currentSongStartTime: 0,
-      });
-      
-      result.playlist = playlist;
-    }
-    else {
-      res.status(400).send('Error: Could not create or get playlist');
-      return;
-    }
+    result.playlist = playlist.result;
   }
   
   res.json(result.playlist);
@@ -224,6 +174,60 @@ async function findClosestPlaces(req, res, next) {
   res.json(publicInfos);
 }
 
+async function getPlaybackInfo(req, res, next) {
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  result = result.result;
+  if (!result.spotifyConnection || !result.spotifyConnection.accessToken) {
+    res.status(400).send('Error: No spotify account is connected to Place');
+    return;
+  }
+  
+  if (!result.playlist || !result.playlist.spotifyPlaylist || !result.playlist.spotifyPlaylist.id) {
+    res.status(400).send('Error: Place does not have a playlist');
+    return;
+  }
+  
+  let playlist = result.playlist;
+  
+  let curPlaying = await spotifyController.getCurrentlyPlaying(result.spotifyConnection);
+  if (!curPlaying) {
+    res.status(400).send('Error: Could not get playback info');
+    return;
+  }
+  
+  let context = (curPlaying.context && curPlaying.context.type === "playlist" && curPlaying.context.uri)
+    ? curPlaying.context.uri.split(":").pop() : "";
+  
+  playlist.isPlaying = curPlaying.is_playing && curPlaying.currently_playing_type === "track" && context === playlist.spotifyPlaylist.id;
+  
+  if (playlist.isPlaying && curPlaying.item) {
+    let currentSong = -1;
+    for (let i = 0; i < playlist.songs.length; i++) {
+      if (playlist.songs[i].spotifySong.id === curPlaying.item.id) {
+        currentSong = i;
+        break;
+      }
+    }
+    
+    playlist.currentSong = currentSong;
+    if (currentSong >= 0 && curPlaying.timestamp && curPlaying.progress_ms) {
+      playlist.currentSongStartTime = Date.now() - curPlaying.progress_ms;
+    }
+  }
+  
+  result.playlist = playlist;
+  res.json({
+    isPlaying: playlist.isPlaying,
+    currentSong: playlist.currentSong >= 0 ? playlist.songs[playlist.currentSong] : null,
+    currentSongStartTime: new Date(playlist.currentSongStartTime),
+  });
+}
+
 async function getPlaceRecord(req) {
   let result = {};
   if (!req.query.placeId && !req.body.placeId && !req.session.placeId) {
@@ -264,6 +268,71 @@ async function getPlaceRecord(req) {
   }
   
   return { result: result };
+}
+
+async function getOrCreateSpotifyPlaylist(spotifyConnection) {
+  // First check if account already has one with the name
+  let lists = await spotifyController.getPlaylists(result.spotifyConnection);
+  if (!lists.items) {
+    return {
+      result: false,
+      error: "Could not get playlists of account",
+    };
+  }
+  
+  let pl = {};
+  for (let list of lists.items) {
+    if (list.name == config.spotify.playlistName) {
+      pl = list;
+      break;
+    }
+  }
+  
+  if (pl.id) {
+    pl = await spotifyController.getPlaylist(result.spotifyConnection, pl.id);
+  }
+  else { // Create if not
+    pl = await spotifyController.createPlaylist(result.spotifyConnection, config.spotify.playlistName, config.spotify.playlistDecription);
+  }
+  
+  if (pl.id) {
+    let songs = [];
+    for (let track of pl.tracks.items) {
+      let spotifyItem = new models.SpotifyItem({
+        id: track.track.id,
+        uri: track.track.uri,
+        name: track.track.name,
+      });
+      let song = new models.Song({
+        name: track.track.name,
+        duration: track.track.duration_ms,
+        spotifySong: spotifyItem,
+      });
+      songs.push(song);
+    }
+    
+    let spotifyPlaylist = new models.SpotifyItem({
+      id: pl.id,
+      uri: pl.uri,
+      name: pl.name,
+      description: pl.description,
+    });
+    let playlist = new models.Playlist({
+      songs: songs,
+      spotifyPlaylist: spotifyPlaylist,
+      currentSong: 0,
+      currentSongStartTime: 0,
+    });
+    
+    return {
+      result: playlist,
+    };
+  }
+  
+  return {
+    result: false,
+    error: "Could not create or get playlist",
+  };
 }
 
 // Used the formulation given in following page
