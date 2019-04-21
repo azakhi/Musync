@@ -8,7 +8,7 @@ class Playlist extends DBObjectBase {
   _initialize() {
     this.songs = new DBBasicTypes.DBArray([], Song);
     this.currentSong = new DBBasicTypes.DBNumber(-1);
-    this.currentSongStartTime = new DBBasicTypes.DBNumber(-1);
+    this.currentSongStartTime = new DBBasicTypes.DBDate(0);
     this.spotifyPlaylist = new SpotifyItem();
   }
   

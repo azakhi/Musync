@@ -175,10 +175,11 @@ static async getLibrary(spotifyConnect) {
   }
   
   static async refreshSpotifyConnection(spotifyConnection) {
-    if (!(spotifyConnection instanceof models.SpotifyConnection)) {
+    if (!(spotifyConnection instanceof models.SpotifyConnection) && !models.SpotifyConnection.isValidValue(spotifyConnection)) {
       return {error: "Invalid spotify connection"};
     }
     
+    spotifyConnection = new models.SpotifyConnection(spotifyConnection);
     if (Date.now() < spotifyConnection.expiresIn.getTime()) { // No need to refresh
       return spotifyConnection;
     }
