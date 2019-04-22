@@ -20,6 +20,8 @@ router.post('/closest', findClosestPlaces);
 router.get('/connect', connectToPlace);
 router.post('/connect', connectToPlace);
 router.get('/playback', getPlaybackInfo);
+router.get('/votestatus', getVoteStatus);
+router.post('/votestatus', getVoteStatus);
 
 async function getPlace(req, res, next) {
   let result = await getPlaceRecord(req);
@@ -292,6 +294,27 @@ async function getPlaybackInfo(req, res, next) {
     currentSong: playlist.currentSong >= 0 ? playlist.songs[playlist.currentSong] : null,
     currentSongStartTime: new Date(playlist.currentSongStartTime),
   });
+}
+
+async function getVoteStatus(req, res, next) {
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  place = result.result;
+  
+  result = {
+    votedSongs: place.votedSongs,
+    votes: place.votes,
+    // TODO: Track and update playback status
+    isPlaying: place.playlist.isPlaying,
+    currentSong: (place.playlist.currentSong >= 0 && place.playlist.songs[place.playlist.currentSong]) ? place.playlist.songs[place.playlist.currentSong] : null,
+    currentSongStartTime: place.playlist.currentSongStartTime,
+  };
+  
+  res.json(result);
 }
 
 async function getPlaceRecord(req) {
