@@ -11,39 +11,7 @@ const config = require('../config.js');
 class SpotifyController{
   constructor(){
   }
-  static async createPlaylist(spotifyConnect) {
-    
-    var options = {
-        url: 'https://api.spotify.com/v1/users/'+spotifyConnect.userId+'/playlists',
-        body: JSON.stringify({
-            name: "MusyncPlaylist",
-            description: "This playlist is created automatically by Musync",
-            public: false
-          }),
-        
-        dataType:'json'
-        ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
-        'Content-Type': 'application/json' }
-      };
-    
-    await  request.post(options, function(error, response, body) {
-        if (!error && response.statusCode === 201) {
-           
-          console.log(JSON.parse(body).id);
-          console.log(response.statusCode);
-            
-        }else{
-            console.log("error");
-            
-           
-        }
 
-
-    });
-    
- 
-  
-}
   static async addSong(spotifyConnect,playlist,song) {
 
     var songUri = 'spotify:track:'+song.id;
@@ -191,7 +159,7 @@ static async getLibrary(spotifyConnect) {
       let spotifyConnection = new models.SpotifyConnection({
         accessToken: r.access_token,
         refreshToken: r.refresh_token,
-        expiresIn: r.expires_in,
+        expiresIn: new Date(Date.now() + Number(r.expires_in) * 1000),
       });
       
       let userObject = await SpotifyController.getCurrentUser(spotifyConnection);
@@ -206,13 +174,158 @@ static async getLibrary(spotifyConnect) {
     return { error: true, response: r};
   }
   
-  static async getCurrentUser(spotifyConnection) {
-    if (!(spotifyConnection instanceof models.SpotifyConnection)) {
+  static async refreshSpotifyConnection(spotifyConnection) {
+    if (!(spotifyConnection instanceof models.SpotifyConnection) && !models.SpotifyConnection.isValidValue(spotifyConnection)) {
       return {error: "Invalid spotify connection"};
     }
     
+    spotifyConnection = new models.SpotifyConnection(spotifyConnection);
+    if (Date.now() < spotifyConnection.expiresIn.getTime()) { // No need to refresh
+      return spotifyConnection;
+    }
+    
+    let options = {
+      url: 'https://accounts.spotify.com/api/token',
+      headers: {
+       'Content-Type': 'application/x-www-form-urlencoded '
+      },
+      form: {
+        grant_type: "refresh_token",
+        refresh_token: spotifyConnection.refreshToken,
+        client_id: config.spotify.clientID,
+        client_secret: config.spotify.clientSecret,
+      }
+    };
+    
+    let r = await request.post(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    if (r.access_token) {
+      let sc = new models.SpotifyConnection({
+        accessToken: r.access_token,
+        refreshToken: spotifyConnection.refreshToken,
+        expiresIn: new Date(Date.now() + Number(r.expires_in) * 1000),
+        userId: spotifyConnection.userId,
+      });
+      
+      return sc;
+    }
+    
+    return { error: true, response: r};
+  }
+  
+  static async getCurrentUser(spotifyConnection) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
     let options = {
       url: 'https://api.spotify.com/v1/me',
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+  
+  static async getPlaylists(spotifyConnection) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/users/' + spotifyConnection.userId + '/playlists',
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+  
+  static async getPlaylist(spotifyConnection, playlistId) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/playlists/' + playlistId
+      + '?fields=id,name,description,uri,tracks.items(track(id,name,duration_ms,uri,artists,album(id,uri,name)))',
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+  
+  static async createPlaylist(spotifyConnection, name, description) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/users/' + spotifyConnection.userId + '/playlists',
+      body: JSON.stringify({
+        name: name,
+        description: description,
+      }),
+      dataType: 'json',
+      headers: {
+        'Authorization': 'Bearer ' + spotifyConnection.accessToken,
+        'Content-Type': 'application/json',
+      },
+    };
+    
+    let r = await request.post(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+  
+  static async getSong(spotifyConnection, songId) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/tracks/' + songId,
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+  
+  static async getAlbum(spotifyConnection, albumId) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/albums/' + albumId,
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+    
+  static async getArtist(spotifyConnection, artistId) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/artists/' + artistId,
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+    };
+    
+    let r = await request.get(options).catch((err) => { return err });
+    r = JSON.parse(r);
+    return r;
+  }
+  
+  static async getCurrentlyPlaying(spotifyConnection) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+    
+    let options = {
+      url: 'https://api.spotify.com/v1/me/player/currently-playing',
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
     };
     

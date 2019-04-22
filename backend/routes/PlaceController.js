@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const config = require('../config.js');
 const models = require("../models/Models");
+const spotifyController = require('./SpotifyController');
 
 
 // Get a Place with given name
@@ -15,37 +17,46 @@ router.post('/', createNewPlace);
 // Get closest Places to a location
 router.post('/closest', findClosestPlaces);
 
+router.get('/connect', connectToPlace);
+router.post('/connect', connectToPlace);
+router.get('/playback', getPlaybackInfo);
+
 async function getPlace(req, res, next) {
-  let result = {};
-  if (req.query.name) {
-    result = await models.Place.findOne({name: req.query.name});
-  }
-  else if (req.query.placeId) {
-    if (!models.ObjectID.isValid(req.query.placeId)) {
-      res.status(400).send('Error: Invalid place ID');
-      return;
-    }
-    
-    result = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
-  }
-  else if (req.session && req.session.placeId && models.ObjectID.isValid(req.session.placeId)) {
-    result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
   }
   
-  result = result ? result.publicInfo : result;
+  result = result.result;
+  result = (req.session.userId && result.owner.toHexString() === req.session.userId) ? result.dbObject : result.publicInfo;
   res.json(result);
 }
 
 async function getPlaylistOfPlace(req, res, next) {
-  let result = {};
-  let placeId = req.query.placeId ? req.query.placeId : 
-    (req.session && req.session.placeId) ? req.session.placeId : "";
-    
-  if (models.ObjectID.isValid(placeId)) {
-    result = await models.Place.findOne({_id: new models.ObjectID(placeId)});
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
   }
   
-  res.json(result ? result.playlist : result);
+  result = result.result;
+  if (!result.spotifyConnection || !result.spotifyConnection.accessToken) {
+    res.status(400).send('Error: No spotify account is connected to Place');
+    return;
+  }
+  
+  if (!result.playlist || !result.playlist.spotifyPlaylist || !result.playlist.spotifyPlaylist.id) {
+    let playlist = await getOrCreateSpotifyPlaylist(result.spotifyConnection);
+    if (!playlist.result) {
+      res.status(400).send('Error: ' + playlist.error);
+      return;
+    }
+    
+    result.playlist = playlist.result;
+  }
+  
+  res.json(result.playlist);
 }
 
 async function createNewPlace(req, res, next) {
@@ -163,6 +174,231 @@ async function findClosestPlaces(req, res, next) {
   }
   
   res.json(publicInfos);
+}
+
+async function connectToPlace(req, res, next) {
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  place = result.result;
+  if (!req.query.pin && !req.body.pin) {
+    res.status(400).send('Error: Pin required');
+    return;
+  }
+  
+  let pin = isNaN(Number(req.query.pin)) ? Number(req.body.pin) : Number(req.query.pin);
+  if (pin !== place.pin) {
+    res.status(400).send('Error: Incorrect pin');
+    return;
+  }
+  
+  if (!req.session.userId) { // Create unregistered user for this session
+    let visitedPlace = new models.VisitedPlace({
+      place: place._id,
+    });
+    let user = new models.User({
+      isRegistered: false,
+      visitedPlaces: [visitedPlace],
+    });
+    
+    await user.commitChanges();
+    req.session.userId = user._id.toHexString();
+    req.session.isSpotifyRegistered = false;
+    req.session.connectedPlace = place._id.toHexString();
+    res.json({ // No need to send anything else. Let frontend redirect
+      success: true,
+    });
+  }
+  else {
+    if (!models.ObjectID.isValid(req.session.userId)) {
+      req.session.destroy();
+      res.status(400).send('Error: Authentication is invalid. Please login again');
+      return;
+    }
+    
+    let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+    if(!user){
+      req.session.destroy();
+      res.status(400).send('Error: Authentication is invalid. Please login again');
+      return;
+    }
+    
+    let visitedPlace = new models.VisitedPlace({
+      place: place._id,
+    });
+    let visitedPlaces = user.visitedPlaces;
+    visitedPlaces.push(visitedPlace);
+    user.visitedPlaces = visitedPlaces;
+    
+    req.session.connectedPlace = place._id.toHexString();
+    res.json({ // No need to send anything else. Let frontend redirect
+      success: true,
+    });
+  }
+}
+
+async function getPlaybackInfo(req, res, next) {
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  result = result.result;
+  if (!result.spotifyConnection || !result.spotifyConnection.accessToken) {
+    res.status(400).send('Error: No spotify account is connected to Place');
+    return;
+  }
+  
+  if (!result.playlist || !result.playlist.spotifyPlaylist || !result.playlist.spotifyPlaylist.id) {
+    res.status(400).send('Error: Place does not have a playlist');
+    return;
+  }
+  
+  let playlist = result.playlist;
+  
+  let curPlaying = await spotifyController.getCurrentlyPlaying(result.spotifyConnection);
+  if (!curPlaying) {
+    res.status(400).send('Error: Could not get playback info');
+    return;
+  }
+  
+  let context = (curPlaying.context && curPlaying.context.type === "playlist" && curPlaying.context.uri)
+    ? curPlaying.context.uri.split(":").pop() : "";
+  
+  playlist.isPlaying = curPlaying.is_playing && curPlaying.currently_playing_type === "track" && context === playlist.spotifyPlaylist.id;
+  
+  if (playlist.isPlaying && curPlaying.item) {
+    let currentSong = -1;
+    for (let i = 0; i < playlist.songs.length; i++) {
+      if (playlist.songs[i].spotifySong.id === curPlaying.item.id) {
+        currentSong = i;
+        break;
+      }
+    }
+    
+    playlist.currentSong = currentSong;
+    if (currentSong >= 0 && curPlaying.timestamp && curPlaying.progress_ms) {
+      playlist.currentSongStartTime = Date.now() - curPlaying.progress_ms;
+    }
+  }
+  
+  result.playlist = playlist;
+  res.json({
+    isPlaying: playlist.isPlaying,
+    currentSong: playlist.currentSong >= 0 ? playlist.songs[playlist.currentSong] : null,
+    currentSongStartTime: new Date(playlist.currentSongStartTime),
+  });
+}
+
+async function getPlaceRecord(req) {
+  let result = {};
+  if (!req.query.placeId && !req.body.placeId && !req.session.placeId) {
+    return {
+      result: false,
+      error: "Missing information",
+    };
+  }
+  
+  if (req.query.placeId || req.body.placeId) {
+    let placeId = (req.query.placeId) ? req.query.placeId : req.body.placeId;
+    if (!models.ObjectID.isValid(placeId)) {
+      return {
+        result: false,
+        error: "Invalid place ID",
+      };
+    }
+    else {
+      result = await models.Place.findOne({_id: new models.ObjectID(placeId)});
+    }
+  }
+  else if (!models.ObjectID.isValid(req.session.placeId)) {
+    req.session.destroy();
+    return {
+      result: false,
+      error: "Invalid session place ID",
+    };
+  }
+  else {
+    result = await models.Place.findOne({_id: new models.ObjectID(req.session.placeId)});
+  }
+    
+  if (!result) {
+    return {
+      result: false,
+      error: "No such place",
+    };
+  }
+  
+  return { result: result };
+}
+
+async function getOrCreateSpotifyPlaylist(spotifyConnection) {
+  // First check if account already has one with the name
+  let lists = await spotifyController.getPlaylists(result.spotifyConnection);
+  if (!lists.items) {
+    return {
+      result: false,
+      error: "Could not get playlists of account",
+    };
+  }
+  
+  let pl = {};
+  for (let list of lists.items) {
+    if (list.name == config.spotify.playlistName) {
+      pl = list;
+      break;
+    }
+  }
+  
+  if (pl.id) {
+    pl = await spotifyController.getPlaylist(result.spotifyConnection, pl.id);
+  }
+  else { // Create if not
+    pl = await spotifyController.createPlaylist(result.spotifyConnection, config.spotify.playlistName, config.spotify.playlistDecription);
+  }
+  
+  if (pl.id) {
+    let songs = [];
+    for (let track of pl.tracks.items) {
+      let spotifyItem = new models.SpotifyItem({
+        id: track.track.id,
+        uri: track.track.uri,
+        name: track.track.name,
+      });
+      let song = new models.Song({
+        name: track.track.name,
+        duration: track.track.duration_ms,
+        spotifySong: spotifyItem,
+      });
+      songs.push(song);
+    }
+    
+    let spotifyPlaylist = new models.SpotifyItem({
+      id: pl.id,
+      uri: pl.uri,
+      name: pl.name,
+      description: pl.description,
+    });
+    let playlist = new models.Playlist({
+      songs: songs,
+      spotifyPlaylist: spotifyPlaylist,
+      currentSong: 0,
+      currentSongStartTime: 0,
+    });
+    
+    return {
+      result: playlist,
+    };
+  }
+  
+  return {
+    result: false,
+    error: "Could not create or get playlist",
+  };
 }
 
 // Used the formulation given in following page

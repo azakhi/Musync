@@ -14,6 +14,8 @@ const dev = {
     clientID: process.env.DEV_SPOTIFY_CLIENT_ID || '',
     clientSecret: process.env.DEV_SPOTIFY_CLIENT_SECRET || '',
     scopes: process.env.DEV_SPOTIFY_SCOPES || 'user-library-modify playlist-read-private user-read-email playlist-modify-public playlist-modify-private user-library-read user-read-playback-state user-modify-playback-state user-top-read user-read-currently-playing',
+    playlistName: process.env.DEV_SPOTIFY_PLAYLIST_NAME || 'MusyncPlaylist',
+    playlistDecription: process.env.DEV_SPOTIFY_PLAYLIST_DESC || 'This playlist is created automatically by Musync',
   }
 };
 
@@ -29,6 +31,8 @@ const test = {
     clientID: process.env.TEST_SPOTIFY_CLIENT_ID || '',
     clientSecret: process.env.TEST_SPOTIFY_CLIENT_SECRET || '',
     scopes: process.env.TEST_SPOTIFY_SCOPES || 'user-library-modify playlist-read-private user-read-email playlist-modify-public playlist-modify-private user-library-read user-read-playback-state user-modify-playback-state user-top-read user-read-currently-playing',
+    playlistName: process.env.TEST_SPOTIFY_PLAYLIST_NAME || 'MusyncPlaylist',
+    playlistDecription: process.env.TEST_SPOTIFY_PLAYLIST_DESC || 'This playlist is created automatically by Musync',
   }
 };
 
