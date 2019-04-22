@@ -17,6 +17,8 @@ router.post('/', createNewPlace);
 // Get closest Places to a location
 router.post('/closest', findClosestPlaces);
 
+router.get('/connect', connectToPlace);
+router.post('/connect', connectToPlace);
 router.get('/playback', getPlaybackInfo);
 
 async function getPlace(req, res, next) {
@@ -172,6 +174,70 @@ async function findClosestPlaces(req, res, next) {
   }
   
   res.json(publicInfos);
+}
+
+async function connectToPlace(req, res, next) {
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  place = result.result;
+  if (!req.query.pin && !req.body.pin) {
+    res.status(400).send('Error: Pin required');
+    return;
+  }
+  
+  let pin = isNaN(Number(req.query.pin)) ? Number(req.body.pin) : Number(req.query.pin);
+  if (pin !== place.pin) {
+    res.status(400).send('Error: Incorrect pin');
+    return;
+  }
+  
+  if (!req.session.userId) { // Create unregistered user for this session
+    let visitedPlace = new models.VisitedPlace({
+      place: place._id,
+    });
+    let user = new models.User({
+      isRegistered: false,
+      visitedPlaces: [visitedPlace],
+    });
+    
+    await user.commitChanges();
+    req.session.userId = user._id.toHexString();
+    req.session.isSpotifyRegistered = false;
+    req.session.connectedPlace = place._id.toHexString();
+    res.json({ // No need to send anything else. Let frontend redirect
+      success: true,
+    });
+  }
+  else {
+    if (!models.ObjectID.isValid(req.session.userId)) {
+      req.session.destroy();
+      res.status(400).send('Error: Authentication is invalid. Please login again');
+      return;
+    }
+    
+    let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+    if(!user){
+      req.session.destroy();
+      res.status(400).send('Error: Authentication is invalid. Please login again');
+      return;
+    }
+    
+    let visitedPlace = new models.VisitedPlace({
+      place: place._id,
+    });
+    let visitedPlaces = user.visitedPlaces;
+    visitedPlaces.push(visitedPlace);
+    user.visitedPlaces = visitedPlaces;
+    
+    req.session.connectedPlace = place._id.toHexString();
+    res.json({ // No need to send anything else. Let frontend redirect
+      success: true,
+    });
+  }
 }
 
 async function getPlaybackInfo(req, res, next) {
