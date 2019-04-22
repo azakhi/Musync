@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Route, Switch} from "react-router-dom";
+import {withCookies} from 'react-cookie';
 
 import Home from "./Home";
 import Place from "./place/Place";
@@ -17,7 +18,10 @@ class App extends Component {
           <Route exact path='/' component={Home}/>
           <Route exact path='/place' component={Place}/>
           <Route exact path='/user' component={User}/>
-          <Route exact path='/sign-up' component={SignUp}/>
+          <Route exact path='/sign-up'
+                 render={(routeProps) => <SignUp cookies={this.props.cookies}
+                                                 history={routeProps.history}/>
+                 }/>
           <Route exact path='/create-place' component={CreatePlace}/>
           <Route path='/' component={NotFound}/>
         </Switch>
@@ -26,4 +30,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withCookies(App);

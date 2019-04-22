@@ -6,10 +6,6 @@ import Link from "@material-ui/core/Link/index";
 
 
 class Footer extends Component{
-  constructor(props) {
-    super(props);
-  }
-  
   render() {
     const {style} = this.props;
     

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { CookiesProvider } from 'react-cookie';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -17,7 +18,9 @@ library.add(fab, faMusic, faGuitar, faUser,
   faExclamationTriangle, faCheckCircle);
 
 ReactDOM.render((
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <CookiesProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </CookiesProvider>
 ), document.getElementById('root'));

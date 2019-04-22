@@ -1,7 +1,6 @@
 export const SERVER_DOMAIN = "http://localhost:1234";
 export const SPOTIFY_INFO = {
   clientID: '...',
-  clientSecret: '...',
   scopes: 'user-library-modify ' +
     'playlist-read-private ' +
     'user-read-email ' +
@@ -14,14 +13,15 @@ export const SPOTIFY_INFO = {
     'user-read-currently-playing',
 };
 
-export function generateSpotifyAuthURL(){
+export function generateSpotifyAuthURL(redirectURI, stateParam) {
   let url = "https://accounts.spotify.com/authorize?";
   let options = {
     client_id: SPOTIFY_INFO.clientID,
-    redirect_uri: encodeURIComponent("http://localhost:1234/callback"),
+    redirect_uri: encodeURIComponent(redirectURI),
     scope: encodeURIComponent(SPOTIFY_INFO.scopes),
     response_type: "code",
-    show_dialog: true
+    show_dialog: false,
+    state: stateParam
   };
   
   for(const key in options){
@@ -29,4 +29,14 @@ export function generateSpotifyAuthURL(){
   }
   
   return url;
+}
+
+export function getCurrentURL() {
+  return window.location.protocol + "//" +
+    window.location.host + window.location.pathname;
+}
+
+export function getURLParamVal(paramKey) {
+  const url = window.location.href;
+  return new URL(url).searchParams.get(paramKey);
 }

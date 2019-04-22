@@ -14,9 +14,10 @@ class ModelBase {
     this._isMarkedForDelete = false;
     this._initialize();
     this._parseObject(obj);
-    ModelManager.register(this);
     
-    return new Proxy(this, this);
+    let proxy = new Proxy(this, this);
+    ModelManager.register(proxy);
+    return proxy;
   }
   
   _initialize() {
@@ -93,19 +94,19 @@ class ModelBase {
     }
     
     if (this._isMarkedForDelete) {
-      if (this._id.value !== null) {
-        await DBManager.db.collection(this.collection).deleteOne({_id: this._id.value});
+      if (this._id !== null) {
+        await DBManager.db.collection(this.collection).deleteOne({_id: this._id});
         this._isDeleted = true;
       }
     }
     else if (this._isDirty) {
       this._isDirty = false;
-      if (this._id.value === null) {
+      if (this._id === null) {
         let result = await DBManager.db.collection(this.collection).insertOne(this.dbObject).catch((err) => { throw err });
-        this._id.value = result.insertedId;
+        this._id = result.insertedId;
       }
       else {
-        await DBManager.db.collection(this.collection).updateOne({_id: this._id.value}, {$set: this.dbObject}).catch((err) => { throw err });
+        await DBManager.db.collection(this.collection).updateOne({_id: this._id}, {$set: this.dbObject}).catch((err) => { throw err });
       }
     }
   }
