@@ -100,7 +100,7 @@ class DBArray extends DBBasicType {
     let arr = [];
     let type = this._type;
     value.forEach(function(item, index, array) {
-      if (item instanceof type) {
+      if (type == null || item instanceof type) {
         arr[index] = item;
       }
       else {
