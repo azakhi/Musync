@@ -15,6 +15,7 @@ router.post('/login', loginWithCredentials);
 router.post('/update', updateUser);
 router.get('/logout', logoutUser);
 router.get('/connectspotify', connectSpotify);
+router.get('/gethistory', getUserHistory);
 
 async function checkConnection(req, res, next) {
   res.json({
@@ -298,6 +299,30 @@ async function connectSpotify(req, res, next) {
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
+}
+
+async function getUserHistory(req, res, next) {
+  if (req.session) {
+    let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+    let resultPlaces = [];
+    let resultSongs = [];
+    if (user) {
+      for( var visitedPlace in user.visitedPlaces){
+        resultPlaces.push({name: visitedPlace.place.name, visitNum: 1});
+      }
+      for( var requestedSong in user.requestedSongs){
+        resultSongs.push({name: requestedSong.song.name, artistName: "Default Artist Name", placeName: requestedSong.place.name});
+      }
+      res.status(200).json(resultPlaces, resultSongs);
+    }
+    else {
+      res.status(204).send("User not logged in");
+    }
+  }
+  else {
+    res.status(400).send("No session");
+  }
+  return;
 }
 
 module.exports = router;
