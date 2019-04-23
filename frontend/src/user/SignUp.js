@@ -222,7 +222,7 @@ function handleSpotifyRedirection(cookies) {
   }
   
   let stateParam = null;
-  if(!redirected || redirected && !accessGiven)
+  if(!redirected || (redirected && !accessGiven))
     stateParam = generateStateParamCookie(cookies);
   
   return {
