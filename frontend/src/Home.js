@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import { Link as RouterLink } from 'react-router-dom'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Grid from "@material-ui/core/Grid";
@@ -68,12 +69,18 @@ class Home extends Component {
         
         <Grid item xs={12}>
           <Typography gutterBottom align="center">
-            <Link href="/login">
+            <Link component={RouterLink}
+                  to={{
+              pathname: "/login",
+              state: { from: window.location.pathname } }}>
               Login
             </Link>
           </Typography>
           <Typography gutterBottom align="center">
-            <Link href="/sign-up">
+            <Link component={RouterLink}
+                  to={{
+              pathname: "/register",
+              state: { from: window.location.pathname } }}>
               Create an account
             </Link>
           </Typography>
