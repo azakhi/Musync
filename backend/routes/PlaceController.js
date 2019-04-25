@@ -169,9 +169,22 @@ async function findClosestPlaces(req, res, next) {
   closePlaces.sort(compareDistances);
   
   let publicInfos = [];
+
   for (const place of closePlaces) {
-    publicInfos.push(place.publicInfo);
+    let genresArray = [];
+
+    genresIds = place.genres;
+    for (var i = 0; i < genresIds.length;i++){
+      let genre = await models.Genre.findOne({_id: genresIds[i]});
+      genresArray.push(genre.name);
+    }
+    let infObj = place.publicInfo;
+    
+    
+    infObj['genres'] = genresArray;
+    publicInfos.push(infObj);
   }
+
   
   res.json(publicInfos);
 }

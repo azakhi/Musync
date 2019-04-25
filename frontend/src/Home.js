@@ -1,47 +1,105 @@
 import React, {Component} from "react";
 import { Link as RouterLink } from 'react-router-dom'
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Grid from "@material-ui/core/Grid";
 import {Link} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import Footer from "./utils/Footer";
 import PlaceCard, {PlaceCardTypes} from "./place/PlaceCard";
+import axios from "axios";
+
+
+// Redux Action Types
+const GET_LOCATION = 'GET_LOCATION';
 
 
 class Home extends Component {
-  render() {
-    const mainPlace = {
+
+    state = { mainPlace: {
       id: 1,
-      name: "Sun Brothers",
-      image: "https://b.zmtcdn.com/data/pictures/6/6001836/cae7f24481e1128ac4070a67c26d4ba8_featured_v2.jpg",
-      genres: ["Rock", "Metal"],
-      currentSong: "Iron Maiden - Dance of Death"
-    };
-    
-    const otherPlaces = [
+      name: "",
+      image: "",
+      genres: [],
+      currentSong: ""
+    }, otherPlaces: [
       {
         id: 2,
-        name: "Blue Jay",
-        genres: ["Pop"],
-        currentSong: "Taylor Swift - Shake it up"
+        name: "",
+        genres: [],
+        currentSong: ""
       },
-      {
-        id: 3,
-        name: "Mozart Cafe",
-        genres: ["Classic"],
-        currentSong: "Beethoven - Symphony No:9 in D minor"
-      },
-    ];
+      ] };
+    
+  
+       getLocation =  () => {
+
+        
+        const geolocation = navigator.geolocation;
+        
+        const location = new Promise((resolve, reject) => {
+          if (!geolocation) {
+           
+            reject(new Error('Not Supported'));
+          }
+          
+          geolocation.getCurrentPosition(async (position) => {
+            
+            let closestPlaces = await this.sendCoords(position.coords.latitude,position.coords.longitude);
+            var arr =[];
+            for (var i = 0; i < closestPlaces.length; i++) { 
+              if(i==0){
+                
+                this.setState({mainPlace:{id: closestPlaces[i].id,
+                  name: closestPlaces[i].name,
+                  genres: closestPlaces[i].genres,
+                  currentSong: closestPlaces[i].currentlyPlaying
+                  
+                
+              }});
+                 
+              }else{
+                arr.push({id: closestPlaces[i].id,
+                  name: closestPlaces[i].name,
+                  genres: closestPlaces[i].genres,
+                  currentSong: closestPlaces[i].currentlyPlaying
+                  
+                
+              });
+                
+              }
+              
+            }
+            this.setState({otherPlaces:arr});
+          }, () => {
+            reject (new Error('Permission denied'));
+          });
+        });
+        
+        
+      };
+  sendCoords = async (latitude,longitude) => {
+    
+    let res = await axios.post("http://localhost:1234/place/closest", { latitude: latitude,longitude:longitude});
+    let  data  = await res.data;
+    return data;
+};
+componentWillMount() {
+  
+  this.getLocation();
+}
+  render() {
+    
+ 
     
     return (
-      <Grid container
+     
+      <Grid onLoad={this.findCoordinates} container
             alignItems="center"
             direction="column"
             justify="center"
             spacing={32}>
         <br/>
-        
+        <br onLoad={()=>this.sendCoords(this.props.coords.latitude,this.props.coords.longitude)}></br>
         <Grid item xs={10}>
           <Typography variant="h2" align="center">
             <FontAwesomeIcon icon="guitar"/>
@@ -54,22 +112,22 @@ class Home extends Component {
         </Grid>
         
         <Grid container item xs={11}>
-          <PlaceCard place={mainPlace} type={PlaceCardTypes.HomeViewPrimary}/>
+          <PlaceCard place={this.state.mainPlace} type={PlaceCardTypes.HomeViewPrimary}/>
         </Grid>
         
         <Grid container item xs={10} spacing={8} justify="center">
           <Typography gutterBottom align="center">
-            {`Are you not in ${mainPlace.name}? Try these ones.`}
+            {`Are you not in ${this.state.mainPlace.name}? Try these ones.`}
           </Typography>
           <br/>
           
-          {renderOtherPlaces(otherPlaces)}
+          {renderOtherPlaces(this.state.otherPlaces)}
           
         </Grid>
         
         <Grid item xs={12}>
           <Typography gutterBottom align="center">
-            <Link component={RouterLink}
+          <Link component={RouterLink}
                   to={{
               pathname: "/login",
               state: { from: window.location.pathname } }}>
@@ -77,7 +135,7 @@ class Home extends Component {
             </Link>
           </Typography>
           <Typography gutterBottom align="center">
-            <Link component={RouterLink}
+          <Link component={RouterLink}
                   to={{
               pathname: "/register",
               state: { from: window.location.pathname } }}>

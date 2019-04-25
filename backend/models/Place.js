@@ -31,7 +31,7 @@ class Place extends ModelBase {
       isSpotifyConnected: !!this.spotifyConnection && !!this.spotifyConnection.accessToken,
       votedSongs: this.votedSongs.value,
       votes: this.votes.value,
-      currentlyPlaying: this.playlist.currentlyPlaying,
+      currentlyPlaying: this.playlist.songs[this.playlist.currentSong].name,
       songRecords: this.songRecords.value,
       location: this.location.value,
     };
