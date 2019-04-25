@@ -8,6 +8,7 @@ const session = require('express-session');
 const MainController = require('./routes/MainController');
 const placeController = require('./routes/PlaceController');
 const userController = require('./routes/UserController');
+const createPlaces = require('./routes/CreatePlaces');
 
 
 const DBManager = require("./models/DBManager");
@@ -44,6 +45,7 @@ app.use(function(req, res, next) {
 
 app.use('/place', placeController);
 app.use('/user', userController);
+app.use('/test', createPlaces);
 app.use('/', MainController);
 
 
