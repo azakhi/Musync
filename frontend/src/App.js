@@ -3,12 +3,14 @@ import {Route, Switch} from "react-router-dom";
 
 import Home from "./Home";
 import Place from "./place/Place";
+import PlaceSettings from "./place/PlaceSettings";
 import User from "./user/User";
 import SignUp from "./user/SignUp";
 import Login from "./user/Login";
 import CreatePlace from "./place/CreatePlace";
 import NotFound from "./utils/NotFound";
 import SpotifyCallback from "./spotify/SpotifyCallback";
+
 
 
 class App extends Component {
@@ -23,6 +25,7 @@ class App extends Component {
           <Route exact path='/login' component={Login}/>
           <Route exact path='/create-place' component={CreatePlace}/>
           <Route exact path='/spotifyCallback' component={SpotifyCallback}/>
+          <Route exact path='/placeSettings' component={PlaceSettings}/>
           <Route path='/' component={NotFound}/>
         </Switch>
       </main>

@@ -28,71 +28,53 @@ class Home extends Component {
         genres: [],
         currentSong: ""
       },
-      ] };
+      ]
+    };
     
   
-       getLocation =  () => {
-
-        
+    getLocation =  () => {
         const geolocation = navigator.geolocation;
-        
         const location = new Promise((resolve, reject) => {
-          if (!geolocation) {
-           
+
+            if (!geolocation) {
             reject(new Error('Not Supported'));
-          }
-          
-          geolocation.getCurrentPosition(async (position) => {
-            
-            let closestPlaces = await this.sendCoords(position.coords.latitude,position.coords.longitude);
-            var arr =[];
-            for (var i = 0; i < closestPlaces.length; i++) { 
-              if(i==0){
-                
-                this.setState({mainPlace:{id: closestPlaces[i].id,
-                  name: closestPlaces[i].name,
-                  genres: closestPlaces[i].genres,
-                  currentSong: closestPlaces[i].currentlyPlaying
-                  
-                
-              }});
-                 
-              }else{
-                arr.push({id: closestPlaces[i].id,
-                  name: closestPlaces[i].name,
-                  genres: closestPlaces[i].genres,
-                  currentSong: closestPlaces[i].currentlyPlaying
-                  
-                
-              });
-                
-              }
-              
             }
-            this.setState({otherPlaces:arr});
-          }, () => {
-            reject (new Error('Permission denied'));
-          });
+            
+            geolocation.getCurrentPosition(async (position) => {
+                let closestPlaces = await this.sendCoords(position.coords.latitude,position.coords.longitude);
+                var arr =[];
+                for (var i = 0; i < closestPlaces.length; i++) { 
+                    if(i==0){
+                        this.setState({ mainPlace:{id: closestPlaces[i].id,
+                                        name: closestPlaces[i].name,
+                                        genres: closestPlaces[i].genres,
+                                        currentSong: closestPlaces[i].currentlyPlaying
+                                    }});
+                    }else{
+                        arr.push({  
+                                    id: closestPlaces[i].id,
+                                    name: closestPlaces[i].name,
+                                    genres: closestPlaces[i].genres,
+                                    currentSong: closestPlaces[i].currentlyPlaying
+                                });
+                    }
+                }
+                this.setState({otherPlaces:arr});
+            }, () => {
+                reject (new Error('Permission denied'));
+            });
         });
-        
-        
-      };
-  sendCoords = async (latitude,longitude) => {
-    
-    let res = await axios.post("http://localhost:1234/place/closest", { latitude: latitude,longitude:longitude});
-    let  data  = await res.data;
-    return data;
-};
-componentWillMount() {
-  
-  this.getLocation();
-}
+    };
+    sendCoords = async (latitude,longitude) => {
+        let res = await axios.post("http://localhost:1234/place/closest", {latitude: latitude,longitude:longitude});
+        let  data  = await res.data;
+        return data;
+    };
+    componentWillMount() {
+        this.getLocation();
+    }
   render() {
-    
- 
-    
     return (
-     
       <Grid onLoad={this.findCoordinates} container
             alignItems="center"
             direction="column"
@@ -153,11 +135,9 @@ componentWillMount() {
 
 function renderOtherPlaces(otherPlaces) {
   let counter = 0;
-  
   return otherPlaces.map(place => {
     counter++;
     const key = 'placeCard_' + counter;
-    
     return <PlaceCard place={place}
                       type={PlaceCardTypes.HomeViewSecondary}
                       key={key}/>

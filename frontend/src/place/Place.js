@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -41,6 +41,10 @@ class Place extends Component {
   };
 
   render() {
+    const buttonStyle = {
+        display: "inline-block",
+        margin: "5px"
+      };
     const currentPlace = {
       id: 1,
       name: "Sun Brothers",
@@ -80,13 +84,24 @@ class Place extends Component {
           <Playlist songs={songs}/>
 
           <br/>
+          
           <Button variant="contained"
                   color="primary"
                   style={{marginBottom: "50px"}}
-                  onClick={this.handleClickOpen}>
+                  onClick={this.handleClickOpen}
+                  style={buttonStyle}>
             Add Song!
           </Button>
-        </Grid>
+          <br/>
+          <Button href="/placeSettings"
+                  variant="contained"
+                  color="primary"
+                  style={buttonStyle}>
+            <FontAwesomeIcon icon="sliders-h"/>&nbsp;
+            Settings
+          </Button>
+          </Grid>
+        
         <Footer/>
         <Dialog
             open={this.state.open}
