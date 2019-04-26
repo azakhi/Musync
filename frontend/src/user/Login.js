@@ -1,6 +1,6 @@
 import React, {Component} from "react";
-import axios from "axios";
 
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Button from "@material-ui/core/Button";
 import Chip from "@material-ui/core/Chip";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -8,27 +8,34 @@ import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import auth from "../auth/auth";
 import Footer from "../utils/Footer";
-import {generateSpotifyAuthURL, USER_LOGIN_URL} from "../config";
+import {generateSpotifyAuthURL} from "../config";
 import {generateStateParamCookie, setNextAndCurrPathCookies} from "../utils/utils";
+import {Heading} from "../utils/Heading";
 
 
 class Login extends Component {
   constructor(props) {
     super(props);
     
-    const {location} = props;
-    const spotifyDenied = location.state ? location.state.spotifyDenied : null;
-    const nextPath = location.state ? location.state.from : "/";
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   
+    const {history, location} = props;
+    const spotifyDenied = location.state ? location.state.spotifyDenied : false;
+    const nextPath = location.state ? location.state.from : "/";
     setNextAndCurrPathCookies(nextPath);
-    const stateParam = generateStateParamCookie();
+    
+    // Check if already authenticated
+    if(auth.isAuthenticated()){
+      history.push(nextPath);
+    }
   
     this.state = {
       email: "",
       password: "",
-      stateParam: stateParam,
+      stateParam: generateStateParamCookie(),
       loading: false,
       success: false,
       error: false,
@@ -51,23 +58,20 @@ class Login extends Component {
       error: false
     });
     
-    const body = {
+    const credentials = {
       email: this.state.email,
       password: this.state.password
     };
     
-    axios.post(USER_LOGIN_URL, body)
+    auth.login(credentials)
       .then(() => {
         this.setState({
           loading: false,
           success: true,
           error: false
         });
-        
-        setTimeout(() => {
-          this.props.history.push(this.state.nextPath);
-        }, 1000);
-        
+
+        this.props.history.push(this.state.nextPath);
       })
       .catch(error => {
         this.setState({
@@ -82,7 +86,7 @@ class Login extends Component {
   }
   
   render() {
-    const {loading, error, errorMsg, success, stateParam} = this.state;
+    const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
     const spotifyAuthURL = generateSpotifyAuthURL(stateParam);
@@ -95,16 +99,7 @@ class Login extends Component {
             spacing={32}>
         <br/>
         
-        <Grid item xs={10}>
-          <Typography variant="h2" align="center">
-            <FontAwesomeIcon icon="guitar"/>
-            Musync
-          </Typography>
-          
-          <Typography align="center" gutterBottom>
-            Start listening what you want to listen
-          </Typography>
-        </Grid>
+        <Heading />
         
         <Grid item xs={12} style={{textAlign: 'center'}}>
           <Typography variant="h5"
@@ -112,18 +107,18 @@ class Login extends Component {
             Login
           </Typography>
           
-          <form onSubmit={event => this.handleSubmit(event)}>
+          <form onSubmit={this.handleSubmit}>
             <TextField required
                        id="email"
                        label="Email"
-                       onChange={event => this.handleInputChange(event)}
+                       onChange={this.handleInputChange}
                        margin="dense"/>
             <br/>
             <TextField required
                        id="password"
                        label="Password"
                        type="password"
-                       onChange={event => this.handleInputChange(event)}
+                       onChange={this.handleInputChange}
                        margin="dense"/>
             <br/>
             <div>
@@ -163,6 +158,12 @@ class Login extends Component {
             <FontAwesomeIcon icon={["fab", "spotify"]} size="lg"/>&nbsp;
             Spotify
           </Button>
+          <br/>
+          
+          {spotifyDenied && <Chip label="Please grant us Spotify access :("
+                                  icon={errorIcon}
+                                  color="secondary"
+                                  variant="outlined"/>}
           
           <Typography align="center"
                       variant="body1"

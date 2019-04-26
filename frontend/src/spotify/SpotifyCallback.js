@@ -1,8 +1,7 @@
 import React, {Component} from "react";
-import axios from "axios";
 import Cookies from 'universal-cookie';
 
-import {SPOTIFY_CALLBACK_URL} from "../config";
+import auth from "../auth/auth";
 import {getURLParamVal} from "../utils/utils";
 
 
@@ -20,17 +19,14 @@ class SpotifyCallback extends Component {
     };
     
     if(redirected && accessGiven) {
-      const url = SPOTIFY_CALLBACK_URL + "?code=" + code;
-      axios.get(url)
-        .then(() =>
-          history.push(historyObj)
+      auth.loginWithSpotify(code)
+        .catch(error =>
+          historyObj.state.spotifyDenied = error.response ?
+            error.response.data : "Network error."
         )
-        .catch(error => {
-          historyObj.state.spotifyDenied = error.response ? error.response.data : "Network error.";
-          history.push(historyObj);
-        });
+        .finally(() => history.push(historyObj));
     }
-    else{
+    else {
       history.push(historyObj);
     }
   }
@@ -86,7 +82,7 @@ function findNextPath(redirected, accessGiven) {
     path = nextPath;
   
   return {
-    path: path ? path : defaultPath,
+    path: path || defaultPath,
     error: error
   };
 }

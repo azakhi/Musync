@@ -11,8 +11,8 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
+
 
 class Place extends Component {
   constructor(props) {
@@ -42,9 +42,9 @@ class Place extends Component {
 
   render() {
     const buttonStyle = {
-        display: "inline-block",
-        margin: "5px"
-      };
+      display: "inline-block",
+      margin: "5px"
+    };
     const currentPlace = {
       id: 1,
       name: "Sun Brothers",
@@ -87,7 +87,6 @@ class Place extends Component {
           
           <Button variant="contained"
                   color="primary"
-                  style={{marginBottom: "50px"}}
                   onClick={this.handleClickOpen}
                   style={buttonStyle}>
             Add Song!

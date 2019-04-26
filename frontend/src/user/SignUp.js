@@ -12,6 +12,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Footer from "../utils/Footer";
 import {generateSpotifyAuthURL, USER_REGISTER_URL} from "../config";
 import {generateStateParamCookie, setNextAndCurrPathCookies} from "../utils/utils";
+import {Heading} from "../utils/Heading";
 
 
 class SignUp extends Component {
@@ -100,16 +101,7 @@ class SignUp extends Component {
             spacing={32}>
         <br/>
         
-        <Grid item xs={10}>
-          <Typography variant="h2" align="center">
-            <FontAwesomeIcon icon="guitar"/>
-            Musync
-          </Typography>
-          
-          <Typography align="center" gutterBottom>
-            Start listening what you want to listen
-          </Typography>
-        </Grid>
+        <Heading />
         
         <Grid item xs={12} style={{textAlign: 'center'}}>
           <Typography variant="h5"

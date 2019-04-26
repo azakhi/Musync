@@ -1,19 +1,84 @@
 import React, {Component} from "react";
-import Grid from "@material-ui/core/Grid";
-import Header from "../utils/Header";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
+import axios from "axios";
+
+import Button from "@material-ui/core/Button/index";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Grid from "@material-ui/core/Grid/index";
+import TextField from "@material-ui/core/TextField/index";
+import Typography from "@material-ui/core/Typography/index";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Footer from "../utils/Footer";
+import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../config";
+import Chip from "@material-ui/core/Chip";
+import {Heading} from "../utils/Heading";
 
 
 class CreatePlace extends Component {
+  
   constructor(props) {
     super(props);
     
-    this.state = {};
+    this.state = {
+      name: "",
+      email: "",
+      password: "",
+      loading: false,
+      success: false,
+      error: false
+    };
+  }
+  
+  handleInputChange(event) {
+    this.setState({
+      [event.target.id]: event.target.value
+    });
+  }
+  
+  handleSubmit(event) {
+    this.setState({
+      loading: true,
+      success: false,
+      error: false
+    });
+    
+    const url = SERVER_DOMAIN + "/user/register";
+    const body = {
+      name: this.state.name,
+      email: this.state.email,
+      password: this.state.password
+    };
+    
+    axios.post(url, body)
+      .then(() => {
+        this.setState({
+          loading: false,
+          success: true,
+          error: false
+        });
+        
+        setTimeout(() => {
+          this.props.history.push('/');
+        }, 2000);
+        
+      })
+      .catch(error => {
+        this.setState({
+          loading: false,
+          success: false,
+          error: true,
+          errorMsg: error.response.data
+        });
+      });
+    
+    event.preventDefault();
   }
   
   render() {
+    const {loading, error, errorMsg, success} = this.state;
+    const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
+    const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
+    const spotifyAuthURL = generateSpotifyAuthURL();
+    
     return (
       <Grid container
             alignItems="center"
@@ -22,38 +87,78 @@ class CreatePlace extends Component {
             spacing={32}>
         <br/>
         
-        <Header/>
-  
-        <Grid item xs={12} style={{textAlign: "center"}}>
+        <Heading />
+        
+        <Grid item xs={12} style={{textAlign: 'center'}}>
           <Typography variant="h5"
                       color="textPrimary">
-            Create a new Place
+            Create an account
           </Typography>
-  
-          <form>
+          
+          <form onSubmit={event => this.handleSubmit(event)}>
             <TextField required
                        id="name"
                        label="Name"
-                       onChange={e => this.handleNameChange(e)}
+                       onChange={event => this.handleInputChange(event)}
                        margin="dense"/>
             <br/>
             <TextField required
-                       id="name"
-                       label="Name"
-                       onChange={e => this.handleNameChange(e)}
+                       id="email"
+                       label="Email"
+                       onChange={event => this.handleInputChange(event)}
                        margin="dense"/>
-                       
             <br/>
-            <Button variant="text"
-                    color="primary"
-                    type="submit">
-              Create
-            </Button>
+            <TextField required
+                       id="password"
+                       label="Password"
+                       type="password"
+                       onChange={event => this.handleInputChange(event)}
+                       margin="dense"/>
+            <br/>
+            <div>
+              <Button variant="text"
+                      color="primary"
+                      type="submit"
+                      disabled={loading}>
+                Sign Up
+              </Button>
+              <br/>
+              {loading && <CircularProgress size={24}/>}
+            </div>
           </form>
           
+          {error && <Chip label={' ' + errorMsg}
+                          icon={errorIcon}
+                          color="secondary"
+                          variant="outlined"/>}
+          
+          {success && <Chip label="Success! Get ready for musynchronization!"
+                            icon={successIcon}
+                            color="primary"
+                            variant="outlined"/>}
+          
+          <Typography align="center"
+                      variant="caption"
+                      color="textSecondary"
+                      gutterBottom>
+            or connect with
+          </Typography>
+          
+          <Button variant="contained"
+                  color="primary"
+                  href={spotifyAuthURL}
+                  disabled={loading}>
+            <FontAwesomeIcon icon={["fab", "spotify"]} size="lg"/>&nbsp;
+            Spotify
+          </Button>
+        
         </Grid>
+        
+        <Footer style={{position: "fixed", bottom: "5%"}}/>
+      
       </Grid>
     );
+    
   }
 }
 
