@@ -66,7 +66,7 @@ async function getUser(req, res, next) {
     return;
   }
   
-  res.json({});
+  res.status(400).send("Error: Login required!");
 }
 
 async function registerUser(req, res, next) {
