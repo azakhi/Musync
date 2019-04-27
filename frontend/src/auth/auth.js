@@ -73,8 +73,6 @@ class Auth {
           reject(error);
         });
     });
-    
-    
   }
 }
 

@@ -1,13 +1,16 @@
 import React, {Component} from "react";
-import axios from "axios/index";
 
 import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
 import Footer from "../utils/Footer";
-import PlaceCard, {PlaceCardTypes} from "../place/PlaceCard";
 import auth from "../auth/auth";
+import location from "../location/location";
 import {Heading} from "../utils/Heading";
 import {ButtomLinks} from "./ButtomLinks";
+import {NearPlaces} from "./NearPlaces";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Chip from "@material-ui/core/Chip";
 
 
 class Home extends Component {
@@ -17,6 +20,23 @@ class Home extends Component {
     
     this.handleLogout = this.handleLogout.bind(this);
     
+    this.state = {
+      authenticated: false,
+      authUser: null,
+      locationPermission: true,
+      loading: false,
+      success: false,
+      mainPlace: null,
+      otherPlaces: null
+    };
+  }
+  
+  componentDidMount() {
+    this.requestAuthUserInfo();
+    this.getNearPlaces();
+  }
+  
+  requestAuthUserInfo() {
     auth.requestUserInfo()
       .then(() => {
         this.setState({
@@ -30,28 +50,31 @@ class Home extends Component {
           authUser: null
         })
       });
-    
-    this.state = {
-      authenticated: false,
-      authUser: null,
-      mainPlace: {
-        id: 1,
-        name: "",
-        image: "/img",
-        genres: [],
-        currentSong: ""
-      },
-      otherPlaces: [{
-        id: 2,
-        name: "",
-        genres: [],
-        currentSong: ""
-      }]
-    };
   }
   
-  componentWillMount() {
-    // this.getLocation();
+  getNearPlaces() {
+    this.setState({
+      loading: true,
+      success: false
+    });
+    
+    location.getNearPlaces()
+      .then(places => {
+        this.setState({
+          loading: false,
+          success: true,
+          locationPermission: true,
+          mainPlace: places.mainPlace,
+          otherPlaces: places.otherPlaces,
+        });
+      })
+      .catch(() => {
+        this.setState({
+          loading: false,
+          success: false,
+          locationPermission: false
+        });
+      });
   }
   
   handleLogout() {
@@ -61,47 +84,10 @@ class Home extends Component {
     })
   }
   
-  getLocation() {
-    const geolocation = navigator.geolocation;
-    return new Promise((resolve, reject) => {
-      
-      if (!geolocation) {
-        reject(new Error('Not Supported'));
-      }
-      
-      geolocation.getCurrentPosition(async (position) => {
-        let closestPlaces = await this.sendCoords(position.coords.latitude,position.coords.longitude);
-        var arr =[];
-        for (var i = 0; i < closestPlaces.length; i++) {
-          if(i === 0){
-            this.setState({ mainPlace:{id: closestPlaces[i].id,
-                name: closestPlaces[i].name,
-                genres: closestPlaces[i].genres,
-                currentSong: closestPlaces[i].currentlyPlaying
-              }});
-          }else{
-            arr.push({
-              id: closestPlaces[i].id,
-              name: closestPlaces[i].name,
-              genres: closestPlaces[i].genres,
-              currentSong: closestPlaces[i].currentlyPlaying
-            });
-          }
-        }
-        this.setState({otherPlaces:arr});
-      }, () => {
-        reject (new Error('Permission denied'));
-      });
-    });
-  }
-  
-  sendCoords = async (latitude,longitude) => {
-    let res = await axios.post("http://localhost:1234/place/closest", {latitude: latitude,longitude:longitude});
-    return await res.data;
-  };
-  
   render() {
-    const {authUser, authenticated} = this.state;
+    const {authUser, authenticated, mainPlace, otherPlaces,
+      success, loading, locationPermission} = this.state;
+    const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     
     return (
       <Grid container
@@ -110,7 +96,6 @@ class Home extends Component {
             justify="center"
             spacing={32}>
         <br/>
-        <br onLoad={() => this.sendCoords(this.props.coords.latitude, this.props.coords.longitude)}/>
         
         <Heading />
         
@@ -121,18 +106,18 @@ class Home extends Component {
           </Typography>
         }
         
-        <Grid container item xs={11}>
-          <PlaceCard place={this.state.mainPlace} type={PlaceCardTypes.HomeViewPrimary}/>
-        </Grid>
+        { success && <NearPlaces mainPlace={mainPlace} otherPlaces={otherPlaces} />}
         
-        <Grid container item xs={10} spacing={8} justify="center">
-          <Typography gutterBottom align="center">
-            {`Are you not in ${this.state.mainPlace.name}? Try these ones.`}
-          </Typography>
-          <br/>
-          
-          {renderOtherPlaces(this.state.otherPlaces)}
-        </Grid>
+        { loading && <CircularProgress size={48}/>}
+        
+        {
+          !locationPermission &&
+          <Chip label="Please grant location permission!
+          It is needed to locate near places."
+                icon={errorIcon}
+                color="secondary"
+                variant="outlined"/>
+        }
         
         <ButtomLinks authenticated={authenticated}
                      handleLogout={this.handleLogout}/>
@@ -142,14 +127,6 @@ class Home extends Component {
       </Grid>
     );
   }
-}
-
-function renderOtherPlaces(otherPlaces) {
-  return otherPlaces.map((place, index) =>
-    <PlaceCard place={place}
-               type={PlaceCardTypes.HomeViewSecondary}
-               key={index.toString()}/>
-  );
 }
 
 export default Home;

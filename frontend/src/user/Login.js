@@ -28,9 +28,7 @@ class Login extends Component {
     setNextAndCurrPathCookies(nextPath);
     
     // Check if already authenticated
-    if(auth.isAuthenticated()){
-      history.push(nextPath);
-    }
+    this.requestAuthUserInfo(history, nextPath);
   
     this.state = {
       email: "",
@@ -43,6 +41,17 @@ class Login extends Component {
       spotifyDenied: spotifyDenied,
       nextPath: nextPath
     };
+  }
+  
+  requestAuthUserInfo(history, nextPath) {
+    auth.requestUserInfo()
+      .then(() => {
+        console.log("Already logged in, redirecting to the next page.");
+        history.push(nextPath);
+      })
+      .catch(() => {
+        console.log("User must log in.");
+      });
   }
   
   handleInputChange(event) {
