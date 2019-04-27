@@ -6,13 +6,15 @@ import PlaceCard, {PlaceCardTypes} from "../place/PlaceCard";
 
 
 export const NearPlaces = (props) => {
-  const {mainPlace, otherPlaces} = props;
+  const {mainPlace, otherPlaces, handleConnectPlace} = props;
   let mainPlaceCard = <Typography gutterBottom align="center">
     Sorry, we could not find any place near you :(
   </Typography>;
   
   if(mainPlace)
-    mainPlaceCard = <PlaceCard place={mainPlace} type={PlaceCardTypes.HomeViewPrimary}/>;
+    mainPlaceCard = <PlaceCard place={mainPlace}
+                               type={PlaceCardTypes.HomeViewPrimary}
+                               handleConnectPlace={handleConnectPlace}/>;
   
   return (
     <Grid container item xs={11} justify="center">
@@ -20,20 +22,20 @@ export const NearPlaces = (props) => {
       
       {
         mainPlace &&
-        <Grid container item xs={10} spacing={16}>
+        <Grid container item xs={10} spacing={16} justify="center">
           <br/>
-          <Typography gutterBottom align="center">
-            {`Are you not in ${mainPlace.name}? Try these ones.`}
+          <Typography gutterBottom align="center" style={{marginTop: "10%"}}>
+            Are you not in {mainPlace.name}? Try these ones
           </Typography>
           
-          {renderOtherPlaces(otherPlaces, 5)}
+          {renderOtherPlaces(otherPlaces, 5, handleConnectPlace)}
         </Grid>
       }
     </Grid>
   );
 };
 
-function renderOtherPlaces(otherPlaces, limit) {
+function renderOtherPlaces(otherPlaces, limit, cb) {
   if(!otherPlaces)
     return;
   
@@ -45,7 +47,8 @@ function renderOtherPlaces(otherPlaces, limit) {
     result.push(
       <PlaceCard place={otherPlaces[i]}
                  type={PlaceCardTypes.HomeViewSecondary}
-                 key={i.toString()}/>
+                 key={i.toString()}
+                 handleConnectPlace={cb}/>
     );
   }
   return result;

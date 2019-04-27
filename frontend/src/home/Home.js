@@ -1,16 +1,18 @@
 import React, {Component} from "react";
 
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Chip from "@material-ui/core/Chip";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
-import Footer from "../utils/Footer";
+
 import auth from "../auth/auth";
+import Footer from "../utils/Footer";
 import location from "../location/location";
 import {Heading} from "../utils/Heading";
 import {ButtomLinks} from "./ButtomLinks";
 import {NearPlaces} from "./NearPlaces";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Chip from "@material-ui/core/Chip";
+import ConnectPlaceDialog from "./ConnectPlaceDialog";
 
 
 class Home extends Component {
@@ -19,6 +21,8 @@ class Home extends Component {
     super(props);
     
     this.handleLogout = this.handleLogout.bind(this);
+    this.handleConnectPlace = this.handleConnectPlace.bind(this);
+    this.handleConnectPlaceClose = this.handleConnectPlaceClose.bind(this);
     
     this.state = {
       authenticated: false,
@@ -26,6 +30,7 @@ class Home extends Component {
       locationPermission: true,
       loading: false,
       success: false,
+      connectPlaceState: false,
       mainPlace: null,
       otherPlaces: null
     };
@@ -84,9 +89,25 @@ class Home extends Component {
     })
   }
   
+  handleConnectPlace(id, name) {
+    this.setState({
+      connectPlaceId: id,
+      connectPlaceName: name,
+      connectPlaceState: true
+    });
+  }
+  
+  handleConnectPlaceClose() {
+    this.setState({
+      connectPlaceId: null,
+      connectPlaceName: null,
+      connectPlaceState: false
+    });
+  }
+  
   render() {
-    const {authUser, authenticated, mainPlace, otherPlaces,
-      success, loading, locationPermission} = this.state;
+    const {authUser, authenticated, mainPlace, otherPlaces, success, loading,
+      locationPermission, connectPlaceId, connectPlaceName, connectPlaceState} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     
     return (
@@ -106,9 +127,11 @@ class Home extends Component {
           </Typography>
         }
         
-        { success && <NearPlaces mainPlace={mainPlace} otherPlaces={otherPlaces} />}
+        { success && <NearPlaces mainPlace={mainPlace}
+                                 otherPlaces={otherPlaces}
+                                 handleConnectPlace={this.handleConnectPlace} />}
         
-        { loading && <CircularProgress size={48}/>}
+        { loading && <CircularProgress size={48}/> }
         
         {
           !locationPermission &&
@@ -124,6 +147,11 @@ class Home extends Component {
         
         <Footer/>
       
+        <ConnectPlaceDialog open={connectPlaceState}
+                            placeName={connectPlaceName}
+                            placeId={connectPlaceId}
+                            handleClose={this.handleConnectPlaceClose}
+                            history={this.props.history} />
       </Grid>
     );
   }

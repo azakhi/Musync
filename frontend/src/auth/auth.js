@@ -1,16 +1,31 @@
 import axios from "axios";
 
-import {GET_USER_URL, SPOTIFY_CALLBACK_URL, USER_LOGIN_URL, USER_LOGOUT_URL} from "../config";
+import {
+  CONNECT_PLACE_URL,
+  GET_PLACE_URL,
+  GET_USER_URL,
+  SPOTIFY_CALLBACK_URL,
+  USER_LOGIN_URL,
+  USER_LOGOUT_URL
+} from "../config";
 
 
 class Auth {
   constructor() {
     this.authenticated = false;
     this.authUser = null;
+    this.pin = null;
+    
+    this.checkLocalStorageForPin();
   }
   
-  isAuthenticated() {
-    return this.authenticated;
+  checkLocalStorageForPin() {
+    this.pin = window.localStorage.getItem("pin_code");
+  }
+  
+  setPin(pin) {
+    this.pin = pin;
+    window.localStorage.setItem("pin_code", pin);
   }
   
   getAuthUser() {
@@ -73,6 +88,50 @@ class Auth {
           reject(error);
         });
     });
+  }
+  
+  requestPlaceInfo(placeId) {
+    this.requestPlaceToken = axios.CancelToken.source();
+    
+    return new Promise((resolve, reject) => {
+      const url = GET_PLACE_URL + `?placeId=${placeId}`;
+      axios.get(url, { cancelToken: this.requestPlaceToken.token})
+        .then(response => resolve(response))
+        .catch(error => {
+          if(axios.isCancel(error))
+            console.log("Request place info has been cancelled.");
+          else
+            reject(error)
+        });
+    });
+  }
+  
+  cancelRequestPlaceInfo() {
+    this.requestPlaceToken.cancel();
+  }
+  
+  connectToPlace(placeId, pin) {
+    if(pin)
+      this.setPin(pin);
+    pin = this.pin;
+    
+    this.connectPlaceToken = axios.CancelToken.source();
+    
+    const url = CONNECT_PLACE_URL + `?placeId=${placeId}&pin=${pin}`;
+    return new Promise((resolve, reject) => {
+      axios.get(url,{ cancelToken: this.connectPlaceToken.token})
+        .then(() => resolve())
+        .catch(error => {
+          if(axios.isCancel(error))
+            console.log("Request place info has been cancelled.");
+          else
+            reject(error)
+        });
+    });
+  }
+  
+  cancelConnectPlaceInfo() {
+    this.connectPlaceToken.cancel();
   }
 }
 

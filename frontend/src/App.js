@@ -11,14 +11,13 @@ import SpotifyCallback from "./spotify/SpotifyCallback";
 import NotFound from "./utils/NotFound";
 
 
-
 class App extends Component {
   render() {
     return (
       <main>
         <Switch>
           <Route exact path='/' component={Home}/>
-          <Route exact path='/place' component={Place}/>
+          <Route exact path='/place/:id' component={Place}/>
           <Route exact path='/user' component={User}/>
           <Route exact path='/register' component={SignUp}/>
           <Route exact path='/login' component={Login}/>
