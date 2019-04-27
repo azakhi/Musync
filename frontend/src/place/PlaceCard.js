@@ -31,7 +31,7 @@ class PlaceCard extends Component {
 
   render() {
     const {place, type} = this.props;
-    const {id, name, image, genres, currentSong} = place;
+    const {id, name, image, genres, currentlyPlaying} = place;
 
     const isTypePrimary = (type === PlaceCardTypes.HomeViewPrimary);
     const isTypeSecondary = (type === PlaceCardTypes.HomeViewSecondary);
@@ -45,7 +45,7 @@ class PlaceCard extends Component {
       <Grid item xs={12} key={id}>
         <Card square elevation={isTypePrimary ? 2 : 1}>
           {
-            showMedia &&
+            (showMedia && image) &&
             <CardMedia component="img"
                        alt={name + " image"}
                        height={imageHeight}
@@ -63,7 +63,7 @@ class PlaceCard extends Component {
             </Typography>
             <Typography align="center" variant="body2">
               <FontAwesomeIcon icon="music"/>
-              {" Now Playing: " + currentSong}
+              {" Now Playing: " + currentlyPlaying}
             </Typography>
           </CardContent>
 
