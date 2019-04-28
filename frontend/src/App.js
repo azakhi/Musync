@@ -9,6 +9,7 @@ import Login from "./user/Login";
 import CreatePlace from "./place/CreatePlace";
 import SpotifyCallback from "./spotify/SpotifyCallback";
 import NotFound from "./utils/NotFound";
+import PlaceSettings from './place/PlaceSettings';
 
 
 class App extends Component {
@@ -22,6 +23,7 @@ class App extends Component {
           <Route exact path='/register' component={SignUp}/>
           <Route exact path='/login' component={Login}/>
           <Route exact path='/create-place' component={CreatePlace}/>
+          <Route exact path='/placeSettings' component={PlaceSettings}/>
           <Route exact path='/spotifyCallback' component={SpotifyCallback}/>
           <Route path='/' component={NotFound}/>
         </Switch>

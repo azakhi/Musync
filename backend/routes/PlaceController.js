@@ -14,6 +14,9 @@ router.get('/playlist', getPlaylistOfPlace);
 // Create a new Place
 router.post('/', createNewPlace);
 
+// Change place settings
+router.post('/change', changePlaceSettings);
+
 // Get closest Places to a location
 router.post('/closest', findClosestPlaces);
 
@@ -86,6 +89,7 @@ async function createNewPlace(req, res, next) {
     return;
   }
   
+  
   // Find Genre ids
   let genres = [];
   if(Array.isArray(body.genres)){
@@ -142,6 +146,44 @@ async function createNewPlace(req, res, next) {
   await place.commitChanges();
   res.send(JSON.stringify(place));
 }
+async function changePlaceSettings(req, res, next){
+  if(!req.body){
+    res.status(400).send('Error: Missing information!');
+    return;
+  }
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  place = result.result;
+  if(req.body.name){
+    place.name = req.body.name;
+  }
+  if(req.body.location){
+    let loc = place.location;
+    loc.latitude = req.body.location.latitude;
+    loc.longitude = req.body.location.longitude;
+    loc.city = req.body.location.city;
+    loc.country = req.body.location.country;
+    place.location = loc;
+  }
+
+  if(req.body.genres){
+    
+    genres = [];
+    for(const genreName of req.body.genres){
+      let genre = await models.Genre.findOne({name: genreName});
+      genres.push(genre._id);
+    }
+    place.genres = genres;
+    
+  }
+  await place.commitChanges();
+  res.status(200).json({});
+}
+
 
 async function findClosestPlaces(req, res, next) {
   if(!req.body || !req.body.latitude || !req.body.longitude){
