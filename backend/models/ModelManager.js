@@ -1,6 +1,5 @@
 const assert = require('assert');
 const ObjectID = require('mongodb').ObjectID;
-const UpdateController = require('../routes/UpdateController');
 
 class ModelManager {
   constructor() {
@@ -10,6 +9,14 @@ class ModelManager {
     this._models["user"] = [];
     this._models["genres"] = [];
     this._newModels = [];
+  }
+
+  get updater() {
+    return this._updater;
+  }
+
+  set updater(value) {
+    this._updater = value;
   }
   
   register(model) {
@@ -49,11 +56,9 @@ class ModelManager {
     time = isNaN(Number(time)) ? -1 : Number(time);
     if (model && time > 0) {
       setTimeout(async function (m, manager) {
-        let t = await UpdateController.updatePlaylist(m);
+        let t = await manager.updater.constructor.updatePlaylist(m);
         manager.registerForUpdate(m._id, t);
       }, time, model, this);
-    }
-    else {
     }
   }
   
