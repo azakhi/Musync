@@ -1,5 +1,6 @@
 const assert = require('assert');
 const ObjectID = require('mongodb').ObjectID;
+const UpdateController = require('../routes/UpdateController');
 
 class ModelManager {
   constructor() {
@@ -40,6 +41,20 @@ class ModelManager {
     }
 
     return null;
+  }
+
+  registerForUpdate(id, time) {
+    // TODO: Make registration generic
+    let model = this.acquire(id, "place");
+    time = isNaN(Number(time)) ? -1 : Number(time);
+    if (model && time > 0) {
+      setTimeout(async function (m, manager) {
+        let t = await UpdateController.updatePlaylist(m);
+        manager.registerForUpdate(m._id, t);
+      }, time, model, this);
+    }
+    else {
+    }
   }
   
   commitChanges() {
