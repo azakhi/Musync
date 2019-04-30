@@ -14,6 +14,8 @@ const createPlaces = require('./routes/CreatePlaces');
 const DBManager = require("./models/DBManager");
 DBManager.connect(function(){});
 const ModelManager = require("./models/ModelManager");
+const UpdateController = require("./routes/UpdateController");
+ModelManager.updater = UpdateController;
 
 const app = express();
 
