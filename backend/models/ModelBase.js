@@ -68,6 +68,10 @@ class ModelBase {
   set isMarkedForDelete(value) {
     this._isMarkedForDelete = !!value;
   }
+
+  get _this() {
+    return this;
+  }
   
   get dbObject() {
     let obj = {};
@@ -97,6 +101,7 @@ class ModelBase {
       if (this._id !== null) {
         await DBManager.db.collection(this.collection).deleteOne({_id: this._id});
         this._isDeleted = true;
+        ModelManager.unregister(this);
       }
     }
     else if (this._isDirty) {
@@ -117,15 +122,21 @@ class ModelBase {
   
   static async findOne(query) {
     let result = await DBManager.db.collection(this.collection).findOne(query);
-    return (!!result) ? new this(result) : null;
+    if (result && result._id) {
+      let cached = ModelManager.acquire(result._id, this.collection);
+      return (!!cached) ? cached : new this(result);
+    }
+    return null;
   }
   
   static async find(query) {
     let result = await DBManager.db.collection(this.collection).find(query).toArray();
+    if (!result) return [];
     
     let models = [];
     for (let i = 0; i < result.length; i++) {
-      let model = new this(result[i]);
+      let cached = ModelManager.acquire(result[i]._id, this.collection);
+      let model = (!!cached) ? cached : new this(result[i]);
       models.push(model);
     }
     
