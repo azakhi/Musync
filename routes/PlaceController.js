@@ -3,7 +3,7 @@ const router = express.Router();
 const config = require('../config.js');
 const models = require("../models/Models");
 const spotifyController = require('./SpotifyController');
-
+const DBBasicTypes = require("../models/DBBasicTypes");
 
 // Get a Place with given name
 router.get('/', getPlace);
@@ -424,7 +424,13 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
         uri: track.track.uri,
         name: track.track.name,
       });
+      let artistArray = [];
+      for(const artist of track.track.artists){
+        let artistName = new DBBasicTypes.DBString(artist.name);
+        artistArray.push(artistName);
+      }
       let song = new models.Song({
+        artistName: artistArray,
         name: track.track.name,
         duration: track.track.duration_ms,
         spotifySong: spotifyItem,

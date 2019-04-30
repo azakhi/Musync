@@ -110,7 +110,12 @@ async function createPlaces(req, res, next) {
       }
       let spotifyItem = new models.SpotifyItem();
       spotifyItem.name = songs[j];
+      artistName = new DBBasicTypes.DBString(songs[j]);
+      artistArray = [];
+      artistArray.push(artistName);
+      artistArray.push(artistName);
       song.name=songs[j];
+      song.artistName = artistArray;
       song.genres = genres;
       song.spotifySong = spotifyItem;
       songs_arr.push(song);
