@@ -25,10 +25,12 @@ router.get('/callback', async function(req, res, next) {
   }
   
   if (req.query.code) {
-    let r = await spotifyController.getSpotifyConnection(req.query.code, "http://" + req.headers.host + "/callback/");
+    const index = req.headers.referer.indexOf('?');
+    const redirectURI = req.headers.referer.substring(0, index);
+    let r = await spotifyController.getSpotifyConnection(req.query.code, redirectURI);
     if (r instanceof models.SpotifyConnection) {
       req.session.spotifyConnection = JSON.stringify(r);
-      res.redirect('/spotify');
+      res.status(200).send("Successful.");
     }
     else {
       res.status(400).send('Error: Spotify connection is not successful');
