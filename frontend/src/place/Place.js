@@ -1,28 +1,90 @@
 import React, {Component} from "react";
 
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import Footer from "../utils/Footer";
-import Header from "../utils/Header";
-import PlaceCard, {PlaceCardTypes} from "./PlaceCard";
-import Playlist from "./Playlist";
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Grid from "@material-ui/core/Grid";
 import TextField from '@material-ui/core/TextField';
+import Typography from "@material-ui/core/Typography";
+
+import auth from "../auth/auth";
+import Footer from "../utils/Footer";
+import Header from "../utils/Header";
+import PlaceCard, {PlaceCardTypes} from "./PlaceCard";
+import Playlist from "./Playlist";
+
 
 class Place extends Component {
   constructor(props) {
     super(props);
+    
     this.state = {
+      isConnected: false,
+      isOwner: false,
+      loading: false,
+      id: props.match.params.id,
+      place: null,
       open: false,
       searchResults: []
-     };
+    };
   }
 
+  componentDidMount() {
+    this.requestPlaceInfo();
+    this.checkConnectionStatus();
+  }
+  
+  componentWillUnmount() {
+    auth.cancelRequestPlaceInfo();
+    auth.cancelConnectPlaceInfo();
+  }
+  
+  requestPlaceInfo() {
+    this.setState({
+      loading: true
+    });
+  
+    const id = this.state.id;
+    auth.requestPlaceInfo(id)
+      .then(response => {
+        const place = response.data;
+        place["genres"] = [];
+        
+        this.setState({
+          place: place,
+          isOwner: place.hasOwnProperty("owner"),
+          loading: false
+        });
+      })
+      .catch(() => {
+        this.props.history.push("/");
+      })
+  }
+  
+  checkConnectionStatus() {
+    this.setState({
+      loading: true
+    });
+    
+    const id = this.state.id;
+    auth.connectToPlace(id)
+      .then(() => {
+        this.setState({
+          isConnected: true,
+          loading: false
+        });
+      })
+      .catch(() => {
+        this.setState({
+          isConnected: false,
+          loading: false
+        });
+      })
+  }
+  
   handleClickOpen = () => {
     this.setState({ open: true });
   };
@@ -41,13 +103,11 @@ class Place extends Component {
   };
 
   render() {
-    const currentPlace = {
-      id: 1,
-      name: "Sun Brothers",
-      image: "https://b.zmtcdn.com/data/pictures/6/6001836/cae7f24481e1128ac4070a67c26d4ba8_featured_v2.jpg",
-      genres: ["Rock", "Metal"],
-      currentSong: "Iron Maiden - Dance of Death"
+    const buttonStyle = {
+      display: "inline-block",
+      margin: "5px"
     };
+    const currentPlace = this.state.place;
     const songs = [
       {name: "To Live Is To Die", artist: "Metallica", length: 9.48},
       {name: "Highway to Hell", artist: "AC/DC", length: 3.28},
@@ -69,7 +129,7 @@ class Place extends Component {
         <Header isPlaceHeader={true}/>
 
         <Grid container item xs={11}>
-          <PlaceCard place={currentPlace} type={PlaceCardTypes.PlaceView}/>
+          {currentPlace && <PlaceCard place={currentPlace} type={PlaceCardTypes.PlaceView}/>}
         </Grid>
 
         <Grid item xs={12} style={{textAlign: 'center'}}>
@@ -80,13 +140,23 @@ class Place extends Component {
           <Playlist songs={songs}/>
 
           <br/>
+          
           <Button variant="contained"
                   color="primary"
-                  style={{marginBottom: "50px"}}
-                  onClick={this.handleClickOpen}>
+                  onClick={this.handleClickOpen}
+                  style={buttonStyle}>
             Add Song!
           </Button>
-        </Grid>
+          <br/>
+          <Button href="/placeSettings"
+                  variant="contained"
+                  color="primary"
+                  style={buttonStyle}>
+            <FontAwesomeIcon icon="sliders-h"/>&nbsp;
+            Settings
+          </Button>
+          </Grid>
+        
         <Footer/>
         <Dialog
             open={this.state.open}

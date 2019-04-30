@@ -1,13 +1,15 @@
 import React, {Component} from 'react';
 import {Route, Switch} from "react-router-dom";
-import {withCookies} from 'react-cookie';
 
-import Home from "./Home";
+import Home from "./home/Home";
 import Place from "./place/Place";
 import User from "./user/User";
 import SignUp from "./user/SignUp";
+import Login from "./user/Login";
 import CreatePlace from "./place/CreatePlace";
+import SpotifyCallback from "./spotify/SpotifyCallback";
 import NotFound from "./utils/NotFound";
+import PlaceSettings from './place/PlaceSettings';
 
 
 class App extends Component {
@@ -16,13 +18,13 @@ class App extends Component {
       <main>
         <Switch>
           <Route exact path='/' component={Home}/>
-          <Route exact path='/place' component={Place}/>
+          <Route exact path='/place/:id' component={Place}/>
           <Route exact path='/user' component={User}/>
-          <Route exact path='/sign-up'
-                 render={(routeProps) => <SignUp cookies={this.props.cookies}
-                                                 history={routeProps.history}/>
-                 }/>
+          <Route exact path='/register' component={SignUp}/>
+          <Route exact path='/login' component={Login}/>
           <Route exact path='/create-place' component={CreatePlace}/>
+          <Route exact path='/placeSettings' component={PlaceSettings}/>
+          <Route exact path='/spotifyCallback' component={SpotifyCallback}/>
           <Route path='/' component={NotFound}/>
         </Switch>
       </main>
@@ -30,4 +32,4 @@ class App extends Component {
   }
 }
 
-export default withCookies(App);
+export default App;

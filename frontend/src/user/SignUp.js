@@ -5,11 +5,14 @@ import Button from "@material-ui/core/Button/index";
 import Chip from "@material-ui/core/Chip";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Grid from "@material-ui/core/Grid/index";
+import Link from "@material-ui/core/Link";
 import TextField from "@material-ui/core/TextField/index";
 import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Footer from "../utils/Footer";
-import {generateSpotifyAuthURL, getCurrentURL, getURLParamVal, SERVER_DOMAIN} from "../config";
+import {generateSpotifyAuthURL, USER_REGISTER_URL} from "../config";
+import {generateStateParamCookie, setNextAndCurrPathCookies} from "../utils/utils";
+import {Heading} from "../utils/Heading";
 
 
 class SignUp extends Component {
@@ -17,41 +20,24 @@ class SignUp extends Component {
   constructor(props) {
     super(props);
     
-    const {cookies, history} = props;
-    const {redirected, accessGiven, stateParam, code} = handleSpotifyRedirection(cookies);
+    const {location} = props;
+    const spotifyDenied = location.state ? location.state.spotifyDenied : null;
+    const nextPath = location.state ? location.state.from : "/";
     
-    if(redirected && accessGiven){
-      const url = SERVER_DOMAIN + "/callback?code=" + code;
-      axios.get(url)
-        .then(response => {
-          this.setState({
-            loading: false,
-            spotifyDenied: false,
-            success: true
-          });
-  
-          setTimeout(() => {
-            history.push('/');
-          }, 2000);
-        })
-        .catch(error => {
-          this.setState({
-            loading: false,
-            spotifyDenied: true,
-            stateParam: generateStateParamCookie(cookies)
-          });
-        });
-    }
+    setNextAndCurrPathCookies(nextPath);
+    const stateParam = generateStateParamCookie();
     
     this.state = {
       name: "",
       email: "",
       password: "",
       stateParam: stateParam,
-      loading: redirected && accessGiven,
-      spotifyDenied: redirected && !accessGiven,
+      loading: false,
       success: false,
-      error: false
+      error: false,
+      errorMsg: "",
+      spotifyDenied: spotifyDenied,
+      nextPath: nextPath
     };
   }
   
@@ -65,10 +51,11 @@ class SignUp extends Component {
     this.setState({
       loading: true,
       success: false,
-      error: false
+      error: false,
+      spotifyDenied: false
     });
     
-    const url = SERVER_DOMAIN + "/user/register";
+    const url = USER_REGISTER_URL;
     const body = {
       name: this.state.name,
       email: this.state.email,
@@ -76,7 +63,7 @@ class SignUp extends Component {
     };
     
     axios.post(url, body)
-      .then(response => {
+      .then(() => {
         this.setState({
           loading: false,
           success: true,
@@ -84,8 +71,8 @@ class SignUp extends Component {
         });
         
         setTimeout(() => {
-          this.props.history.push('/');
-        }, 2000);
+          this.props.history.push(this.state.nextPath);
+        }, 1000);
         
       })
       .catch(error => {
@@ -93,7 +80,7 @@ class SignUp extends Component {
           loading: false,
           success: false,
           error: true,
-          errorMsg: error.response.data
+          errorMsg: error.response ? error.response.data : error
         });
       });
     
@@ -104,7 +91,7 @@ class SignUp extends Component {
     const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
-    const spotifyAuthURL = generateSpotifyAuthURL(getCurrentURL(), stateParam);
+    const spotifyAuthURL = generateSpotifyAuthURL(stateParam);
     
     return (
       <Grid container
@@ -114,16 +101,7 @@ class SignUp extends Component {
             spacing={32}>
         <br/>
         
-        <Grid item xs={10}>
-          <Typography variant="h2" align="center">
-            <FontAwesomeIcon icon="guitar"/>
-            Musync
-          </Typography>
-          
-          <Typography align="center" gutterBottom>
-            Start listening what you want to listen
-          </Typography>
-        </Grid>
+        <Heading />
         
         <Grid item xs={12} style={{textAlign: 'center'}}>
           <Typography variant="h5"
@@ -193,6 +171,14 @@ class SignUp extends Component {
                                   icon={errorIcon}
                                   color="secondary"
                                   variant="outlined"/>}
+                                  
+          <Typography align="center"
+                      variant="body1"
+                      color="textSecondary" style={{marginTop: "7%"}}>
+            Have an account?&nbsp;
+            <Link href="/login">Login</Link>
+          </Typography>
+         
         </Grid>
         
         <Footer style={{position: "fixed", bottom: "5%"}}/>
@@ -204,41 +190,3 @@ class SignUp extends Component {
 }
 
 export default SignUp;
-
-function handleSpotifyRedirection(cookies) {
-  const code = getURLParamVal("code");
-  const error = getURLParamVal("error");
-  const state  = getURLParamVal("state");
-  
-  let redirected = false;
-  let accessGiven = false;
-  const confirmState = checkStateParamCookie(state, cookies);
-  if(error && confirmState){
-    redirected = true;
-  }
-  else if(code && confirmState){
-    redirected = true;
-    accessGiven = true;
-  }
-  
-  let stateParam = null;
-  if(!redirected || redirected && !accessGiven)
-    stateParam = generateStateParamCookie(cookies);
-  
-  return {
-    redirected: redirected,
-    accessGiven: accessGiven,
-    stateParam: stateParam,
-    code: code
-  };
-}
-
-function generateStateParamCookie(cookies) {
-  const state = Math.random().toString(36).substring(2, 15);
-  cookies.set('state_param', state, { path: '/sign-up' });
-  return state;
-}
-
-function checkStateParamCookie(state, cookies) {
-  return state && cookies.get('state_param') === state;
-}

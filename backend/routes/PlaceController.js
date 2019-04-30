@@ -3,7 +3,7 @@ const router = express.Router();
 const config = require('../config.js');
 const models = require("../models/Models");
 const spotifyController = require('./SpotifyController');
-
+const DBBasicTypes = require("../models/DBBasicTypes");
 
 // Get a Place with given name
 router.get('/', getPlace);
@@ -13,6 +13,9 @@ router.get('/playlist', getPlaylistOfPlace);
 
 // Create a new Place
 router.post('/', createNewPlace);
+
+// Change place settings
+router.post('/change', changePlaceSettings);
 
 // Get closest Places to a location
 router.post('/closest', findClosestPlaces);
@@ -80,6 +83,7 @@ async function createNewPlace(req, res, next) {
 
   let user = result.result;
   
+  
   // Find Genre ids
   let genres = [];
   if(Array.isArray(body.genres)){
@@ -136,6 +140,44 @@ async function createNewPlace(req, res, next) {
   await place.commitChanges();
   res.send(JSON.stringify(place));
 }
+async function changePlaceSettings(req, res, next){
+  if(!req.body){
+    res.status(400).send('Error: Missing information!');
+    return;
+  }
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  place = result.result;
+  if(req.body.name){
+    place.name = req.body.name;
+  }
+  if(req.body.location){
+    let loc = place.location;
+    loc.latitude = req.body.location.latitude;
+    loc.longitude = req.body.location.longitude;
+    loc.city = req.body.location.city;
+    loc.country = req.body.location.country;
+    place.location = loc;
+  }
+
+  if(req.body.genres){
+    
+    genres = [];
+    for(const genreName of req.body.genres){
+      let genre = await models.Genre.findOne({name: genreName});
+      genres.push(genre._id);
+    }
+    place.genres = genres;
+    
+  }
+  await place.commitChanges();
+  res.status(200).json({});
+}
+
 
 async function findClosestPlaces(req, res, next) {
   if(!req.body || !req.body.latitude || !req.body.longitude){
@@ -163,9 +205,22 @@ async function findClosestPlaces(req, res, next) {
   closePlaces.sort(compareDistances);
   
   let publicInfos = [];
+
   for (const place of closePlaces) {
-    publicInfos.push(place.publicInfo);
+    let genresArray = [];
+
+    genresIds = place.genres;
+    for (var i = 0; i < genresIds.length;i++){
+      let genre = await models.Genre.findOne({_id: genresIds[i]});
+      genresArray.push(genre.name);
+    }
+    let infObj = place.publicInfo;
+    
+    
+    infObj['genres'] = genresArray;
+    publicInfos.push(infObj);
   }
+
   
   res.json(publicInfos);
 }
@@ -479,7 +534,13 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
         uri: track.track.uri,
         name: track.track.name,
       });
+      let artistArray = [];
+      for(const artist of track.track.artists){
+        let artistName = new DBBasicTypes.DBString(artist.name);
+        artistArray.push(artistName);
+      }
       let song = new models.Song({
+        artistName: artistArray,
         name: track.track.name,
         duration: track.track.duration_ms,
         spotifySong: spotifyItem,

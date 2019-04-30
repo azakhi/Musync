@@ -13,14 +13,24 @@ export const SPOTIFY_INFO = {
     'user-read-currently-playing',
 };
 
-export function generateSpotifyAuthURL(redirectURI, stateParam) {
+export const USER_REGISTER_URL = SERVER_DOMAIN + "/user/register";
+export const USER_LOGIN_URL = SERVER_DOMAIN + "/user/login";
+export const USER_LOGOUT_URL = SERVER_DOMAIN + "/user/logout";
+export const GET_USER_URL = SERVER_DOMAIN + "/user/";
+export const SPOTIFY_CALLBACK_URL = SERVER_DOMAIN + "/callback";
+export const GET_PLACE_URL = SERVER_DOMAIN + "/place";
+export const GET_NEAR_PLACES_URL = SERVER_DOMAIN + "/place/closest";
+export const CONNECT_PLACE_URL = SERVER_DOMAIN + "/place/connect";
+
+export function generateSpotifyAuthURL(stateParam) {
+  const {protocol, host} = window.location;
   let url = "https://accounts.spotify.com/authorize?";
   let options = {
     client_id: SPOTIFY_INFO.clientID,
-    redirect_uri: encodeURIComponent(redirectURI),
+    redirect_uri: encodeURIComponent(protocol + "//" + host + "/spotifyCallback"),
     scope: encodeURIComponent(SPOTIFY_INFO.scopes),
     response_type: "code",
-    show_dialog: false,
+    show_dialog: true,
     state: stateParam
   };
   
@@ -29,14 +39,4 @@ export function generateSpotifyAuthURL(redirectURI, stateParam) {
   }
   
   return url;
-}
-
-export function getCurrentURL() {
-  return window.location.protocol + "//" +
-    window.location.host + window.location.pathname;
-}
-
-export function getURLParamVal(paramKey) {
-  const url = window.location.href;
-  return new URL(url).searchParams.get(paramKey);
 }
