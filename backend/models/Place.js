@@ -17,6 +17,7 @@ class Place extends ModelBase {
     this.votedSongs = new DBBasicTypes.DBArray([], Song);
     this.votes = new DBBasicTypes.DBArray([]);
     this.playlist = new Playlist();
+    this.initialPoint =  new DBBasicTypes.DBNumber(200, 0);
     this.songRecords = new DBBasicTypes.DBArray([], SongRecord);
     this.owner = new DBBasicTypes.DBObjectID(null);
     this.location = new Location();

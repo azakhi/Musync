@@ -246,11 +246,12 @@ async function connectToPlace(req, res, next) {
   
   if (!req.session.userId) { // Create unregistered user for this session
     let visitedPlace = new models.VisitedPlace({
-      place: place._id,
+      place: place._id
     });
     let user = new models.User({
       isRegistered: false,
       visitedPlaces: [visitedPlace],
+      points: place.initialPoint
     });
     
     await user.commitChanges();
@@ -274,13 +275,25 @@ async function connectToPlace(req, res, next) {
       res.status(400).send('Error: Authentication is invalid. Please login again');
       return;
     }
+    let visitedCount = 1;
+    let visitedPlaces = user.visitedPlaces;
+    for(const i = 0; i <  user.visitedPlaces.length; i++){
+      if(place._id ==  user.visitedPlaces[i]._id){
+        visitedCount = user.visitedPlaces[i].visitCount + 1;
+        visitedPlaces.splice(i,1);
+      }
+    }
     
     let visitedPlace = new models.VisitedPlace({
       place: place._id,
+      visitCount: visitedCount
     });
-    let visitedPlaces = user.visitedPlaces;
+    
     visitedPlaces.push(visitedPlace);
-    user.visitedPlaces = visitedPlaces;
+    user.visitedPlaces = visitedPlaces;  
+    user.points = place.initialPoint*(visitedCount/10+1);
+    
+
     
     req.session.connectedPlace = place._id.toHexString();
     res.json({ // No need to send anything else. Let frontend redirect
@@ -365,6 +378,7 @@ async function getVoteStatus(req, res, next) {
 }
 
 async function voteForSong(req, res, next) {
+  
   let points = Number(req.query.points);
   if (!req.query.songIndex || !points) {
     res.status(400).send('Error: Missing information');
@@ -395,7 +409,16 @@ async function voteForSong(req, res, next) {
     return;
   }
 
-  // TODO: Check if the voting period for current song is over
+
+  let currentPlaylist = place.playlist;
+  let songs = currentPlaylist.songs;
+  let currentSong = songs[currentPlaylist.currentSong];
+
+  if(currentSong.duration - (Date.now() - currentPlaylist.currentSongStartTime.getTime()) < 10000){
+    res.status(400).send('Error: Voting period for user is over');
+    return;
+  }
+
   let votes = place.votes;
   votes[req.query.songIndex] += points;
   place.votes = votes;
