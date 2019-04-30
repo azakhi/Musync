@@ -9,4 +9,4 @@ class UpdateController {
   }
 }
 
-module.exports =  UpdateController;
+module.exports = new UpdateController();
