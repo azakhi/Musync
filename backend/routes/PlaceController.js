@@ -23,6 +23,9 @@ router.post('/closest', findClosestPlaces);
 router.get('/connect', connectToPlace);
 router.post('/connect', connectToPlace);
 router.get('/playback', getPlaybackInfo);
+router.get('/votestatus', getVoteStatus);
+router.post('/votestatus', getVoteStatus);
+router.get('/voteforsong', voteForSong);
 
 async function getPlace(req, res, next) {
   let result = await getPlaceRecord(req);
@@ -63,15 +66,6 @@ async function getPlaylistOfPlace(req, res, next) {
 }
 
 async function createNewPlace(req, res, next) {
-  if (!req.session || !req.session.userId) {
-    res.status(400).send('Error: User authentication required');
-  }
-  
-  if (!models.ObjectID.isValid(req.session.userId)) {
-    req.session.destroy();
-    res.status(400).send('Error: Authentication is invalid. Please login again');
-  }
-  
   const body = req.body;
   const {placeName, latitude, longitude, spotifyInfo,
     isPermanent, district, city, country} = body;
@@ -80,14 +74,14 @@ async function createNewPlace(req, res, next) {
     res.status(400).send('Error: Missing information!');
     return;
   }
-  
-  // Find Place owner
-  let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
-  if(!user){
-    req.session.destroy();
-    res.status(400).send('Error: Authentication is invalid. Please login again');
+
+  let result = await getSessionUser(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
     return;
   }
+
+  let user = result.result;
   
   
   // Find Genre ids
@@ -349,6 +343,68 @@ async function getPlaybackInfo(req, res, next) {
   });
 }
 
+async function getVoteStatus(req, res, next) {
+  let result = await getPlaceRecord(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+  
+  place = result.result;
+  
+  result = {
+    votedSongs: place.votedSongs,
+    votes: place.votes,
+    // TODO: Track and update playback status
+    isPlaying: place.playlist.isPlaying,
+    currentSong: (place.playlist.currentSong >= 0 && place.playlist.songs[place.playlist.currentSong]) ? place.playlist.songs[place.playlist.currentSong] : null,
+    currentSongStartTime: place.playlist.currentSongStartTime,
+  };
+  
+  res.json(result);
+}
+
+async function voteForSong(req, res, next) {
+  let points = Number(req.query.points);
+  if (!req.query.songIndex || !points) {
+    res.status(400).send('Error: Missing information');
+    return;
+  }
+
+  let result = await getConnectedPlace(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+
+  let place = result.result;
+  if (!place.votedSongs[req.query.songIndex]) {
+    res.status(400).send('Error: Invalid song index');
+    return;
+  }
+
+  result = await getSessionUser(req);
+  if (!result.result) {
+    res.status(400).send('Error: ' + result.error);
+    return;
+  }
+
+  let user = result.result;
+  if (user.points < points) {
+    res.status(400).send('Error: User does not have enough points');
+    return;
+  }
+
+  // TODO: Check if the voting period for current song is over
+  let votes = place.votes;
+  votes[req.query.songIndex] += points;
+  place.votes = votes;
+  user.points = user.points - points;
+  res.json({
+    success: true,
+  });
+}
+
 async function getPlaceRecord(req) {
   let result = {};
   if (!req.query.placeId && !req.body.placeId && !req.session.placeId) {
@@ -388,6 +444,60 @@ async function getPlaceRecord(req) {
     };
   }
   
+  return { result: result };
+}
+
+async function getConnectedPlace(req) {
+  if (!req.session || !req.session.connectedPlace) {
+    return {
+      result: false,
+      error: "Not connected to a place",
+    };
+  }
+
+  if (!models.ObjectID.isValid(req.session.connectedPlace)) {
+    req.session.destroy();
+    return {
+      result: false,
+      error: "Connected place id is invalid. Please login again and connect to place",
+    };
+  }
+
+  let result = await models.Place.findOne({_id: new models.ObjectID(req.session.connectedPlace)});
+  if (!result) {
+    return {
+      result: false,
+      error: "No such place",
+    };
+  }
+
+  return { result: result };
+}
+
+async function getSessionUser(req) {
+  if (!req.session || !req.session.userId) {
+    return {
+      result: false,
+      error: "No user authentication",
+    };
+  }
+
+  if (!models.ObjectID.isValid(req.session.userId)) {
+    req.session.destroy();
+    return {
+      result: false,
+      error: "Authentication is invalid. Please login again",
+    };
+  }
+
+  let result = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+  if (!result) {
+    return {
+      result: false,
+      error: "No such user",
+    };
+  }
+
   return { result: result };
 }
 
