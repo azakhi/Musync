@@ -1,5 +1,6 @@
 const assert = require('assert');
 
+const ModelManager = require("./ModelManager");
 const DBBasicTypes = require("./DBBasicTypes");
 const ModelBase = require("./ModelBase");
 const SpotifyConnection = require("./SpotifyConnection");
@@ -22,6 +23,10 @@ class Place extends ModelBase {
     this.location = new Location();
     this.isPermanent = new DBBasicTypes.DBBoolean(false);
     this.genres = new DBBasicTypes.DBArray([], DBBasicTypes.DBObjectID);
+  }
+
+  _afterInitialize(proxy) {
+    ModelManager.registerForUpdate(proxy._id, 1000);
   }
   
   get publicInfo() {
