@@ -1,15 +1,15 @@
 import React, {Component} from "react";
 
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Chip from "@material-ui/core/Chip";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Chip from "@material-ui/core/Chip/index";
+import CircularProgress from "@material-ui/core/CircularProgress/index";
 import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
 
-import auth from "../auth/auth";
-import Footer from "../utils/Footer";
-import location from "../location/location";
-import {Heading} from "../utils/Heading";
+import auth from "../../auth/auth";
+import Footer from "../Utils/Footer";
+import location from "../../location/location";
+import {Heading} from "../Utils/Heading";
 import {ButtomLinks} from "./ButtomLinks";
 import {NearPlaces} from "./NearPlaces";
 import ConnectPlaceDialog from "./ConnectPlaceDialog";

@@ -1,10 +1,10 @@
 import React from "react";
 import {Link as RouterLink} from "react-router-dom";
 
-import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
-import Typography from "@material-ui/core/Typography";
-import auth from "../auth/auth";
+import Grid from "@material-ui/core/Grid/index";
+import Link from "@material-ui/core/Link/index";
+import Typography from "@material-ui/core/Typography/index";
+import auth from "../../auth/auth";
 
 
 export const ButtomLinks = (props) => {

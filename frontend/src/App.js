@@ -1,16 +1,16 @@
 import React, {Component} from 'react';
 import {Route, Switch} from "react-router-dom";
 
-import Home from "./home/Home";
-import Place from "./place/Place";
-import User from "./user/User";
-import SignUp from "./user/SignUp";
-import Login from "./user/Login";
-import CreatePlace from "./place/CreatePlace";
+import Home from "./Components/Home/Home";
+import Place from "./Components/Place/Place";
+import User from "./Components/User/User";
+import SignUp from "./Components/User/SignUp";
+import Login from "./Components/User/Login";
+import CreatePlace from "./Components/Place/CreatePlace";
 import SpotifyCallback from "./spotify/SpotifyCallback";
-import NotFound from "./utils/NotFound";
-import PlaceSettings from './place/PlaceSettings';
-import UserSettings from './user/UserSettings';
+import NotFound from "./Components/Utils/NotFound";
+import PlaceSettings from './Components/Place/PlaceSettings';
+import UserSettings from './Components/User/UserSettings';
 
 class App extends Component {
   render() {

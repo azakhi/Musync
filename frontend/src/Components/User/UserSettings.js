@@ -1,14 +1,14 @@
 import React, {Component} from "react";
 
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import Footer from "../utils/Footer";
-import {Heading} from "../utils/Heading";
-import axios from "axios";
-import {SERVER_DOMAIN} from "../config";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Button from "@material-ui/core/Button/index";
+import Grid from "@material-ui/core/Grid/index";
+import Typography from "@material-ui/core/Typography/index";
+import TextField from "@material-ui/core/TextField/index";
+import Footer from "../Utils/Footer";
+import {Heading} from "../Utils/Heading";
+import axios from "axios/index";
+import {SERVER_DOMAIN} from "../../config";
 
 class UserSettings extends Component {
   constructor(props) {

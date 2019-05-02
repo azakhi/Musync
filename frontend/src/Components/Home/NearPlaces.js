@@ -1,8 +1,8 @@
 import React from "react";
 
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import PlaceCard, {PlaceCardTypes} from "../place/PlaceCard";
+import Grid from "@material-ui/core/Grid/index";
+import Typography from "@material-ui/core/Typography/index";
+import PlaceCard, {PlaceCardTypes} from "../Place/PlaceCard";
 
 
 export const NearPlaces = (props) => {

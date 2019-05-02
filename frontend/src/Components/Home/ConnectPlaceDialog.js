@@ -1,12 +1,12 @@
 import React, {Component} from "react";
 
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import TextField from "@material-ui/core/TextField";
-import DialogActions from "@material-ui/core/DialogActions";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import auth from "../auth/auth";
+import DialogContent from "@material-ui/core/DialogContent/index";
+import DialogContentText from "@material-ui/core/DialogContentText/index";
+import TextField from "@material-ui/core/TextField/index";
+import DialogActions from "@material-ui/core/DialogActions/index";
+import Button from "@material-ui/core/Button/index";
+import Dialog from "@material-ui/core/Dialog/index";
+import auth from "../../auth/auth";
 
 
 class ConnectPlaceDialog extends Component {

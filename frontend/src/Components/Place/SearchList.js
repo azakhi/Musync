@@ -1,13 +1,13 @@
 import React, {Component} from "react";
 
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {SERVER_DOMAIN} from "../config";
+import List from "@material-ui/core/List/index";
+import ListItem from "@material-ui/core/ListItem/index";
+import ListItemText from "@material-ui/core/ListItemText/index";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction/index";
+import IconButton from "@material-ui/core/IconButton/index";
+import Typography from "@material-ui/core/Typography/index";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import {SERVER_DOMAIN} from "../../config";
 
 
 class SearchList extends Component {

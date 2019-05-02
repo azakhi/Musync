@@ -1,43 +1,30 @@
 import React, {Component} from "react";
-import axios from "axios";
+import axios from "axios/index";
 
 import Button from "@material-ui/core/Button/index";
-import Chip from "@material-ui/core/Chip";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from "@material-ui/core/CircularProgress/index";
 import Grid from "@material-ui/core/Grid/index";
-import Link from "@material-ui/core/Link";
 import TextField from "@material-ui/core/TextField/index";
 import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
-import Footer from "../utils/Footer";
-import {generateSpotifyAuthURL, USER_REGISTER_URL} from "../config";
-import {generateStateParamCookie, setNextAndCurrPathCookies} from "../utils/utils";
-import {Heading} from "../utils/Heading";
+import Footer from "../Utils/Footer";
+import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../../config";
+import Chip from "@material-ui/core/Chip/index";
+import {Heading} from "../Utils/Heading";
 
 
-class SignUp extends Component {
+class CreatePlace extends Component {
   
   constructor(props) {
     super(props);
-    
-    const {location} = props;
-    const spotifyDenied = location.state ? location.state.spotifyDenied : null;
-    const nextPath = location.state ? location.state.from : "/";
-    
-    setNextAndCurrPathCookies(nextPath);
-    const stateParam = generateStateParamCookie();
     
     this.state = {
       name: "",
       email: "",
       password: "",
-      stateParam: stateParam,
       loading: false,
       success: false,
-      error: false,
-      errorMsg: "",
-      spotifyDenied: spotifyDenied,
-      nextPath: nextPath
+      error: false
     };
   }
   
@@ -51,11 +38,10 @@ class SignUp extends Component {
     this.setState({
       loading: true,
       success: false,
-      error: false,
-      spotifyDenied: false
+      error: false
     });
     
-    const url = USER_REGISTER_URL;
+    const url = SERVER_DOMAIN + "/user/register";
     const body = {
       name: this.state.name,
       email: this.state.email,
@@ -71,8 +57,8 @@ class SignUp extends Component {
         });
         
         setTimeout(() => {
-          this.props.history.push(this.state.nextPath);
-        }, 1000);
+          this.props.history.push('/');
+        }, 2000);
         
       })
       .catch(error => {
@@ -80,7 +66,7 @@ class SignUp extends Component {
           loading: false,
           success: false,
           error: true,
-          errorMsg: error.response ? error.response.data : error
+          errorMsg: error.response.data
         });
       });
     
@@ -88,10 +74,10 @@ class SignUp extends Component {
   }
   
   render() {
-    const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
+    const {loading, error, errorMsg, success} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
-    const spotifyAuthURL = generateSpotifyAuthURL(stateParam);
+    const spotifyAuthURL = generateSpotifyAuthURL();
     
     return (
       <Grid container
@@ -145,12 +131,12 @@ class SignUp extends Component {
                           icon={errorIcon}
                           color="secondary"
                           variant="outlined"/>}
-  
+          
           {success && <Chip label="Success! Get ready for musynchronization!"
                             icon={successIcon}
                             color="primary"
                             variant="outlined"/>}
-                          
+          
           <Typography align="center"
                       variant="caption"
                       color="textSecondary"
@@ -161,32 +147,19 @@ class SignUp extends Component {
           <Button variant="contained"
                   color="primary"
                   href={spotifyAuthURL}
-                  disabled={loading}
-                  style={{marginBottom: "2%"}}>
+                  disabled={loading}>
             <FontAwesomeIcon icon={["fab", "spotify"]} size="lg"/>&nbsp;
             Spotify
           </Button>
-          
-          {spotifyDenied && <Chip label="Please grant us Spotify access, we will behave"
-                                  icon={errorIcon}
-                                  color="secondary"
-                                  variant="outlined"/>}
-                                  
-          <Typography align="center"
-                      variant="body1"
-                      color="textSecondary" style={{marginTop: "7%"}}>
-            Have an account?&nbsp;
-            <Link href="/login">Login</Link>
-          </Typography>
-         
+        
         </Grid>
         
         <Footer style={{position: "fixed", bottom: "5%"}}/>
-        
+      
       </Grid>
     );
     
   }
 }
 
-export default SignUp;
+export default CreatePlace;
