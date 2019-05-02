@@ -9,18 +9,20 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Grid from "@material-ui/core/Grid";
 import TextField from '@material-ui/core/TextField';
 import Typography from "@material-ui/core/Typography";
-
 import auth from "../auth/auth";
 import Footer from "../utils/Footer";
 import Header from "../utils/Header";
 import PlaceCard, {PlaceCardTypes} from "./PlaceCard";
 import Playlist from "./Playlist";
-
+import SearchList from "./SearchList";
+import {SERVER_DOMAIN} from "../config";
+import axios from "axios"
 
 class Place extends Component {
   constructor(props) {
     super(props);
-    
+    this.handleInputChange = this.handleInputChange.bind(this);
+
     this.state = {
       isConnected: false,
       isOwner: false,
@@ -28,7 +30,9 @@ class Place extends Component {
       id: props.match.params.id,
       place: null,
       open: false,
-      searchResults: []
+      searchResults: [],
+      songName: "",
+      resultIds: []
     };
   }
 
@@ -36,23 +40,29 @@ class Place extends Component {
     this.requestPlaceInfo();
     this.checkConnectionStatus();
   }
-  
+
   componentWillUnmount() {
     auth.cancelRequestPlaceInfo();
     auth.cancelConnectPlaceInfo();
   }
-  
+  handleInputChange(event) {
+    this.setState({
+      [event.target.id]: event.target.value
+    });
+    console.log(this.state);
+  }
+
   requestPlaceInfo() {
     this.setState({
       loading: true
     });
-  
+
     const id = this.state.id;
     auth.requestPlaceInfo(id)
       .then(response => {
         const place = response.data;
         place["genres"] = [];
-        
+
         this.setState({
           place: place,
           isOwner: place.hasOwnProperty("owner"),
@@ -63,12 +73,12 @@ class Place extends Component {
         this.props.history.push("/");
       })
   }
-  
+
   checkConnectionStatus() {
     this.setState({
       loading: true
     });
-    
+
     const id = this.state.id;
     auth.connectToPlace(id)
       .then(() => {
@@ -84,7 +94,7 @@ class Place extends Component {
         });
       })
   }
-  
+
   handleClickOpen = () => {
     this.setState({ open: true });
   };
@@ -95,11 +105,43 @@ class Place extends Component {
   };
 
   getSearchResults = () => {
-    this.setState({ searchResults: [
-      {name: "Ashes to Ashes", artist: "David Bowie", length: 3.48},
-      {name: "Deutschland", artist: "Rammstein", length: 6.04},
-      {name: "Under Pressure", artist: "Queen", length: 3.22},
-    ] });
+    const url = SERVER_DOMAIN + "/searchsong";
+    let results = [];
+    let songIds = [];
+    let self = this;
+    let artistName = "";
+    axios.post(url, {songName: this.state.songName} )
+      .then(function (response) {
+        if( response.status === 200 ){
+          let artistResults = [];
+          let songResults = [];
+          console.log(response.data);
+          for(var i = 0; i < response.data.tracks.items.length; i++){
+            artistName = "";
+            for(var j = 0; j < response.data.tracks.items[i].artists.length; j++){
+              artistName += response.data.tracks.items[i].artists[j].name + ", ";
+            }
+            artistName = artistName.substring(0, artistName.length - 2);
+            console.log(response.data.tracks.items[i].name);
+            results.push({id: response.data.tracks.items[i].id, name:response.data.tracks.items[i].name, artist: artistName, length: response.data.tracks.items[i].duration_ms / 1000 });
+            songIds.push(response.data.tracks.items[i].id);
+          }
+          console.log("Results are:", results);
+          self.setState({searchResults: results});
+          self.setState({resultIds: songIds});
+        }
+        else{
+          console.log("Response not 200");
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    //this.setState({ searchResults: [
+    //  {name: "Ashes to Ashes", artist: "David Bowie", length: 3.48},
+    //  {name: "Deutschland", artist: "Rammstein", length: 6.04},
+    //  {name: "Under Pressure", artist: "Queen", length: 3.22},
+    //] });
   };
 
   render() {
@@ -140,7 +182,7 @@ class Place extends Component {
           <Playlist songs={songs}/>
 
           <br/>
-          
+
           <Button variant="contained"
                   color="primary"
                   onClick={this.handleClickOpen}
@@ -156,7 +198,7 @@ class Place extends Component {
             Settings
           </Button>
           </Grid>
-        
+
         <Footer/>
         <Dialog
             open={this.state.open}
@@ -167,24 +209,29 @@ class Place extends Component {
               <DialogContentText>
                 Search for a song
               </DialogContentText>
+            <form onSubmit={this.getSearchResults}>
               <TextField
                 autoFocus
                 margin="dense"
-                id="name"
+                id="songName"
                 label=""
                 type="text"
                 fullWidth
+                onChange={this.handleInputChange}
               />
-              <Playlist songs={this.state.searchResults}/>
-            </DialogContent>
+              <SearchList songs={this.state.searchResults} ids={this.state.resultIds} playlistId = {"123456"}/>
             <DialogActions>
+
+              <Button  onClick={this.getSearchResults}  color="primary">
+                Search
+              </Button>
               <Button onClick={this.handleClose} color="primary">
                 Cancel
               </Button>
-              <Button onClick={this.getSearchResults} color="primary">
-                Search
-              </Button>
             </DialogActions>
+            </form>
+            </DialogContent>
+
           </Dialog>
       </Grid>
     );

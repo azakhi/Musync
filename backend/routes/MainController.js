@@ -23,7 +23,7 @@ router.get('/callback', async function(req, res, next) {
   if (!req.session || !req.session.id) {
     res.status(400).send('Error: No session');
   }
-  
+
   if (req.query.code) {
     const index = req.headers.referer.indexOf('?');
     const redirectURI = req.headers.referer.substring(0, index);
@@ -43,16 +43,25 @@ router.get('/callback', async function(req, res, next) {
 
 /* GET API listing. */
 router.post('/berk', async function(req, res, next) {
-  console.log("heree");
   let spotifyConnection = await new models.SpotifyConnection({accessToken: "",refreshToken:"xd",expiresIn:2,userId:""});
-  console.log("heree1");
   let playlist =await new models.SpotifyItem({id:"2D5UM1WdOtCRppu5eW7gOT", uri:"", name:"", description:""});
-  console.log("heree2");
   let song = await new models.SpotifyItem({id:"2fuCquhmrzHpu5xcA1ci9x", uri:"", name:"", description:""});
-  console.log("heree3"); 
   await spotifyController.getLibrary(spotifyConnection);
- 
-  console.log("heree4"); 
+  res.json({});
+});
+
+router.post('/searchsong', async function(req, res, next) {
+  let songName = req.body.songName;
+  let spotifyConnection = await new models.SpotifyConnection({accessToken: "TOKEN",refreshToken:"xd",expiresIn:2,userId:""});
+  let result = await spotifyController.searchSong(spotifyConnection, songName );
+  res.json(result);
+});
+
+router.post('/addsong', async function(req, res, next) {
+  let songId = req.body.songId;
+  let playlistId = req.body.playlistId;
+  let spotifyConnection = await new models.SpotifyConnection({accessToken:"TOKEN",refreshToken:"xd",expiresIn:2,userId:""});
+  await spotifyController.addSong(spotifyConnection, playlistId, songId );
   res.json({});
 });
 
