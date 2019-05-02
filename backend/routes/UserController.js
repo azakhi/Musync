@@ -306,11 +306,16 @@ async function getUserHistory(req, res, next) {
     let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
     let resultPlaces = [];
     let resultSongs = [];
+
     if (user) {
-      for( var visitedPlace in user.visitedPlaces){
-        resultPlaces.push({name: visitedPlace.place.name, visitNum: 1});
+      for( let i = 0; i < user.visitedPlaces.length; i++){
+        let visitedPlace = user.visitedPlaces[i];
+        let place = await models.Place.findOne({_id: new models.ObjectID(visitedPlace.place)});
+        resultPlaces.push({name: place.name, visitNum: visitedPlace.visitCount});
       }
-      for( var requestedSong in user.requestedSongs){
+      
+      for( let i = 0; i < user.requestedSongs.length; i++){
+        let requestedSong = user.requestedSongs[i];
         resultSongs.push({name: requestedSong.song.name, artistName: "Default Artist Name", placeName: requestedSong.place.name});
       }
       res.status(200).json({
