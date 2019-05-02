@@ -11,7 +11,38 @@ const config = require('../config.js');
 class SpotifyController{
   constructor(){
   }
+  static async reorderTrack(spotifyConnect,playlist,range_start,insert_before){
+    console.log(range_start,insert_before);
+    spotifyConnect = await SpotifyController.refreshSpotifyConnection(spotifyConnect);
+    if (!(spotifyConnect instanceof models.SpotifyConnection)) return spotifyConnect;
+    var options = {
+      url: 'https://api.spotify.com/v1/playlists/'+playlist.id+'/tracks',
+      body: JSON.stringify({
+        range_start: range_start,
+        insert_before: insert_before + 1
 
+        }),
+      dataType:'json'
+      ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
+      'Content-Type': 'application/json' }
+    };
+
+
+    await  request.put(options, function(error, response, body) {
+      if (!error && response.statusCode === 200) {
+        
+        console.log(JSON.parse(body));
+        console.log(response.statusCode);
+          
+      }else{
+          console.log("error");
+          
+        
+      }
+
+
+  });
+  }
   static async addSong(spotifyConnect,playlist,song) {
 
     var songUri = 'spotify:track:'+song.id;
@@ -198,6 +229,7 @@ static async getLibrary(spotifyConnect) {
     };
     
     let r = await request.post(options).catch((err) => { return err });
+ 
     r = JSON.parse(r);
     if (r.access_token) {
       let sc = new models.SpotifyConnection({
@@ -330,6 +362,7 @@ static async getLibrary(spotifyConnect) {
     };
     
     let r = await request.get(options).catch((err) => { return err });
+
     r = JSON.parse(r);
     return r;
   }
