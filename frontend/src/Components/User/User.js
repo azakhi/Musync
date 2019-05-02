@@ -8,11 +8,11 @@ import ListItemIcon from "@material-ui/core/ListItemIcon/index";
 import ListItemText from "@material-ui/core/ListItemText/index";
 import {Link} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography/index";
-import Header from "../utils/Header";
-import Footer from "../utils/Footer";
+import Header from "../Utils/Header";
+import Footer from "../Utils/Footer";
 import Button from "@material-ui/core/Button/index";
-import axios from "axios"
-import {SERVER_DOMAIN} from "../config";
+import axios from "axios/index"
+import {SERVER_DOMAIN} from "../../config";
 
 
 class User extends Component {

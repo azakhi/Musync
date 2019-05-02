@@ -1,31 +1,57 @@
 import React, {Component} from "react";
-import axios from "axios";
 
-import Button from "@material-ui/core/Button/index";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Grid from "@material-ui/core/Grid/index";
-import TextField from "@material-ui/core/TextField/index";
-import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
-import Footer from "../utils/Footer";
-import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../config";
-import Chip from "@material-ui/core/Chip";
-import {Heading} from "../utils/Heading";
+import Button from "@material-ui/core/Button/index";
+import Chip from "@material-ui/core/Chip/index";
+import CircularProgress from "@material-ui/core/CircularProgress/index";
+import Grid from "@material-ui/core/Grid/index";
+import Link from "@material-ui/core/Link/index";
+import Typography from "@material-ui/core/Typography/index";
+import TextField from "@material-ui/core/TextField/index";
+import auth from "../../auth/auth";
+import Footer from "../Utils/Footer";
+import {generateSpotifyAuthURL} from "../../config";
+import {generateStateParamCookie, setNextAndCurrPathCookies} from "../../utils/utils";
+import {Heading} from "../Utils/Heading";
 
 
-class CreatePlace extends Component {
-  
+class Login extends Component {
   constructor(props) {
     super(props);
     
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  
+    const {history, location} = props;
+    const spotifyDenied = location.state ? location.state.spotifyDenied : false;
+    const nextPath = location.state ? location.state.from : "/";
+    setNextAndCurrPathCookies(nextPath);
+    
+    // Check if already authenticated
+    this.requestAuthUserInfo(history, nextPath);
+  
     this.state = {
-      name: "",
       email: "",
       password: "",
+      stateParam: generateStateParamCookie(),
       loading: false,
       success: false,
-      error: false
+      error: false,
+      errorMsg: "",
+      spotifyDenied: spotifyDenied,
+      nextPath: nextPath
     };
+  }
+  
+  requestAuthUserInfo(history, nextPath) {
+    auth.requestUserInfo()
+      .then(() => {
+        console.log("Already logged in, redirecting to the next page.");
+        history.push(nextPath);
+      })
+      .catch(() => {
+        console.log("User must log in.");
+      });
   }
   
   handleInputChange(event) {
@@ -41,32 +67,27 @@ class CreatePlace extends Component {
       error: false
     });
     
-    const url = SERVER_DOMAIN + "/user/register";
-    const body = {
-      name: this.state.name,
+    const credentials = {
       email: this.state.email,
       password: this.state.password
     };
     
-    axios.post(url, body)
+    auth.login(credentials)
       .then(() => {
         this.setState({
           loading: false,
           success: true,
           error: false
         });
-        
-        setTimeout(() => {
-          this.props.history.push('/');
-        }, 2000);
-        
+
+        this.props.history.push(this.state.nextPath);
       })
       .catch(error => {
         this.setState({
           loading: false,
           success: false,
           error: true,
-          errorMsg: error.response.data
+          errorMsg: error.response ? error.response.data : "Network error."
         });
       });
     
@@ -74,11 +95,11 @@ class CreatePlace extends Component {
   }
   
   render() {
-    const {loading, error, errorMsg, success} = this.state;
+    const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
-    const spotifyAuthURL = generateSpotifyAuthURL();
-    
+    const spotifyAuthURL = generateSpotifyAuthURL(stateParam);
+  
     return (
       <Grid container
             alignItems="center"
@@ -92,27 +113,21 @@ class CreatePlace extends Component {
         <Grid item xs={12} style={{textAlign: 'center'}}>
           <Typography variant="h5"
                       color="textPrimary">
-            Create an account
+            Login
           </Typography>
           
-          <form onSubmit={event => this.handleSubmit(event)}>
-            <TextField required
-                       id="name"
-                       label="Name"
-                       onChange={event => this.handleInputChange(event)}
-                       margin="dense"/>
-            <br/>
+          <form onSubmit={this.handleSubmit}>
             <TextField required
                        id="email"
                        label="Email"
-                       onChange={event => this.handleInputChange(event)}
+                       onChange={this.handleInputChange}
                        margin="dense"/>
             <br/>
             <TextField required
                        id="password"
                        label="Password"
                        type="password"
-                       onChange={event => this.handleInputChange(event)}
+                       onChange={this.handleInputChange}
                        margin="dense"/>
             <br/>
             <div>
@@ -120,7 +135,7 @@ class CreatePlace extends Component {
                       color="primary"
                       type="submit"
                       disabled={loading}>
-                Sign Up
+                Login
               </Button>
               <br/>
               {loading && <CircularProgress size={24}/>}
@@ -147,19 +162,31 @@ class CreatePlace extends Component {
           <Button variant="contained"
                   color="primary"
                   href={spotifyAuthURL}
-                  disabled={loading}>
+                  disabled={loading}
+                  style={{marginBottom: "2%"}}>
             <FontAwesomeIcon icon={["fab", "spotify"]} size="lg"/>&nbsp;
             Spotify
           </Button>
-        
+          <br/>
+          
+          {spotifyDenied && <Chip label="Please grant us Spotify access :("
+                                  icon={errorIcon}
+                                  color="secondary"
+                                  variant="outlined"/>}
+          
+          <Typography align="center"
+                      variant="body1"
+                      color="textSecondary" style={{marginTop: "7%"}}>
+            Don't have an account?&nbsp;
+            <Link href="/register">Sign Up</Link>
+          </Typography>
         </Grid>
         
         <Footer style={{position: "fixed", bottom: "5%"}}/>
       
       </Grid>
     );
-    
   }
 }
 
-export default CreatePlace;
+export default Login;

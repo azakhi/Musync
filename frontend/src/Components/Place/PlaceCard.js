@@ -1,13 +1,13 @@
 import React from "react";
 
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardMedia from "@material-ui/core/CardMedia";
-import CardContent from "@material-ui/core/CardContent";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Button from "@material-ui/core/Button/index";
+import Card from "@material-ui/core/Card/index";
+import CardActions from "@material-ui/core/CardActions/index";
+import CardMedia from "@material-ui/core/CardMedia/index";
+import CardContent from "@material-ui/core/CardContent/index";
+import Grid from "@material-ui/core/Grid/index";
+import Typography from "@material-ui/core/Typography/index";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 
 
 const PlaceCard = (props) => {

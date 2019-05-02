@@ -1,22 +1,22 @@
 import React, {Component} from "react";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
-import Button from "@material-ui/core/Button";
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import Grid from "@material-ui/core/Grid";
-import TextField from '@material-ui/core/TextField';
-import Typography from "@material-ui/core/Typography";
-import auth from "../auth/auth";
-import Footer from "../utils/Footer";
-import Header from "../utils/Header";
+import Button from "@material-ui/core/Button/index";
+import Dialog from '@material-ui/core/Dialog/index';
+import DialogActions from '@material-ui/core/DialogActions/index';
+import DialogContent from '@material-ui/core/DialogContent/index';
+import DialogContentText from '@material-ui/core/DialogContentText/index';
+import Grid from "@material-ui/core/Grid/index";
+import TextField from '@material-ui/core/TextField/index';
+import Typography from "@material-ui/core/Typography/index";
+import auth from "../../auth/auth";
+import Footer from "../Utils/Footer";
+import Header from "../Utils/Header";
 import PlaceCard, {PlaceCardTypes} from "./PlaceCard";
 import Playlist from "./Playlist";
 import SearchList from "./SearchList";
-import {SERVER_DOMAIN} from "../config";
-import axios from "axios"
+import {SERVER_DOMAIN} from "../../config";
+import axios from "axios/index"
 
 class Place extends Component {
   constructor(props) {

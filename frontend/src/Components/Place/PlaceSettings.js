@@ -1,21 +1,21 @@
 import React, {Component} from "react";
 
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Button from "@material-ui/core/Button";
-import Chip from "@material-ui/core/Chip";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import auth from "../auth/auth";
-import Footer from "../utils/Footer";
-import {generateSpotifyAuthURL} from "../config";
-import {generateStateParamCookie, setNextAndCurrPathCookies} from "../utils/utils";
-import {Heading} from "../utils/Heading";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Button from "@material-ui/core/Button/index";
+import Chip from "@material-ui/core/Chip/index";
+import CircularProgress from "@material-ui/core/CircularProgress/index";
+import Grid from "@material-ui/core/Grid/index";
+import Link from "@material-ui/core/Link/index";
+import Typography from "@material-ui/core/Typography/index";
+import TextField from "@material-ui/core/TextField/index";
+import auth from "../../auth/auth";
+import Footer from "../Utils/Footer";
+import {generateSpotifyAuthURL} from "../../config";
+import {generateStateParamCookie, setNextAndCurrPathCookies} from "../../utils/utils";
+import {Heading} from "../Utils/Heading";
 import Map from "./Map";
-import axios from "axios";
-import {SERVER_DOMAIN} from "../config";
+import axios from "axios/index";
+import {SERVER_DOMAIN} from "../../config";
 
 import Select from 'react-select';
  const colourOptions = [
@@ -118,7 +118,7 @@ class PlaceSettings extends Component {
           </Typography>
           
 
-          <input id="pac-input" class="controls" type="text" placeholder="Search Box"></input>
+          <input id="pac-input" className="controls" type="text" placeholder="Search Box"></input>
         <Map
           id="myMap"
           options={{

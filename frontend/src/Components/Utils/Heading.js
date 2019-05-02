@@ -1,8 +1,8 @@
 import React from "react";
 
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Grid from "@material-ui/core/Grid/index";
+import Typography from "@material-ui/core/Typography/index";
 
 export const Heading = () => {
   return (
