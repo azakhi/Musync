@@ -4,6 +4,7 @@ const models = require("../models/Models");
 const DBObjectBase = require("../models/DBObjectBase");
 const DBBasicTypes = require("../models/DBBasicTypes");
 const SpotifyItem = require("../models/SpotifyItem");
+const spotifyController = require('./SpotifyController');
 router.get('/', createPlaces);
 
 async function createPlaces(req, res, next) {
@@ -57,12 +58,12 @@ async function createPlaces(req, res, next) {
     latitudes.push(y + y0);
     longitudes.push(x + x0);
   }
-  for (var i = 0; i < 31; i++) { 
+  for (var i = 0; i < 2; i++) { 
 
     let placeName = placeNames[i];
     let latitude  = latitudes[i];
     let longitude = longitudes[i];
-    let spotifyInfo = {id:"1",uri:"1",name:"1",description:"1",accessToken:"1",refreshToken:"1",expiresIn:1};
+    let spotifyInfo = {id:"21oyeba5vfcrlozzp4jiiax6a",uri:"1",name:"1",description:"1",accessToken:"BQBEQ5dwS4XFldGB7vC6fjUzDGjcuI5uy1QETUaVBgag9N3IKzfBESU5u0Y5JylnFtz8QzFL_qdtqG6Y62wXaTFeVmmDQ8Zy42ADF-AdT6I2iW3-P1lXN7GemzmeAv-PRiNijoYFBqWgxqzj4E83_zqPEFxJLm4mMzu-TCJKjfU4pv35lq0a211JVUBDWzmmu_gVtPhoF7UbmWUwtnN0dlUEsmOrk4jejhsQaFP3iLJvxyRzBK9rSVowWg8fNcesgtooJ5ZdnKCYeXs",refreshToken:"AQDxYUwvjDwWxpWl9fJpQi9sSrj9UCs7IpVSPZlS7CiC5ZPCOL_fdPIf1mQcBjSG3NjsKjY2KPqbuwiqHay7X6cxLQXKROARU0sGjQi-hunwyefl0I_QEKnDgjzNO5f7QF4oOw",expiresIn:1};
     let isPermanent = true;
     let district ="ankara";
     let city="ankara";
@@ -70,7 +71,7 @@ async function createPlaces(req, res, next) {
     const {id, uri, name, description,
         accessToken, refreshToken, expiresIn} = spotifyInfo;
     
-    let songs_list = ["Dangerous Protest","The Unremarkable Fair","Everybody Wilds On Savior","We Talks They","Savannah Like the Challenges","The Storey Waited","Snickering Lover","Eat Path","Swift Season","Oh Baby","Soundwaves","At The Tantric Pictures","Sexuality Loves Without a Sky","Brothers Like Elite","The Refined Tsar","The Hand of Opinion","The Rose's Healing","Flying Reply Comrade","Farewell Whispering","Beyond Nobody Sweet Child","Exploding Factorys","Unremarkable","Merry Forever","The Anxious Messenger","Nobody Sends Beyond Oddities","It Hopes Its","Birch On the Abyss","The Spirit Put","Proselytizing Fellow","Understand Song","Wild Angst","Work","Directon","Beyond The Frozen Past","Painter Waiteds In a Writer","Role On Scent","The Green Home","The Play House of Tree","The Opus's Shores","Epitaphs Pay Dreams","Souls Slaughtering","After It Slumber","Soaring Mistakes","Healthy"]
+    //let songs_list = ["Dangerous Protest","The Unremarkable Fair","Everybody Wilds On Savior","We Talks They","Savannah Like the Challenges","The Storey Waited","Snickering Lover","Eat Path","Swift Season","Oh Baby","Soundwaves","At The Tantric Pictures","Sexuality Loves Without a Sky","Brothers Like Elite","The Refined Tsar","The Hand of Opinion","The Rose's Healing","Flying Reply Comrade","Farewell Whispering","Beyond Nobody Sweet Child","Exploding Factorys","Unremarkable","Merry Forever","The Anxious Messenger","Nobody Sends Beyond Oddities","It Hopes Its","Birch On the Abyss","The Spirit Put","Proselytizing Fellow","Understand Song","Wild Angst","Work","Directon","Beyond The Frozen Past","Painter Waiteds In a Writer","Role On Scent","The Green Home","The Play House of Tree","The Opus's Shores","Epitaphs Pay Dreams","Souls Slaughtering","After It Slumber","Soaring Mistakes","Healthy"]
     let n =  Math.floor(Math.random() * Math.floor(6))+1;
     let genress = genres_list.sort(() => .5 - Math.random()).slice(0,n);
     let genres = [];
@@ -80,53 +81,51 @@ async function createPlaces(req, res, next) {
         genres.push(genre._id);
       }
     }
-    
-    
-    let spotifyItem =await new models.SpotifyItem({
-      id: id,
-      uri: uri,
-      name: name,
-      description: description
-    });
-    
     let spotifyConnection =await new models.SpotifyConnection({
+      userId:id,
       accessToken: accessToken,
       refreshToken: refreshToken,
       expiresIn: expiresIn
     });
-    let n_2 =  Math.floor(Math.random() * Math.floor(10))+1;
-    let songs = songs_list.sort(() => .5 - Math.random()).slice(0,n_2);
-    songs_arr = [];
-    for (var j = 0; j < songs.length; j++) { 
-      let song = new models.Song();
-      let n =  Math.floor(Math.random() * Math.floor(2))+1;
-      let genress = genres_list.sort(() => .5 - Math.random()).slice(0,n);
-      let genres = [];
-      if(Array.isArray(genress)){
-        for(const genreName of genress){
-          let genre = await models.Genre.findOne({name: genreName});
-          genres.push(genre._id);
-        }
+   
+    let pl = await spotifyController.getPlaylist(spotifyConnection, "6g38Lh2W0jvyD4Qd6bfCEE");
+    console.log(pl);
+    let songs = [];
+    for (let track of pl.tracks.items) {
+      let spotifyItem = new models.SpotifyItem({
+        id: track.track.id,
+        uri: track.track.uri,
+        name: track.track.name,
+      });
+      let artistArray = [];
+      for(const artist of track.track.artists){
+        let artistName = new DBBasicTypes.DBString(artist.name);
+        artistArray.push(artistName);
       }
-      let spotifyItem = new models.SpotifyItem();
-      spotifyItem.name = songs[j];
-      artistName = new DBBasicTypes.DBString(songs[j]);
-      artistArray = [];
-      artistArray.push(artistName);
-      artistArray.push(artistName);
-      song.name=songs[j];
-      song.artistName = artistArray;
-      song.genres = genres;
-      song.spotifySong = spotifyItem;
-      songs_arr.push(song);
-    } 
+      let song = new models.Song({
+        artistName: artistArray,
+        name: track.track.name,
+        duration: track.track.duration_ms,
+        spotifySong: spotifyItem,
+      });
+      songs.push(song);
+    }
     
-    let playlist = await new models.Playlist({
-      songs: songs_arr,
+    let spotifyPlaylist = new models.SpotifyItem({
+      id: pl.id,
+      uri: pl.uri,
+      name: pl.name,
+      description: pl.description,
+    });
+    let playlist = new models.Playlist({
+      songs: songs,
+      spotifyPlaylist: spotifyPlaylist,
       currentSong: 0,
       currentSongStartTime: 0,
-      spotifyPlaylist: spotifyItem
     });
+    
+  
+  
     
     let location = await new models.Location({
       latitude: latitude,

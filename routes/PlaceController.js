@@ -414,7 +414,7 @@ async function voteForSong(req, res, next) {
   let songs = currentPlaylist.songs;
   let currentSong = songs[currentPlaylist.currentSong];
 
-  if(currentSong.duration - (Date.now() - currentPlaylist.currentSongStartTime.getTime()) < 10000){
+  if(!currentPlaylist.isPlaying||currentSong.duration - (Date.now() - currentPlaylist.currentSongStartTime.getTime()) < 10000){
     res.status(400).send('Error: Voting period for user is over');
     return;
   }

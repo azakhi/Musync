@@ -8,7 +8,7 @@ const spotifyController = require('./SpotifyController');
 router.get('/spotify', async function(req, res, next) {
   if (!req.session || !req.session.spotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
     res.redirect('https://accounts.spotify.com/en/authorize?response_type=code&client_id='
-      + config.spotify.clientID
+      + "b954f3b9ea8f48c28c716c0131dcaf92"
       + '&redirect_uri=' + encodeURIComponent("http://" + req.headers.host + "/callback/")
       + '&scope=' + encodeURIComponent(config.spotify.scopes)
       + '&show_dialog=true'
@@ -18,6 +18,42 @@ router.get('/spotify', async function(req, res, next) {
     res.send("Spotify connection is successful. You can close this tab now.");
   }
 });
+router.get('/cpts', async function(req, res, next) {
+  if (!req.session || !req.session.spotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
+    res.send("No connection");
+    return;
+  }
+  
+  if (!req.query.placeId) {
+    res.send("No place ID");
+    return;
+  }
+  
+  let place = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
+  
+  if (!place) {
+    res.send("No such place");
+    return;
+  }
+  
+  let spotifyConnection = new models.SpotifyConnection(JSON.parse(req.session.spotifyConnection));
+  place.spotifyConnection = spotifyConnection;
+  await place.commitChanges();
+  
+  res.send("Done");
+});
+router.get('/test3',async function(req, res, next){
+let place = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
+let votes = [0,0,0];
+votes[req.query.songIndex] += Number(req.query.point);
+place.votes = votes;
+res.json(place.votes);
+
+
+
+
+});
+
 
 router.get('/callback', async function(req, res, next) {
   if (!req.session || !req.session.id) {
