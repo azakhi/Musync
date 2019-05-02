@@ -278,7 +278,7 @@ async function connectToPlace(req, res, next) {
     let visitedCount = 1;
     let visitedPlaces = user.visitedPlaces;
     for(const i = 0; i <  user.visitedPlaces.length; i++){
-      if(place._id ==  user.visitedPlaces[i]._id){
+      if(place._id ===  user.visitedPlaces[i]._id){
         visitedCount = user.visitedPlaces[i].visitCount + 1;
         visitedPlaces.splice(i,1);
       }
@@ -536,7 +536,7 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
   
   let pl = {};
   for (let list of lists.items) {
-    if (list.name == config.spotify.playlistName) {
+    if (list.name === config.spotify.playlistName) {
       pl = list;
       break;
     }
