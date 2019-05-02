@@ -30,12 +30,12 @@ async function getUser(req, res, next) {
     if (!models.ObjectID.isValid(req.query.userId)) {
       res.status(400).send('Error: Invalid user id');
     }
-    
+
     let user = await models.User.findOne({_id: new models.ObjectID(req.query.userId)});
     if (!user) {
       res.status(400).send('Error: No such user exists');
     }
-    
+
     if (req.session && req.session.userId === req.query.userId) {
       res.json({
         _id: user._id,
@@ -56,38 +56,38 @@ async function getUser(req, res, next) {
         name: user.name,
       });
     }
-    
+
     return;
   }
-  
+
   if (req.session && req.session.userId && models.ObjectID.isValid(req.session.userId)) {
     let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
     res.json(user);
     return;
   }
-  
+
   res.status(400).send("Error: Login required!");
 }
 
 async function registerUser(req, res, next) {
   const body = req.body;
   const {name, email, password} = body;
-  
+
   let spotifyConnection = null;
   if (req.session && req.session.spotifyConnection && models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
     spotifyConnection = new models.SpotifyConnection(JSON.parse(req.session.spotifyConnection));
   }
-  
+
   if((!email || !password) && !spotifyConnection) {
     res.status(400).send('Error: Missing information!');
     return;
   }
-  
+
   if (email && !validateEmail(email)) {
     res.status(400).send('Error: Invalid email!');
     return;
   }
-  
+
   let user = new models.User({
     name: name ? name : "",
     isRegistered: true,
@@ -96,7 +96,7 @@ async function registerUser(req, res, next) {
     email: email ? email : "",
     password: password ? crypto.createHash('md5').update(password + passwordSalt).digest('hex') : "",
   });
-  
+
   let err = {};
   try {
     await user.commitChanges();
@@ -110,7 +110,7 @@ async function registerUser(req, res, next) {
     });
     return;
   }
-  
+
   res.json({
     success: false,
     error: err,
@@ -124,18 +124,18 @@ async function loginWithSpotify(req, res, next) {
     });
     return;
   }
-  
+
   if (!req.session || !req.session.spotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
     res.status(400).send('Error: No valid connection information');
     return;
   }
-  
+
   let user = null;
   let spotifyUserId = JSON.parse(req.session.spotifyConnection).userId;
   if (spotifyUserId) {
     user = await models.User.findOne({"spotifyConnection.userId": spotifyUserId});
   }
-  
+
   if (user) {
     user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
@@ -146,7 +146,7 @@ async function loginWithSpotify(req, res, next) {
     });
     return;
   }
-  
+
   res.status(400).send('Error: No such user');
 }
 
@@ -159,22 +159,22 @@ async function loginWithCredentials(req, res, next) {
   }
 
   const {email, password} = req.body;
-  
+
   if(!email || !password) {
     res.status(400).send('Error: Missing information!');
     return;
   }
-  
+
   if (!validateEmail(email)) {
     res.status(400).send('Error: Invalid email!');
     return;
   }
-  
+
   let user = await models.User.findOne({
     email: email,
     password: crypto.createHash('md5').update(password + passwordSalt).digest('hex'),
   });
-  
+
   if (user) {
     user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
@@ -184,7 +184,7 @@ async function loginWithCredentials(req, res, next) {
     });
     return;
   }
-  
+
   res.status(400).send('Error: No such user');
 }
 
@@ -193,34 +193,34 @@ async function updateUser(req, res, next) {
     res.status(400).send('Error: User authentication required');
     return;
   }
-  
+
   if (!models.ObjectID.isValid(req.session.userId)) {
     req.session.destroy();
     res.status(400).send('Error: Authentication is invalid. Please login again');
     return;
   }
-  
+
   const {name, email, password, newPassword, location} = req.body;
-  
+
   if(!name && !email && !newPassword) {
     res.json({ // Nothing to change
       success: true,
     });
     return;
   }
-  
+
   if (email && !validateEmail(email)) {
     res.status(400).send('Error: Invalid email!');
     return;
   }
-  
+
   let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
   if(!user){
     req.session.destroy();
     res.status(400).send('Error: Authentication is invalid. Please login again');
     return;
   }
-  
+
   if ((email || newPassword) && user.password) {
     if(!password) {
       res.status(400).send('Error: Current password is required to change email or password');
@@ -231,12 +231,12 @@ async function updateUser(req, res, next) {
       return;
     }
   }
-  
+
   if (name) user.name = name;
   if (email) user.email = email;
   if (newPassword) user.password = crypto.createHash('md5').update(newPassword + passwordSalt).digest('hex');
   if (location && models.Location.isValidValue(location)) user.location = location;
-  
+
   let err = null;
   try {
     await user.commitChanges();
@@ -248,7 +248,7 @@ async function updateUser(req, res, next) {
     });
     return;
   }
-  
+
   res.json({
     success: false,
     error: err,
@@ -259,7 +259,7 @@ async function logoutUser(req, res, next) {
   if(req.session) {
     req.session.destroy();
   }
-  
+
   res.json({
     success: true,
   });
@@ -270,19 +270,19 @@ async function connectSpotify(req, res, next) {
     if (req.session) {
         req.session.destroy();
     }
-    
+
     res.status(400).send('Error: User authentication required');
     return;
   }
-  
+
   if (!req.session || !req.session.spotifyConnection
   || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection)) || !req.session.spotifyConnection.userId) {
     res.status(400).send('Error: No valid connection information');
     return;
   }
-  
+
   let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
-  
+
   if (user) {
     user.spotifyConnection = JSON.parse(req.session.spotifyConnection);
     req.session.isSpotifyRegistered = true;
@@ -291,7 +291,7 @@ async function connectSpotify(req, res, next) {
     });
     return;
   }
-  
+
   res.status(400).send('Error: No such user');
 }
 
@@ -313,7 +313,10 @@ async function getUserHistory(req, res, next) {
       for( var requestedSong in user.requestedSongs){
         resultSongs.push({name: requestedSong.song.name, artistName: "Default Artist Name", placeName: requestedSong.place.name});
       }
-      res.status(200).json(resultPlaces, resultSongs);
+      res.status(200).json({
+        resultPlaces: resultPlaces,
+        resultSongs: resultSongs
+      });
     }
     else {
       res.status(204).send("User not logged in");
