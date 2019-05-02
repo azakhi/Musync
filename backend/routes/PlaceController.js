@@ -27,7 +27,7 @@ router.get('/votestatus', getVoteStatus);
 router.post('/votestatus', getVoteStatus);
 router.get('/voteforsong', voteForSong);
 
-async function getPlace(req, res, next) {
+async function getPlace(req, res) {
   let result = await getPlaceRecord(req);
   if (!result.result) {
     res.status(400).send('Error: ' + result.error);
@@ -39,7 +39,7 @@ async function getPlace(req, res, next) {
   res.json(result);
 }
 
-async function getPlaylistOfPlace(req, res, next) {
+async function getPlaylistOfPlace(req, res) {
   let result = await getPlaceRecord(req);
   if (!result.result) {
     res.status(400).send('Error: ' + result.error);
@@ -65,7 +65,7 @@ async function getPlaylistOfPlace(req, res, next) {
   res.json(result.playlist);
 }
 
-async function createNewPlace(req, res, next) {
+async function createNewPlace(req, res) {
   const body = req.body;
   const {placeName, latitude, longitude, spotifyInfo,
     isPermanent, district, city, country} = body;
@@ -140,7 +140,8 @@ async function createNewPlace(req, res, next) {
   await place.commitChanges();
   res.send(JSON.stringify(place));
 }
-async function changePlaceSettings(req, res, next){
+
+async function changePlaceSettings(req, res){
   if(!req.body){
     res.status(400).send('Error: Missing information!');
     return;
@@ -151,7 +152,7 @@ async function changePlaceSettings(req, res, next){
     return;
   }
   
-  place = result.result;
+  let place = result.result;
   if(req.body.name){
     place.name = req.body.name;
   }
@@ -165,8 +166,7 @@ async function changePlaceSettings(req, res, next){
   }
 
   if(req.body.genres){
-    
-    genres = [];
+    let genres = [];
     for(const genreName of req.body.genres){
       let genre = await models.Genre.findOne({name: genreName});
       genres.push(genre._id);
@@ -178,8 +178,7 @@ async function changePlaceSettings(req, res, next){
   res.status(200).json({});
 }
 
-
-async function findClosestPlaces(req, res, next) {
+async function findClosestPlaces(req, res) {
   if(!req.body || !req.body.latitude || !req.body.longitude){
     res.status(400).send('Error: Missing information!');
     return;
@@ -225,7 +224,7 @@ async function findClosestPlaces(req, res, next) {
   res.json(publicInfos);
 }
 
-async function connectToPlace(req, res, next) {
+async function connectToPlace(req, res) {
   let result = await getPlaceRecord(req);
   if (!result.result) {
     res.status(400).send('Error: ' + result.error);
@@ -277,8 +276,8 @@ async function connectToPlace(req, res, next) {
     }
     let visitedCount = 1;
     let visitedPlaces = user.visitedPlaces;
-    for(const i = 0; i <  user.visitedPlaces.length; i++){
-      if(place._id ==  user.visitedPlaces[i]._id){
+    for(let i = 0; i <  user.visitedPlaces.length; i++){
+      if(place._id === user.visitedPlaces[i]._id){
         visitedCount = user.visitedPlaces[i].visitCount + 1;
         visitedPlaces.splice(i,1);
       }
@@ -293,8 +292,6 @@ async function connectToPlace(req, res, next) {
     user.visitedPlaces = visitedPlaces;  
     user.points = place.initialPoint*(visitedCount/10+1);
     
-
-    
     req.session.connectedPlace = place._id.toHexString();
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
@@ -302,7 +299,7 @@ async function connectToPlace(req, res, next) {
   }
 }
 
-async function getPlaybackInfo(req, res, next) {
+async function getPlaybackInfo(req, res) {
   let result = await getPlaceRecord(req);
   if (!result.result) {
     res.status(400).send('Error: ' + result.error);
@@ -356,16 +353,16 @@ async function getPlaybackInfo(req, res, next) {
   });
 }
 
-async function getVoteStatus(req, res, next) {
+async function getVoteStatus(req, res) {
   let result = await getPlaceRecord(req);
   if (!result.result) {
     res.status(400).send('Error: ' + result.error);
     return;
   }
   
-  place = result.result;
+  let place = result.result;
   
-  result = {
+  const voteStatus = {
     votedSongs: place.votedSongs,
     votes: place.votes,
     // TODO: Track and update playback status
@@ -374,10 +371,10 @@ async function getVoteStatus(req, res, next) {
     currentSongStartTime: place.playlist.currentSongStartTime,
   };
   
-  res.json(result);
+  res.json(voteStatus);
 }
 
-async function voteForSong(req, res, next) {
+async function voteForSong(req, res) {
   
   let points = Number(req.query.points);
   if (!req.query.songIndex || !points) {
@@ -526,7 +523,7 @@ async function getSessionUser(req) {
 
 async function getOrCreateSpotifyPlaylist(spotifyConnection) {
   // First check if account already has one with the name
-  let lists = await spotifyController.getPlaylists(result.spotifyConnection);
+  let lists = await spotifyController.getPlaylists(spotifyConnection);
   if (!lists.items) {
     return {
       result: false,
@@ -536,17 +533,17 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
   
   let pl = {};
   for (let list of lists.items) {
-    if (list.name == config.spotify.playlistName) {
+    if (list.name === config.spotify.playlistName) {
       pl = list;
       break;
     }
   }
   
   if (pl.id) {
-    pl = await spotifyController.getPlaylist(result.spotifyConnection, pl.id);
+    pl = await spotifyController.getPlaylist(spotifyConnection, pl.id);
   }
   else { // Create if not
-    pl = await spotifyController.createPlaylist(result.spotifyConnection, config.spotify.playlistName, config.spotify.playlistDecription);
+    pl = await spotifyController.createPlaylist(spotifyConnection, config.spotify.playlistName, config.spotify.playlistDecription);
   }
   
   if (pl.id) {
