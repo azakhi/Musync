@@ -36,6 +36,7 @@ async function getPlace(req, res) {
   
   result = result.result;
   result = (req.session.userId && result.owner.toHexString() === req.session.userId) ? result.dbObject : result.publicInfo;
+  result.genres = await getGenreNames(place);
   res.json(result);
 }
 
@@ -206,20 +207,12 @@ async function findClosestPlaces(req, res) {
   let publicInfos = [];
 
   for (const place of closePlaces) {
-    let genresArray = [];
-
-    genresIds = place.genres;
-    for (var i = 0; i < genresIds.length;i++){
-      let genre = await models.Genre.findOne({_id: genresIds[i]});
-      genresArray.push(genre.name);
-    }
+    let genresArray = await getGenreNames(place);
     let infObj = place.publicInfo;
-    
     
     infObj['genres'] = genresArray;
     publicInfos.push(infObj);
   }
-
   
   res.json(publicInfos);
 }
@@ -651,5 +644,14 @@ function compareDistances(place1, place2) {
     return 0;
 }
 
+async function getGenreNames(place) {
+  let genres = [];
+  let genresIds = place.genres;
+  for (let i = 0; i < genresIds.length;i++){
+    let genre = await models.Genre.findOne({_id: genresIds[i]});
+    genres.push(genre.name);
+  }
+  return genres;
+}
 
 module.exports = router;
