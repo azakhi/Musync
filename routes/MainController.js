@@ -23,23 +23,23 @@ router.get('/cpts', async function(req, res, next) {
     res.send("No connection");
     return;
   }
-  
+
   if (!req.query.placeId) {
     res.send("No place ID");
     return;
   }
-  
+
   let place = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
-  
+
   if (!place) {
     res.send("No such place");
     return;
   }
-  
+
   let spotifyConnection = new models.SpotifyConnection(JSON.parse(req.session.spotifyConnection));
   place.spotifyConnection = spotifyConnection;
   await place.commitChanges();
-  
+
   res.send("Done");
 });
 router.get('/test3',async function(req, res, next){
@@ -87,8 +87,11 @@ router.post('/berk', async function(req, res, next) {
 });
 
 router.post('/searchsong', async function(req, res, next) {
+  let connectedPlaceId = req.session.connectedPlace;
+  let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
   let songName = req.body.songName;
-  let spotifyConnection = await new models.SpotifyConnection({accessToken: "TOKEN",refreshToken:"xd",expiresIn:2,userId:""});
+  let spotifyConnection = place.spotifyConnection;
+  console.log(spotifyConnection);
   let result = await spotifyController.searchSong(spotifyConnection, songName );
   res.json(result);
 });
