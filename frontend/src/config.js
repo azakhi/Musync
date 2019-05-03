@@ -1,6 +1,6 @@
 export const SERVER_DOMAIN = "http://localhost:1234";
 export const SPOTIFY_INFO = {
-  clientID: '...',
+  clientID: 'b954f3b9ea8f48c28c716c0131dcaf92',
   scopes: 'user-library-modify ' +
     'playlist-read-private ' +
     'user-read-email ' +
