@@ -303,8 +303,8 @@ function validateEmail(email) {
 }
 
 async function getUserHistory(req, res, next) {
-  if (req.session) {
-    let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+  if (req.query && req.query.userId) {
+    let user = await models.User.findOne({_id: new models.ObjectID(req.query.userId)});
     let resultPlaces = [];
     let resultSongs = [];
 
@@ -312,6 +312,7 @@ async function getUserHistory(req, res, next) {
       for( let i = 0; i < user.visitedPlaces.length; i++){
         let visitedPlace = user.visitedPlaces[i];
         let place = await models.Place.findOne({_id: new models.ObjectID(visitedPlace.place)});
+        
         resultPlaces.push({name: place.name, visitNum: visitedPlace.visitCount});
       }
       
@@ -319,19 +320,18 @@ async function getUserHistory(req, res, next) {
         let requestedSong = user.requestedSongs[i];
         resultSongs.push({name: requestedSong.name, artistName: requestedSong.artistName, placeName: ""});
       }
-      res.status(200).json({
-        resultPlaces: resultPlaces,
-        resultSongs: resultSongs
-      });
+      user.visitedPlaces = resultPlaces;
+      user.requestedSongs = resultSongs;
+      
+      res.status(200).json(user);
     }
     else {
-      res.status(204).send("User not logged in");
+      res.status(400).send("Invalid user id.");
     }
   }
   else {
-    res.status(400).send("No session");
+    res.status(400).send("Invalid request: Give user id.");
   }
-  return;
 }
 
 module.exports = router;

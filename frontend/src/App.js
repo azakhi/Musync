@@ -18,14 +18,14 @@ class App extends Component {
       <main>
         <Switch>
           <Route exact path='/' component={Home}/>
+          <Route exact path='/place/settings' component={PlaceSettings}/>
           <Route exact path='/place/:id' component={Place}/>
-          <Route exact path='/user' component={User}/>
+          <Route exact path='/user/settings' component={UserSettings}/>
+          <Route exact path='/user/:id' component={User}/>
           <Route exact path='/register' component={SignUp}/>
           <Route exact path='/login' component={Login}/>
           <Route exact path='/create-place' component={CreatePlace}/>
-          <Route exact path='/placeSettings' component={PlaceSettings}/>
           <Route exact path='/spotifyCallback' component={SpotifyCallback}/>
-          <Route exact path='/usersettings' component={UserSettings}/>
           <Route path='/' component={NotFound}/>
         </Switch>
       </main>

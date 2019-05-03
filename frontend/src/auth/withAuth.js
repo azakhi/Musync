@@ -4,7 +4,7 @@ import history from "../utils/history"
 
 import {
   CONNECT_PLACE_URL,
-  GET_PLACE_URL,
+  GET_PLACE_URL, GET_USER_PROFILE_URL,
   GET_USER_URL,
   SPOTIFY_CALLBACK_URL, USER_LOGIN_URL,
   USER_LOGOUT_URL,
@@ -18,6 +18,7 @@ const withAuth = (WrappedComponent, type) => {
       super(props);
       this.checkAuthentication = this.checkAuthentication.bind(this);
       this.requestPlaceInfo = this.requestPlaceInfo.bind(this);
+      this.requestUserInfo = this.requestUserInfo.bind(this);
       this.cancelWithAuthCalls = this.cancelWithAuthCalls.bind(this);
       this.logout = this.logout.bind(this);
       this.login = this.login.bind(this);
@@ -87,6 +88,26 @@ const withAuth = (WrappedComponent, type) => {
           history.push("/");
         });
     }
+  
+    requestUserInfo(userId) {
+      const url = GET_USER_PROFILE_URL + `?userId=${userId}`;
+      axios.get(url, { cancelToken: this.state.source.token })
+        .then(response => {
+          console.log(response);
+          this.setState({
+            user: response.data
+          });
+        })
+        .catch(error => {
+          if(axios.isCancel(error)){
+            console.log(error);
+            return;
+          }
+        
+          this.cancelWithAuthCalls("User does not exist.");
+          history.push("/");
+        });
+    }
     
     async login(credentials, nextPath) {
       this.setState({ loading: true, loginAttempted: true, authFailed: false });
@@ -137,7 +158,7 @@ const withAuth = (WrappedComponent, type) => {
       axios.get(USER_LOGOUT_URL, { cancelToken: this.state.source.token })
         .then(() => {
           history.push("/");
-          window.location.reload();
+          // window.location.reload();
         })
         .catch(error => {
           console.log(error);
@@ -157,12 +178,14 @@ const withAuth = (WrappedComponent, type) => {
     
     render() {
       const {isAuthenticated, authFailed, authUser,
-        connectedPlace, place, errorMsg, loginAttempted} = this.state;
+        connectedPlace, place, errorMsg, loginAttempted, user} = this.state;
       
       const otherProps = {
         requestPlaceInfo: type === 'place' ? this.requestPlaceInfo : undefined,
+        requestUserInfo: type === 'user' ? this.requestUserInfo : undefined,
         place: type === 'place' ? place : undefined,
         isOwner: type === 'place' && place && place.hasOwnProperty("owner"),
+        user: type === 'user' ? user : undefined,
       };
 
       return <WrappedComponent authFailed={authFailed}

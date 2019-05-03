@@ -17,6 +17,7 @@ export const USER_REGISTER_URL = SERVER_DOMAIN + "/user/register";
 export const USER_LOGIN_URL = SERVER_DOMAIN + "/user/login";
 export const USER_LOGOUT_URL = SERVER_DOMAIN + "/user/logout";
 export const GET_USER_URL = SERVER_DOMAIN + "/user/";
+export const GET_USER_PROFILE_URL = SERVER_DOMAIN + "/user/gethistory";
 export const SPOTIFY_CALLBACK_URL = SERVER_DOMAIN + "/callback";
 export const GET_PLACE_URL = SERVER_DOMAIN + "/place";
 export const GET_NEAR_PLACES_URL = SERVER_DOMAIN + "/place/closest";

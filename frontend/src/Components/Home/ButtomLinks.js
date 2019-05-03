@@ -22,8 +22,8 @@ const ButtomLinks = (props) => {
                           to={to("/login")}
                           children="Login" />;
   const logoutLink = <Link component={RouterLink}
-                           to={to("/")}
-                           onClick={() => props.logout(props.history)}
+                           to={to("/logout")}
+                           onClick={props.logout}
                            children="Logout" />;
   const createAccLink = <Link component={RouterLink}
                               to={to("/register")}
