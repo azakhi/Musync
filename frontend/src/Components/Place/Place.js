@@ -219,7 +219,7 @@ class Place extends Component {
                 fullWidth
                 onChange={this.handleInputChange}
               />
-              <SearchList songs={this.state.searchResults} ids={this.state.resultIds} playlistId = {"123456"}/>
+              <SearchList songs={this.state.searchResults} ids={this.state.resultIds}/>
             <DialogActions>
 
               <Button  onClick={this.getSearchResults}  color="primary">

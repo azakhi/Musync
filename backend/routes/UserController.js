@@ -313,10 +313,10 @@ async function getUserHistory(req, res, next) {
         let place = await models.Place.findOne({_id: new models.ObjectID(visitedPlace.place)});
         resultPlaces.push({name: place.name, visitNum: visitedPlace.visitCount});
       }
-      
+
       for( let i = 0; i < user.requestedSongs.length; i++){
         let requestedSong = user.requestedSongs[i];
-        resultSongs.push({name: requestedSong.song.name, artistName: "Default Artist Name", placeName: requestedSong.place.name});
+        resultSongs.push({name: requestedSong.name, artistName: requestedSong.artistName, placeName: ""});
       }
       res.status(200).json({
         resultPlaces: resultPlaces,

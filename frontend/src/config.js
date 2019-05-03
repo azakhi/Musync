@@ -33,10 +33,10 @@ export function generateSpotifyAuthURL(stateParam) {
     show_dialog: true,
     state: stateParam
   };
-  
+
   for(const key in options){
     url += `&${key}=${options[key]}`;
   }
-  
+
   return url;
 }
