@@ -126,6 +126,11 @@ class ModelBase {
   }
   
   static async findOne(query) {
+    if (query._id && Object.keys(query).length == 1) {
+      let cached = ModelManager.acquire(query._id, this.collection);
+      if (cached) return cached;
+    }
+
     let result = await DBManager.db.collection(this.collection).findOne(query);
     if (result && result._id) {
       let cached = ModelManager.acquire(result._id, this.collection);

@@ -8,10 +8,11 @@ import CardContent from "@material-ui/core/CardContent/index";
 import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
+import Chip from "@material-ui/core/Chip";
 
 
 const PlaceCard = (props) => {
-  const {place, type} = props;
+  const {place, type, isConnected} = props;
   const {name, image, genres, currentlyPlaying} = place;
   
   const isTypePrimary = (type === PlaceCardTypes.HomeViewPrimary);
@@ -20,11 +21,15 @@ const PlaceCard = (props) => {
   
   const showMedia = (isTypePrimary || isTypePlaceView);
   const imageHeight = isTypePrimary ? "auto" : 150;
-  const showCardActions = (isTypePrimary || isTypeSecondary);
+  const showCardActions = (isTypePrimary || isTypeSecondary || !isConnected);
   
   let {handleConnectPlace} = props;
   if(typeof handleConnectPlace !== "function")
-    handleConnectPlace = () => {};
+    handleConnectPlace = () => { console.log("Undefined handleConnectPlace() be careful.") };
+  
+  const connectMessage = <Chip label={`Connect to ${name} to start requesting songs!`}
+                               color="primary"
+                               variant="outlined" style={{marginLeft: "10%", marginBottom: "3%"}}/>;
   
   return (
     <Grid item xs={12} key={place._id}>
@@ -59,10 +64,12 @@ const PlaceCard = (props) => {
                     size="small"
                     variant={isTypePrimary ? "contained" : "text"}
                     onClick={() => handleConnectPlace(place._id, name)}>
-              I am here!
+              Connect!
             </Button>;
           </CardActions>
         }
+        
+        {(!isConnected && isTypePlaceView) && connectMessage}
       </Card>
     </Grid>
   );

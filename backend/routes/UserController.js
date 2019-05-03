@@ -62,6 +62,7 @@ async function getUser(req, res, next) {
 
   if (req.session && req.session.userId && models.ObjectID.isValid(req.session.userId)) {
     let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+    user.connectedPlace = req.session.connectedPlace;
     res.json(user);
     return;
   }

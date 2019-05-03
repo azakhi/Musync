@@ -4,45 +4,44 @@ import {Link as RouterLink} from "react-router-dom";
 import Grid from "@material-ui/core/Grid/index";
 import Link from "@material-ui/core/Link/index";
 import Typography from "@material-ui/core/Typography/index";
-import auth from "../../auth/auth";
+import withAuth from "../../auth/withAuth";
 
 
-export const ButtomLinks = (props) => {
-  const to = (pathname) => {
+const ButtomLinks = (props) => {
+  const to = (pathname, user) => {
+    if(user)
+      pathname = pathname + "/" + user._id;
+    
     return {
       pathname: pathname,
       state: { from: window.location.pathname }
     }
   };
   
-  const handleLogout = (event) => {
-    event.preventDefault();
-    
-    auth.logout().finally(() => props.handleLogout());
-  };
-  
   const loginLink = <Link component={RouterLink}
                           to={to("/login")}
                           children="Login" />;
   const logoutLink = <Link component={RouterLink}
-                           to={to("/logout")}
-                           onClick={handleLogout}
+                           to={to("/")}
+                           onClick={() => props.logout(props.history)}
                            children="Logout" />;
   const createAccLink = <Link component={RouterLink}
                               to={to("/register")}
                               children="Create an account"/>;
   const profileLink = <Link component={RouterLink}
-                            to={to("/user")}
+                            to={to("/user", props.authUser)}
                             children="Profile"/>;
   return (
     <Grid item xs={12}>
       <Typography gutterBottom align="center">
-        {props.authenticated ? profileLink : createAccLink}
+        {props.isAuthenticated ? profileLink : createAccLink}
       </Typography>
       
       <Typography gutterBottom align="center">
-        {props.authenticated ? logoutLink : loginLink}
+        {props.isAuthenticated ? logoutLink : loginLink}
       </Typography>
     </Grid>
   );
 };
+
+export default withAuth(ButtomLinks);

@@ -72,7 +72,7 @@ class SignUp extends Component {
         
         setTimeout(() => {
           this.props.history.push(this.state.nextPath);
-        }, 1000);
+        }, 500);
         
       })
       .catch(error => {
