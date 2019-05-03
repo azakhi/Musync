@@ -1,24 +1,19 @@
 import React, {Component} from "react";
+import Select from 'react-select';
+import axios from "axios";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Button from "@material-ui/core/Button/index";
-import Chip from "@material-ui/core/Chip/index";
-import CircularProgress from "@material-ui/core/CircularProgress/index";
 import Grid from "@material-ui/core/Grid/index";
-import Link from "@material-ui/core/Link/index";
 import Typography from "@material-ui/core/Typography/index";
 import TextField from "@material-ui/core/TextField/index";
-import auth from "../../auth/auth";
 import Footer from "../Utils/Footer";
-import {generateSpotifyAuthURL} from "../../config";
-import {generateStateParamCookie, setNextAndCurrPathCookies} from "../../utils/utils";
+import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../../config";
 import {Heading} from "../Utils/Heading";
 import Map from "./Map";
-import axios from "axios/index";
-import {SERVER_DOMAIN} from "../../config";
 
-import Select from 'react-select';
- const colourOptions = [
+
+const colourOptions = [
     { value: 'Blues', label: 'Blues' },
     { value: 'Classic Rock', label: 'Classic Rock'},
     { value: 'Dance', label: 'Dance'},

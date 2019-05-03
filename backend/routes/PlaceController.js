@@ -34,9 +34,9 @@ async function getPlace(req, res) {
     return;
   }
   
-  result = result.result;
-  result = (req.session.userId && result.owner && result.owner.toHexString() === req.session.userId)
-    ? result.dbObject : result.publicInfo;
+  const place = result.result;
+  result = (req.session.userId && place.owner && place.owner.toHexString() === req.session.userId)
+    ? place.dbObject : place.publicInfo;
   result.genres = await getGenreNames(place);
   res.json(result);
 }
@@ -586,6 +586,16 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
   };
 }
 
+async function getGenreNames(place) {
+  let genres = [];
+  let genresIds = place.genres;
+  for (let i = 0; i < genresIds.length;i++){
+    let genre = await models.Genre.findOne({_id: genresIds[i]});
+    genres.push(genre.name);
+  }
+  return genres;
+}
+
 // Used the formulation given in following page
 // http://janmatuschek.de/LatitudeLongitudeBoundingCoordinates
 function calculateBoundingBox(location, distance) {
@@ -643,16 +653,6 @@ function compareDistances(place1, place2) {
     return 1;
   else
     return 0;
-}
-
-async function getGenreNames(place) {
-  let genres = [];
-  let genresIds = place.genres;
-  for (let i = 0; i < genresIds.length;i++){
-    let genre = await models.Genre.findOne({_id: genresIds[i]});
-    genres.push(genre.name);
-  }
-  return genres;
 }
 
 module.exports = router;

@@ -8,11 +8,11 @@ import Grid from "@material-ui/core/Grid/index";
 import Link from "@material-ui/core/Link/index";
 import Typography from "@material-ui/core/Typography/index";
 import TextField from "@material-ui/core/TextField/index";
-import auth from "../../auth/auth";
 import Footer from "../Utils/Footer";
 import {generateSpotifyAuthURL} from "../../config";
 import {generateStateParamCookie, setNextAndCurrPathCookies} from "../../utils/utils";
 import {Heading} from "../Utils/Heading";
+import withAuth from "../../auth/withAuth";
 
 
 class Login extends Component {
@@ -22,36 +22,18 @@ class Login extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   
-    const {history, location} = props;
+    const {location} = props;
     const spotifyDenied = location.state ? location.state.spotifyDenied : false;
     const nextPath = location.state ? location.state.from : "/";
     setNextAndCurrPathCookies(nextPath);
     
-    // Check if already authenticated
-    this.requestAuthUserInfo(history, nextPath);
-  
     this.state = {
       email: "",
       password: "",
       stateParam: generateStateParamCookie(),
-      loading: false,
-      success: false,
-      error: false,
-      errorMsg: "",
       spotifyDenied: spotifyDenied,
       nextPath: nextPath
     };
-  }
-  
-  requestAuthUserInfo(history, nextPath) {
-    auth.requestUserInfo()
-      .then(() => {
-        console.log("Already logged in, redirecting to the next page.");
-        history.push(nextPath);
-      })
-      .catch(() => {
-        console.log("User must log in.");
-      });
   }
   
   handleInputChange(event) {
@@ -61,41 +43,19 @@ class Login extends Component {
   }
   
   handleSubmit(event) {
-    this.setState({
-      loading: true,
-      success: false,
-      error: false
-    });
-    
     const credentials = {
       email: this.state.email,
       password: this.state.password
     };
     
-    auth.login(credentials)
-      .then(() => {
-        this.setState({
-          loading: false,
-          success: true,
-          error: false
-        });
-
-        this.props.history.push(this.state.nextPath);
-      })
-      .catch(error => {
-        this.setState({
-          loading: false,
-          success: false,
-          error: true,
-          errorMsg: error.response ? error.response.data : "Network error."
-        });
-      });
+    this.props.login(credentials, this.state.nextPath);
     
     event.preventDefault();
   }
   
   render() {
-    const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
+    const {loading, authFailed, errorMsg, isAuthenticated, loginAttempted} = this.props;
+    const {stateParam, spotifyDenied} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
     const spotifyAuthURL = generateSpotifyAuthURL(stateParam);
@@ -142,15 +102,17 @@ class Login extends Component {
             </div>
           </form>
           
-          {error && <Chip label={' ' + errorMsg}
-                          icon={errorIcon}
-                          color="secondary"
-                          variant="outlined"/>}
+          {
+            (loginAttempted && authFailed) &&
+            <Chip label={' ' + errorMsg}
+                  icon={errorIcon}
+                  color="secondary"
+                  variant="outlined"/>}
           
-          {success && <Chip label="Success! Get ready for musynchronization!"
-                            icon={successIcon}
-                            color="primary"
-                            variant="outlined"/>}
+          {isAuthenticated && <Chip label="Success! Get ready for musynchronization!"
+                                    icon={successIcon}
+                                    color="primary"
+                                    variant="outlined"/>}
           
           <Typography align="center"
                       variant="caption"
@@ -189,4 +151,4 @@ class Login extends Component {
   }
 }
 
-export default Login;
+export default withAuth(Login, 'login');

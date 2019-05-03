@@ -1,15 +1,15 @@
 import React, {Component} from "react";
 import Cookies from 'universal-cookie';
 
-import auth from "../auth/auth";
 import {getURLParamVal} from "../utils/utils";
+import history from "../utils/history";
+import withAuth from "../auth/withAuth";
 
 
 class SpotifyCallback extends Component {
   constructor(props) {
     super(props);
   
-    const {history} = props;
     const {code, redirected, accessGiven} = handleSpotifyRedirection();
     
     const {path, error} = findNextPath(redirected, accessGiven);
@@ -18,17 +18,10 @@ class SpotifyCallback extends Component {
       state: { spotifyDenied: error }
     };
     
-    if(redirected && accessGiven) {
-      auth.loginWithSpotify(code)
-        .catch(error =>
-          historyObj.state.spotifyDenied = error.response ?
-            error.response.data : "Network error."
-        )
-        .finally(() => history.push(historyObj));
-    }
-    else {
+    if(redirected && accessGiven)
+      props.loginWithSpotify(code, historyObj);
+    else
       history.push(historyObj);
-    }
   }
   
   render() {
@@ -36,7 +29,7 @@ class SpotifyCallback extends Component {
   }
 }
 
-export default SpotifyCallback;
+export default withAuth(SpotifyCallback);
 
 
 function handleSpotifyRedirection() {

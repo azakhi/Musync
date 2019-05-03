@@ -8,7 +8,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon/index";
 import ListItemText from "@material-ui/core/ListItemText/index";
 import {Link} from "@material-ui/core";
 import Typography from "@material-ui/core/Typography/index";
-import Header from "../Utils/Header";
+import Navbar from "../Utils/Navbar";
 import Footer from "../Utils/Footer";
 import Button from "@material-ui/core/Button/index";
 import axios from "axios/index"
@@ -65,7 +65,7 @@ class User extends Component {
             spacing={32}
             style={{marginTop: "2%"}}>
 
-        <Header/>
+        <Navbar/>
 
         <Grid item xs={10}>
           <Typography variant="h5">

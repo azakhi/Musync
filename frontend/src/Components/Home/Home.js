@@ -6,13 +6,13 @@ import CircularProgress from "@material-ui/core/CircularProgress/index";
 import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
 
-import auth from "../../auth/auth";
 import Footer from "../Utils/Footer";
 import location from "../../location/location";
 import {Heading} from "../Utils/Heading";
-import {ButtomLinks} from "./ButtomLinks";
+import ButtomLinks from "./ButtomLinks";
 import {NearPlaces} from "./NearPlaces";
 import ConnectPlaceDialog from "./ConnectPlaceDialog";
+import withAuth from "../../auth/withAuth";
 
 
 class Home extends Component {
@@ -25,8 +25,6 @@ class Home extends Component {
     this.handleConnectPlaceClose = this.handleConnectPlaceClose.bind(this);
     
     this.state = {
-      authenticated: false,
-      authUser: null,
       locationPermission: true,
       loading: false,
       success: false,
@@ -37,24 +35,7 @@ class Home extends Component {
   }
   
   componentDidMount() {
-    this.requestAuthUserInfo();
     this.getNearPlaces();
-  }
-  
-  requestAuthUserInfo() {
-    auth.requestUserInfo()
-      .then(() => {
-        this.setState({
-          authenticated: true,
-          authUser: auth.getAuthUser()
-        })
-      })
-      .catch(() => {
-        this.setState({
-          authenticated: false,
-          authUser: null
-        })
-      });
   }
   
   getNearPlaces() {
@@ -106,10 +87,11 @@ class Home extends Component {
   }
   
   render() {
-    const {authUser, authenticated, mainPlace, otherPlaces, success, loading,
-      locationPermission, connectPlaceId, connectPlaceName, connectPlaceState} = this.state;
+    const {mainPlace, otherPlaces, success, loading, locationPermission,
+      connectPlaceId, connectPlaceName, connectPlaceState} = this.state;
+    const {authUser, isAuthenticated} = this.props;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
-    
+
     return (
       <Grid container
             alignItems="center"
@@ -117,19 +99,21 @@ class Home extends Component {
             justify="center"
             spacing={32}>
         <br/>
-        
         <Heading />
         
         {
-          authUser &&
+          (isAuthenticated && authUser) &&
           <Typography align="center" variant="subtitle1" color="textPrimary">
             {`Welcome back ${authUser.name}!`}
           </Typography>
         }
         
-        { success && <NearPlaces mainPlace={mainPlace}
-                                 otherPlaces={otherPlaces}
-                                 handleConnectPlace={this.handleConnectPlace} />}
+        {
+          success &&
+          <NearPlaces mainPlace={mainPlace}
+                      otherPlaces={otherPlaces}
+                      handleConnectPlace={this.handleConnectPlace} />
+        }
         
         { loading && <CircularProgress size={48}/> }
         
@@ -142,19 +126,17 @@ class Home extends Component {
                 variant="outlined"/>
         }
         
-        <ButtomLinks authenticated={authenticated}
-                     handleLogout={this.handleLogout}/>
+        <ButtomLinks />
         
         <Footer/>
       
         <ConnectPlaceDialog open={connectPlaceState}
                             placeName={connectPlaceName}
                             placeId={connectPlaceId}
-                            handleClose={this.handleConnectPlaceClose}
-                            history={this.props.history} />
+                            handleClose={this.handleConnectPlaceClose}/>
       </Grid>
     );
   }
 }
 
-export default Home;
+export default withAuth(Home);

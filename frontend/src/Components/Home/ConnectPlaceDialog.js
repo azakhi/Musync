@@ -6,7 +6,7 @@ import TextField from "@material-ui/core/TextField/index";
 import DialogActions from "@material-ui/core/DialogActions/index";
 import Button from "@material-ui/core/Button/index";
 import Dialog from "@material-ui/core/Dialog/index";
-import auth from "../../auth/auth";
+import withAuth from "../../auth/withAuth";
 
 
 class ConnectPlaceDialog extends Component {
@@ -31,13 +31,7 @@ class ConnectPlaceDialog extends Component {
     const id = this.props.placeId;
     const pin = this.state.value;
 
-    auth.connectToPlace(id, pin)
-      .then(() => {
-        this.props.history.push("/place/" + id);
-      })
-      .catch((error)=>{
-        console.log(error)
-      })
+    this.props.connectToPlace(id, pin);
   }
   
   render() {
@@ -72,4 +66,4 @@ class ConnectPlaceDialog extends Component {
   }
 }
 
-export default ConnectPlaceDialog;
+export default withAuth(ConnectPlaceDialog);
