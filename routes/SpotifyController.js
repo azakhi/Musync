@@ -1,156 +1,121 @@
-//instance of check edilcek
-
-const spotifyConnection = require('../models/SpotifyConnection');
-
 const models = require("../models/Models");
-var request = require('request-promise-native');
-var querystring = require('querystring');
+const request = require('request-promise-native');
+const querystring = require('querystring');
 const config = require('../config.js');
 
 
 class SpotifyController{
-  constructor(){
-  }
-  static async reorderTrack(spotifyConnect,playlist,range_start,insert_before){
-    console.log(range_start,insert_before);
-    spotifyConnect = await SpotifyController.refreshSpotifyConnection(spotifyConnect);
-    if (!(spotifyConnect instanceof models.SpotifyConnection)) return spotifyConnect;
-    var options = {
-      url: 'https://api.spotify.com/v1/playlists/'+playlist.id+'/tracks',
-      body: JSON.stringify({
-        range_start: range_start,
-        insert_before: insert_before + 1
+  static async reorderTrack(spotifyConnection, playlist, rangeStart, insertBefore){
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
 
-        }),
-      dataType:'json'
-      ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
-      'Content-Type': 'application/json' }
+    let options = {
+      url: 'https://api.spotify.com/v1/playlists/' + playlist.id + '/tracks',
+      body: JSON.stringify({
+        range_start: rangeStart,
+        insert_before: insertBefore + 1,
+      }),
+      dataType:'json',
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' }
     };
 
-
-    await  request.put(options, function(error, response, body) {
-      if (!error && response.statusCode === 200) {
-
-        console.log(JSON.parse(body));
-        console.log(response.statusCode);
-
-      }else{
-          console.log("error");
-
-
-      }
-
-
-  });
+    let r = await request.put(options).catch((err) => { return err });
+    try {r = JSON.parse(r)} catch (e) {}
+    return r;
   }
-  
+
   static async addSong(spotifyConnect,playlist,song) {
-    spotifyConnect = await SpotifyController.refreshSpotifyConnection(spotifyConnect);
-    if (!(spotifyConnect instanceof models.SpotifyConnection)) return spotifyConnect;
+      spotifyConnect = await SpotifyController.refreshSpotifyConnection(spotifyConnect);
+      if (!(spotifyConnect instanceof models.SpotifyConnection)) return spotifyConnect;
 
-    var songUri = 'spotify:track:'+song;
-    var options = {
-      url: 'https://api.spotify.com/v1/playlists/'+playlist+'/tracks',
-      body: JSON.stringify({
-          uris: [songUri]
-        }),
-      dataType:'json'
-      ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
-      'Content-Type': 'application/json' }
-    };
+      let songUri = 'spotify:track:'+song;
+      let options = {
+        url: 'https://api.spotify.com/v1/playlists/'+playlist+'/tracks',
+        body: JSON.stringify({
+            uris: [songUri]
+          }),
+        dataType:'json'
+        ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
+        'Content-Type': 'application/json' }
+      };
 
-    await  request.post(options, function(error, response, body) {
-      if (!error && response.statusCode === 201) {
-      }else{
-          console.log("error");
-      }
-    });
-  }
+      await  request.post(options, function(error, response, body) {
+        if (!error && response.statusCode === 201) {
+        }else{
+            console.log("error");
+        }
+      });
+    }
 
-  static async removeSong(spotifyConnect,playlist,song) {
-    var songUri = 'spotify:track:'+song.id;
-    var options = {
+  static async removeSong(spotifyConnection, playlist, song) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+
+    let songUri = 'spotify:track:'+song.id;
+    let options = {
       url: 'https://api.spotify.com/v1/playlists/'+playlist.id+'/tracks',
       body: JSON.stringify({
-          tracks:[{uri: songUri}]
-        }),
-      dataType:'json'
-      ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
-      'Content-Type': 'application/json' }
+        tracks:[{uri: songUri}]
+      }),
+      dataType:'json',
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' }
     };
-    await  request.delete(options, function(error, response, body) {
-      if (!error && response.statusCode === 200) {
 
+    let r = await request.delete(options).catch((err) => { return err });
+    try {r = JSON.parse(r)} catch (e) {}
+    return r;
+  }
 
+  static async playSong(spotifyConnection,playlist) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
 
-      }else{
-          console.log("error");
-      }
-    });
-}
-static async playSong(spotifyConnect,playlist) {
-
-  var options = {
-    url: 'https://api.spotify.com/v1/me/player/play',
-    body: JSON.stringify({
+    let options = {
+      url: 'https://api.spotify.com/v1/me/player/play',
+      body: JSON.stringify({
         context_uri:"spotify:playlist:"+playlist.id
       }),
-    dataType:'json'
-    ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
-    'Content-Type': 'application/json' }
-  };
-  await  request.put(options, function(error, response, body) {
-    if (!error && response.statusCode === 204) {
-    }else{
-        console.log("error");
-    }
-  });
-}
-static async searchSong(spotifyConnect, songName) {
-  spotifyConnect = await SpotifyController.refreshSpotifyConnection(spotifyConnect);
-  if (!(spotifyConnect instanceof models.SpotifyConnection)) return spotifyConnect;
-  var options = {
-    url: 'https://api.spotify.com/v1/search?'+querystring.stringify({
-      q: songName,
-      type: 'track',
-    }),
-   headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken ,
-   'Content-Type': 'application/json'
-  },
-   json: true
-  };
-  let result="";
-  await  request.get(options, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      result=body;
+      dataType:'json',
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' }
+    };
 
-    }else{
-        console.log("error");
-    }
-  });
-  return result;
-}
+    let r = await request.put(options).catch((err) => { return err });
+    try {r = JSON.parse(r)} catch (e) {}
+    return r;
+  }
 
-static async getLibrary(spotifyConnect) {
-  var options = {
-    url: 'https://api.spotify.com/v1/me/tracks',
-    headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken ,
-   'Content-Type': 'application/json'
-  },
-   json: true
-  };
-  var result="";
-  await  request.get(options, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      result=body;
+  static async searchSong(spotifyConnection, songName) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
 
+    let options = {
+      url: 'https://api.spotify.com/v1/search?'+querystring.stringify({
+        q: songName,
+        type: 'track',
+      }),
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken , 'Content-Type': 'application/json' },
+      json: true
+    };
 
-    }else{
-        console.log("error");
-    }
-  });
-  return result;
-}
+    let r = await request.get(options).catch((err) => { return err });
+    try {r = JSON.parse(r)} catch (e) {}
+    return r;
+  }
+
+  static async getLibrary(spotifyConnection) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+
+    let options = {
+      url: 'https://api.spotify.com/v1/me/tracks',
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken , 'Content-Type': 'application/json' },
+      json: true
+    };
+
+    let r = await request.get(options).catch((err) => { return err });
+    try {r = JSON.parse(r)} catch (e) {}
+    return r;
+  }
 
   static async getSpotifyConnection(code, redirectUri) {
     let options = {
@@ -168,7 +133,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.post(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     if (r.access_token) {
       let spotifyConnection = new models.SpotifyConnection({
         accessToken: r.access_token,
@@ -212,8 +177,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.post(options).catch((err) => { return err });
-
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     if (r.access_token) {
       let sc = new models.SpotifyConnection({
         accessToken: r.access_token,
@@ -238,7 +202,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -252,7 +216,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -267,7 +231,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -289,7 +253,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.post(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -303,7 +267,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -317,7 +281,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -331,7 +295,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 
@@ -345,8 +309,7 @@ static async getLibrary(spotifyConnect) {
     };
 
     let r = await request.get(options).catch((err) => { return err });
-
-    r = JSON.parse(r);
+    try {r = JSON.parse(r)} catch (e) {}
     return r;
   }
 }
