@@ -91,7 +91,7 @@ const withAuth = (WrappedComponent, type) => {
     async login(credentials, nextPath) {
       this.setState({ loading: true, loginAttempted: true, authFailed: false });
       
-      if(!this.state.authUser.isRegistered)
+      if(this.state.authUser && !this.state.authUser.isRegistered)
         await this.logout();
       
       axios.post(USER_LOGIN_URL, credentials, { cancelToken: this.state.source.token })
