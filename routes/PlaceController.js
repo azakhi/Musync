@@ -35,7 +35,8 @@ async function getPlace(req, res) {
   }
   
   result = result.result;
-  result = (req.session.userId && result.owner.toHexString() === req.session.userId) ? result.dbObject : result.publicInfo;
+  result = (req.session.userId && result.owner && result.owner.toHexString() === req.session.userId)
+    ? result.dbObject : result.publicInfo;
   result.genres = await getGenreNames(place);
   res.json(result);
 }
