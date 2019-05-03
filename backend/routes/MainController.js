@@ -48,12 +48,7 @@ let votes = [0,0,0];
 votes[req.query.songIndex] += Number(req.query.point);
 place.votes = votes;
 res.json(place.votes);
-
-
-
-
 });
-
 
 router.get('/callback', async function(req, res, next) {
   if (!req.session || !req.session.id) {
@@ -91,17 +86,46 @@ router.post('/searchsong', async function(req, res, next) {
   let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
   let songName = req.body.songName;
   let spotifyConnection = place.spotifyConnection;
-  console.log(spotifyConnection);
   let result = await spotifyController.searchSong(spotifyConnection, songName );
   res.json(result);
 });
 
 router.post('/addsong', async function(req, res, next) {
-  let songId = req.body.songId;
-  let playlistId = req.body.playlistId;
-  let spotifyConnection = await new models.SpotifyConnection({accessToken:"TOKEN",refreshToken:"xd",expiresIn:2,userId:""});
+  let userId = req.session.userId;
+  let user = await models.User.findOne({_id: new models.ObjectID(userId)});
+
+  let songId = req.body.songId; //spotify item ID
+  let artistArray = [];
+  artistArray.push(req.body.artistName);
+
+  let song = new models.Song({
+    name: req.body.songName,
+    artistName: artistArray
+  });
+  let err = {};
+  try {
+    await song.commitChanges();
+  } catch(e) {err = e};
+
+  if(user){
+    let songList = user.requestedSongs;
+    songList.push(song);
+    user.requestedSongs = songList;
+  }
+
+  let connectedPlaceId = req.session.connectedPlace;
+  let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
+  let spotifyConnection = place.spotifyConnection;
+  let playlistId = place.playlist.spotifyPlaylist.id;
   await spotifyController.addSong(spotifyConnection, playlistId, songId );
   res.json({});
+});
+
+router.get('/allplaces', async function(req, res, next) {
+  let places = await models.Place.find();
+  for( let i = 0; i < places.length; i++){
+    console.log(places[i].name);
+  }
 });
 
 module.exports = router;
