@@ -10,6 +10,7 @@ class Song extends DBObjectBase {
     this.duration = new DBBasicTypes.DBNumber(0, 0);
     this.genres = new DBBasicTypes.DBArray([], DBBasicTypes.DBObjectID);
     this.spotifySong = new SpotifyItem();
+    this.songUri = new DBBasicTypes.DBString("");
   }
 }
 
