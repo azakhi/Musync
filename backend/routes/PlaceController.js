@@ -68,74 +68,49 @@ async function getPlaylistOfPlace(req, res) {
 }
 
 async function createNewPlace(req, res) {
-  const body = req.body;
-  const {placeName, latitude, longitude, spotifyInfo,
-    isPermanent, district, city, country} = body;
+  if(!req.session || !req.session.userId){
+    res.status(400).send('Error: Authentication needed!');
+    return;
+  }
   
-  if(!placeName || !latitude || !longitude || !spotifyInfo){
+  let user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+  if(!user || !user.isRegistered){
+    res.status(400).send('Error: Authentication needed!');
+    return;
+  }
+  
+  const body = req.body;
+  const {name, location, isPermanent, pin} = body;
+  console.log(body);
+  if(!name || !location || !location.longitude || !location.latitude || !pin){
     res.status(400).send('Error: Missing information!');
     return;
   }
-
-  let result = await getSessionUser(req);
-  if (!result.result) {
-    res.status(400).send('Error: ' + result.error);
-    return;
-  }
-
-  let user = result.result;
-  
   
   // Find Genre ids
-  let genres = [];
-  if(Array.isArray(body.genres)){
+  let genreIds = [];
+  if(isPermanent && Array.isArray(body.genres)){
     for(const genreName of body.genres){
       let genre = await models.Genre.findOne({name: genreName});
-      genres.push(genre._id);
+      if(genre)
+        genreIds.push(genre._id);
     }
   }
   
-  const {id, uri, name, description,
-    accessToken, refreshToken, expiresIn} = spotifyInfo;
-  let spotifyItem = new models.SpotifyItem({
-    id: id,
-    uri: uri,
-    name: name,
-    description: description
-  });
-  
-  let spotifyConnection = new models.SpotifyConnection({
-    accessToken: accessToken,
-    refreshToken: refreshToken,
-    expiresIn: expiresIn
-  });
-  
-  let playlist = new models.Playlist({
-    songs: [],
-    currentSong: 0,
-    currentSongStartTime: 0,
-    spotifyPlaylist: spotifyItem
-  });
-  
-  let location = new models.Location({
-    latitude: latitude,
-    longitude: longitude,
-    district: district,
-    city: city,
-    country: country,
+  let locationObj = new models.Location({
+    latitude: location.latitude,
+    longitude: location.longitude
   });
   
   let place = new models.Place({
-    name: placeName,
+    name: name,
     owner: user._id,
-    pin: 1994,
-    playlist: playlist,
-    genres: genres,
+    pin: pin,
+    genres: genreIds,
     votes: [],
     votedSongs: [],
     songRecords: [],
-    spotifyConnection: spotifyConnection,
-    location: location,
+    location: locationObj,
     isPermanent: !!isPermanent,
   });
   

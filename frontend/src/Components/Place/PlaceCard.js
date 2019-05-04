@@ -46,9 +46,9 @@ const PlaceCard = (props) => {
         
         <CardContent>
           <Typography variant="h5" align="center" gutterBottom>
-            {name}
+            {name} <br/>
             <Typography inline style={{verticalAlign: "10%"}}>
-              {" · " + genres.join(", ")}
+              {genres.join(", ")}
             </Typography>
           </Typography>
           <Typography align="center" variant="body2">

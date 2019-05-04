@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React from "react";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome/index'
 import Grid from "@material-ui/core/Grid/index";
@@ -19,7 +19,7 @@ const Navbar = (props) => {
   const profileLink =
     <Grid item xs={4}>
       <Typography align="center">
-        <Link href={isAuthenticated ? authUser._id : "/user"} color="inherit">
+        <Link href={isAuthenticated ? "/user/" + authUser._id : ""} color="inherit">
           Profile
           <FontAwesomeIcon icon="user" size="2x" style={iconStyle}/>
         </Link>

@@ -63,7 +63,7 @@ class Place extends Component {
   }
 
   componentDidMount() {
-    const { requestPlaceInfo, match} = this.props;
+    const { requestPlaceInfo, match } = this.props;
     const placeId = match.params.id;
     setInterval(this.updateVoteStatus, 5000);
     requestPlaceInfo(placeId);
@@ -211,7 +211,7 @@ class Place extends Component {
   
           {
             isOwner &&
-            <Button href="/placeSettings"
+            <Button href="/place/settings"
                     variant="contained"
                     color="primary"
                     style={buttonStyle}>

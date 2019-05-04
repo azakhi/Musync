@@ -128,4 +128,14 @@ router.get('/allplaces', async function(req, res, next) {
   }
 });
 
+router.get('/genres', async function(req, res, next) {
+  let genres = await models.Genre.find();
+  let genreNames = [];
+  for( let i = 0; i < genres.length; i++){
+    if(genres[i])
+      genres.push(genres[i].name);
+  }
+  res.status(200).json(genreNames);
+});
+
 module.exports = router;
