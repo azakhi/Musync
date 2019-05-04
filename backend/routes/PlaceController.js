@@ -80,8 +80,8 @@ async function createNewPlace(req, res) {
   }
   
   const body = req.body;
-  const {name, location, isPermanent, pin} = body;
-  if(!name || !location || !location.longitude || !location.latitude || !pin){
+  const {name, location, isPermanent, pin, playlist} = body;
+  if(!name || !location || !location.longitude || !location.latitude || !pin || !playlist){
     res.status(400).send('Error: Missing information!');
     return;
   }
@@ -95,6 +95,58 @@ async function createNewPlace(req, res) {
         genreIds.push(genre._id);
     }
   }
+
+  if(!req.session.isSpotifyRegistered){
+    res.status(400).send('Error: Need Spotify account!');
+    return;
+  }
+  
+  let anyOtherPlace = await models.Place.findOne({"spotifyConnection.userId": user._id});
+  if(anyOtherPlace){
+    res.status(400).send("Error: You must use a different Spotify account!");
+    return;
+  }
+  
+  let pl = await spotifyController.getPlaylist(user.spotifyConnection, playlist);
+  if(pl.success)
+    pl = pl.response;
+  
+  let songs = [];
+  for (let track of pl.tracks.items) {
+    let spotifyItem = new models.SpotifyItem({
+      id: track.track.id,
+      uri: track.track.uri,
+      name: track.track.name,
+    });
+    
+    let artistArray = [];
+    for(const artist of track.track.artists){
+      let artistName = new DBBasicTypes.DBString(artist.name);
+      artistArray.push(artistName);
+    }
+    
+    let song = new models.Song({
+      artistName: artistArray,
+      name: track.track.name,
+      duration: track.track.duration_ms,
+      spotifySong: spotifyItem,
+    });
+    songs.push(song);
+  }
+  
+  let spotifyPlaylist = new models.SpotifyItem({
+    id: pl.id,
+    uri: pl.uri,
+    name: pl.name,
+    description: pl.description,
+  });
+  
+  let playlistObj = new models.Playlist({
+    songs: songs,
+    spotifyPlaylist: spotifyPlaylist,
+    currentSong: 0,
+    currentSongStartTime: 0,
+  });
   
   let locationObj = new models.Location({
     latitude: location.latitude,
@@ -111,6 +163,8 @@ async function createNewPlace(req, res) {
     songRecords: [],
     location: locationObj,
     isPermanent: !!isPermanent,
+    spotifyConnection: user.spotifyConnection,
+    playlist: playlistObj
   });
   
   await place.commitChanges();

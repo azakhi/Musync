@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const models = require("../models/Models");
+const spotifyController = require('./SpotifyController');
 
 //TODO: Implement a better way to define and store salt for password
 const passwordSalt = "salt";
@@ -16,6 +17,7 @@ router.post('/update', updateUser);
 router.get('/logout', logoutUser);
 router.get('/connectspotify', connectSpotify);
 router.get('/gethistory', getUserHistory);
+router.get('/playlists', getUserPlaylists);
 
 async function checkConnection(req, res, next) {
   res.json({
@@ -294,6 +296,22 @@ async function connectSpotify(req, res, next) {
   }
 
   res.status(400).send('Error: No such user');
+}
+
+async function getUserPlaylists(req, res, next) {
+  if (!req.session || !req.session.userId || !req.session.isSpotifyRegistered) {
+    res.status(400).send('Error: No valid connection information');
+    return;
+  }
+  
+  const user = await models.User.findOne({_id: new models.ObjectID(req.session.userId)});
+  let playlists = await spotifyController.getPlaylists(user.spotifyConnection);
+  playlists = playlists.response.items;
+  let result = playlists.map(playlist => {
+    return {value: playlist.id, label: playlist.name};
+  });
+  
+  res.status(200).json(result);
 }
 
 // Taken from https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript

@@ -10,7 +10,7 @@ import Typography from "@material-ui/core/Typography/index";
 import TextField from "@material-ui/core/TextField/index";
 import Footer from "../Utils/Footer";
 import {generateSpotifyAuthURL} from "../../config";
-import {generateStateParamCookie, setNextAndCurrPathCookies} from "../../utils/utils";
+import {generateStateParamCookie, setNextAndCurrPathCookies, setSpotifyTypeCookie} from "../../utils/utils";
 import {Heading} from "../Utils/Heading";
 import withAuth from "../../auth/withAuth";
 
@@ -26,6 +26,7 @@ class Login extends Component {
     const spotifyDenied = location.state ? location.state.spotifyDenied : false;
     const nextPath = location.state ? location.state.from : "/";
     setNextAndCurrPathCookies(nextPath);
+    setSpotifyTypeCookie("login");
     
     this.state = {
       email: "",
