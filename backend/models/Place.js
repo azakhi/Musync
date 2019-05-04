@@ -25,10 +25,6 @@ class Place extends ModelBase {
     this.isPermanent = new DBBasicTypes.DBBoolean(false);
     this.genres = new DBBasicTypes.DBArray([], DBBasicTypes.DBObjectID);
   }
-
-  _afterInitialize(proxy) {
-    ModelManager.registerForUpdate(proxy._id, 1000);
-  }
   
   get publicInfo() {
     const currentlyPlaying = this.playlist.songs[this.playlist.currentSong];
@@ -42,6 +38,13 @@ class Place extends ModelBase {
       currentlyPlaying: currentlyPlaying && currentlyPlaying.name,
       songRecords: this.songRecords.value,
       location: this.location.value,
+    };
+  }
+
+  get updateInformation() {
+    return {
+      time: 1000,
+      method: "updatePlaylist",
     };
   }
   
