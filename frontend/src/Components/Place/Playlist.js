@@ -1,14 +1,9 @@
 import React, {Component} from "react";
 
 import List from "@material-ui/core/List/index";
-import ListItem from "@material-ui/core/ListItem/index";
-import ListItemText from "@material-ui/core/ListItemText/index";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction/index";
-import IconButton from "@material-ui/core/IconButton/index";
-import Typography from "@material-ui/core/Typography/index";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import {SERVER_DOMAIN} from "../../config";
 import axios from "axios";
+import SongItem from "./SongItem";
 
 
 class Playlist extends Component {
@@ -61,7 +56,7 @@ class Playlist extends Component {
     const {songs} = this.state;
   
     return (
-      <List dense>
+      <List dense style={{height: "70vh", overflow: "auto"}}>
         {renderPlaylist(songs)}
       </List>
     );
@@ -78,25 +73,7 @@ function renderPlaylist(songs) {
 }
 
 function renderSong(song) {
-  const {id, name, artist, length} = song;
-  
-  return <ListItem key={id} disableGutters divider>
-    <IconButton color="secondary" onClick={()=> console.log("Add " + name)}>
-      <FontAwesomeIcon  icon="plus" size="xs"/>
-    </IconButton>
-    
-    <ListItemText>
-      <Typography variant="body2" align="left" >
-        {artist + " - " + name + " · " + length}
-      </Typography>
-    </ListItemText>
-    
-    <ListItemSecondaryAction>
-      <IconButton color="secondary" onClick={()=> console.log("Upvote " + name)}>
-        <FontAwesomeIcon  icon="arrow-up" size="xs"/>
-      </IconButton>
-    </ListItemSecondaryAction>
-  </ListItem>;
+  return <SongItem key={song.id} song={song}/>;
 }
 
 export default Playlist;
