@@ -55,10 +55,10 @@ class ModelManager {
     let model = this.acquire(id, "place");
     time = isNaN(Number(time)) ? -1 : Number(time);
     if (model && time > 0) {
-      setTimeout(async function (m, manager) {
-        let t = await manager.updater.constructor.updatePlaylist(m);
-        manager.registerForUpdate(m._id, t);
-      }, time, model, this);
+      setTimeout(async function (id, manager) {
+        let t = await manager.updater.constructor.updatePlaylist(id);
+        manager.registerForUpdate(id, t);
+      }, time, id, this);
     }
   }
   

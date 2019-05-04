@@ -230,7 +230,7 @@ class SpotifyController{
 
     let options = {
       url: 'https://api.spotify.com/v1/playlists/' + playlistId
-      + '?fields=id,name,description,uri,tracks.items(track(id,name,duration_ms,uri,artists,album(id,uri,name)))',
+      + '?fields=id,name,description,uri,snapshot_id,tracks.items(track(id,name,duration_ms,uri,artists,album(id,uri,name)))',
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
       simple: false,
       resolveWithFullResponse: true,
