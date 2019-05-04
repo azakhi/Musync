@@ -289,10 +289,11 @@ async function getPlaybackInfo(req, res) {
   let playlist = result.playlist;
   
   let curPlaying = await spotifyController.getCurrentlyPlaying(result.spotifyConnection);
-  if (!curPlaying) {
+  if (!curPlaying.success) {
     res.status(400).send('Error: Could not get playback info');
     return;
   }
+  else { curPlaying = curPlaying.response }
   
   let context = (curPlaying.context && curPlaying.context.type === "playlist" && curPlaying.context.uri)
     ? curPlaying.context.uri.split(":").pop() : "";
@@ -493,12 +494,14 @@ async function getSessionUser(req) {
 async function getOrCreateSpotifyPlaylist(spotifyConnection) {
   // First check if account already has one with the name
   let lists = await spotifyController.getPlaylists(spotifyConnection);
-  if (!lists.items) {
+  if (!lists.success) {
     return {
       result: false,
       error: "Could not get playlists of account",
     };
   }
+
+  lists = lists.response;
   
   let pl = {};
   for (let list of lists.items) {
@@ -515,7 +518,8 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
     pl = await spotifyController.createPlaylist(spotifyConnection, config.spotify.playlistName, config.spotify.playlistDecription);
   }
   
-  if (pl.id) {
+  if (pl.success) {
+    pl = pl.response;
     let songs = [];
     for (let track of pl.tracks.items) {
       let spotifyItem = new models.SpotifyItem({

@@ -8,8 +8,8 @@ const spotifyController = require('./SpotifyController');
 router.get('/spotify', async function(req, res, next) {
   if (!req.session || !req.session.spotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
     res.redirect('https://accounts.spotify.com/en/authorize?response_type=code&client_id='
-      + "b954f3b9ea8f48c28c716c0131dcaf92"
-      + '&redirect_uri=' + encodeURIComponent("http://" + req.headers.host + "/callback/")
+      + config.spotify.clientID
+      + '&redirect_uri=' + encodeURIComponent("http://" + req.headers.host + "/callback2/")
       + '&scope=' + encodeURIComponent(config.spotify.scopes)
       + '&show_dialog=true'
     );
@@ -18,6 +18,7 @@ router.get('/spotify', async function(req, res, next) {
     res.send("Spotify connection is successful. You can close this tab now.");
   }
 });
+
 router.get('/cpts', async function(req, res, next) {
   if (!req.session || !req.session.spotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
     res.send("No connection");
@@ -59,8 +60,8 @@ router.get('/callback', async function(req, res, next) {
     const index = req.headers.referer.indexOf('?');
     const redirectURI = req.headers.referer.substring(0, index);
     let r = await spotifyController.getSpotifyConnection(req.query.code, redirectURI);
-    if (r instanceof models.SpotifyConnection) {
-      req.session.spotifyConnection = JSON.stringify(r);
+    if (r.success) {
+      req.session.spotifyConnection = JSON.stringify(r.response);
       res.status(200).send("Successful.");
     }
     else {
@@ -87,7 +88,7 @@ router.post('/searchsong', async function(req, res, next) {
   let songName = req.body.songName;
   let spotifyConnection = place.spotifyConnection;
   let result = await spotifyController.searchSong(spotifyConnection, songName );
-  res.json(result);
+  res.json(result.response);
 });
 
 router.post('/addsong', async function(req, res, next) {
