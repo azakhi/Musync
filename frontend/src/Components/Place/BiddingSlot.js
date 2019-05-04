@@ -6,9 +6,8 @@ import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import Grid from "@material-ui/core/Grid/index";
-import InputAdornment from '@material-ui/core/InputAdornment';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
-import {GET_VOTING_STATUS_URL, SERVER_DOMAIN,VOTE_URL} from "../../config";
+import {GET_VOTING_STATUS_URL, VOTE_URL} from "../../config";
 import axios from "axios";
 import Chip from "@material-ui/core/Chip/index";
 
@@ -57,16 +56,21 @@ class BiddingSlot extends React.Component {
   }
 
   handleSubmit(event){
-   
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     console.log(url);
     axios.get(url)
       .then((response) => {
-        this.setState({successMessage:"You have succesfully bidded "+this.state.amount+" points"});
+        this.setState({
+          successMessage: "You have succesfully bidded "+this.state.amount+" points",
+          errorMessage: null
+        });
       })
       .catch((error)=>{
         console.log(error);
-        this.setState({errorMessage:error.response.data});
+        this.setState({
+          successMessage: null,
+          errorMessage:error.response.data
+        });
       });
 
   }  
@@ -96,6 +100,8 @@ class BiddingSlot extends React.Component {
   };
   
   render() {
+    console.log(this.state);
+    
     const {songs,errorMessage,successMessage} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
