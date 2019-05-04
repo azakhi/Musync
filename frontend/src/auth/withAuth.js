@@ -41,13 +41,14 @@ const withAuth = (WrappedComponent, type) => {
     checkAuthentication() {
       axios.get(GET_USER_URL, { cancelToken: this.state.source.token })
         .then(response => {
+          console.log(response);
           const user = response.data;
           
           this.setState({
             authFailed: false,
-            isAuthenticated: user.isRegistered,
+            isAuthenticated: user && user.isRegistered,
             authUser: user,
-            connectedPlace: user.connectedPlace
+            connectedPlace: user ? user.connectedPlace : null
           });
           
           if(type === 'login' && user.isRegistered)

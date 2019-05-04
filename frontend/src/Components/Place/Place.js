@@ -27,6 +27,7 @@ class Place extends Component {
   constructor(props) {
     super(props);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.updateVoteStatus = this.updateVoteStatus.bind(this)
 
     this.state = {
       voting:[
@@ -64,6 +65,7 @@ class Place extends Component {
   componentDidMount() {
     const { requestPlaceInfo, match} = this.props;
     const placeId = match.params.id;
+    setInterval(this.updateVoteStatus, 5000);
     requestPlaceInfo(placeId);
   }
   
@@ -81,7 +83,33 @@ class Place extends Component {
     this.setState({ searchResults: [] });
     this.setState({ open: false });
   };
+  updateVoteStatus = () => {
+    const url = SERVER_DOMAIN + "/place/votestatus";
+    axios.post(url, {placeId: this.props.match.params.id} )
+    .then(function (response) {
+      if( response.status === 200 ){
+        
+        console.log(response.data);
+        /** 
+        let voting = [];
+        let data = response.data;
+        let votes = data.votes;
+        let votedSongs = data.votedSongs;
+        for(let i = 0; i < votes.length; i++){
+          voting.push({votingCount:votes[i],})
 
+        }
+        */
+       
+      }
+      else{
+        console.log("Response not 200");
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }; 
   getSearchResults = () => {
     const url = SERVER_DOMAIN + "/searchsong";
     let results = [];
