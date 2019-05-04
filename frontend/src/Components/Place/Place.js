@@ -27,7 +27,8 @@ class Place extends Component {
   constructor(props) {
     super(props);
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.updateVoteStatus = this.updateVoteStatus.bind(this)
+    this.updateVoteStatus = this.updateVoteStatus.bind(this);
+    this.getPlaylist = this.getPlaylist.bind(this);
 
     this.state = {
       voting:[
@@ -50,6 +51,10 @@ class Place extends Component {
              author: 'author',
          }
        ],
+       songs: [
+      
+        ]
+       ,
       isConnected: false,
       isOwner: false,
       loading: false,
@@ -66,6 +71,7 @@ class Place extends Component {
     const { requestPlaceInfo, match } = this.props;
     const placeId = match.params.id;
     setInterval(this.updateVoteStatus, 5000);
+    setInterval(this.getPlaylist, 5000);
     requestPlaceInfo(placeId);
   }
   
@@ -83,23 +89,44 @@ class Place extends Component {
     this.setState({ searchResults: [] });
     this.setState({ open: false });
   };
+
+  getPlaylist = () => {
+    const url = SERVER_DOMAIN + "/place/playlist?placeId="+this.props.match.params.id;
+    axios.get(url).then((response) => {
+   
+      let data = response.data;
+      let songs = data.songs;
+      let songArr = [];
+
+      for(let i = 0; i < songs.length; i++){
+        songArr.push({name:songs[i].name,artist:songs[i].artistName[0],length:songs[i].duration});
+      }
+      this.setState({songs:songArr});
+
+    });
+
+  };
   updateVoteStatus = () => {
     const url = SERVER_DOMAIN + "/place/votestatus";
     axios.post(url, {placeId: this.props.match.params.id} )
-    .then(function (response) {
+    .then((response)=> {
       if( response.status === 200 ){
         
-        console.log(response.data);
-        /** 
+     
+        
         let voting = [];
         let data = response.data;
         let votes = data.votes;
         let votedSongs = data.votedSongs;
         for(let i = 0; i < votes.length; i++){
-          voting.push({votingCount:votes[i],})
-
+          voting.push({
+            votingCount:votes[i],
+            img:image,
+            title:votedSongs[i].name,
+            author:votedSongs[i].artistName[0]
+          });
         }
-        */
+        this.setState({voting:voting});
        
       }
       else{
@@ -121,18 +148,18 @@ class Place extends Component {
         if( response.status === 200 ){
           let artistResults = [];
           let songResults = [];
-          console.log(response.data);
+          
           for(var i = 0; i < response.data.tracks.items.length; i++){
             artistName = "";
             for(var j = 0; j < response.data.tracks.items[i].artists.length; j++){
               artistName += response.data.tracks.items[i].artists[j].name + ", ";
             }
             artistName = artistName.substring(0, artistName.length - 2);
-            console.log(response.data.tracks.items[i].name);
+        
             results.push({id: response.data.tracks.items[i].id, name:response.data.tracks.items[i].name, artist: artistName, length: response.data.tracks.items[i].duration_ms / 1000 });
             songIds.push(response.data.tracks.items[i].id);
           }
-          console.log("Results are:", results);
+       
           self.setState({searchResults: results});
           self.setState({resultIds: songIds});
         }
@@ -155,14 +182,7 @@ class Place extends Component {
       display: "inline-block",
       margin: "5px"
     };
-    const songs = [
-      {name: "To Live Is To Die", artist: "Metallica", length: 9.48},
-      {name: "Highway to Hell", artist: "AC/DC", length: 3.28},
-      {name: "Holy Diver", artist: "Dio", length: 5.40},
-      {name: "The Trooper", artist: "Iron Maiden", length: 4.12},
-      {name: "One", artist: "Metallica", length: 7.27},
-      {name: "Ace of Spades", artist: "Motörhead", length: 2.45}
-    ];
+   
   
     const {place, isOwner, connectedPlace} = this.props;
     const isConnected = place && place._id === connectedPlace;
@@ -194,7 +214,7 @@ class Place extends Component {
             Play Queue
           </Typography>
 
-          <Playlist songs={songs}/>
+          <Playlist songs={this.state.songs}/>
 
           <br/>
 

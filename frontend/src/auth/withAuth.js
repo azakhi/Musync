@@ -43,7 +43,7 @@ const withAuth = (WrappedComponent, type) => {
     checkAuthentication() {
       axios.get(GET_USER_URL, { cancelToken: this.state.source.token })
         .then(response => {
-          console.log(response);
+     
           const user = response.data;
           
           this.setState({

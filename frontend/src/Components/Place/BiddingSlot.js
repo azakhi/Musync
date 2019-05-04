@@ -40,6 +40,7 @@ class BiddingSlot extends React.Component {
          amount:'',
          arr:[{borderColor: "",borderStyle:""},{borderColor: "",borderStyle:""},{borderColor: "",borderStyle:""}]
         };
+        this.handleOnclick = this.handleOnclick.bind(this);
         this.handleInputChange=this.handleInputChange.bind(this);
       }
 
@@ -52,44 +53,39 @@ class BiddingSlot extends React.Component {
         console.log(this.state);
    
       }
+      handleOnclick(event){
+            const val = event.target.key;
+
+            const { arr } = this.state;
+            for(let i = 0; i < arr.length; i++){
+                if(arr[i].borderColor=="green"){
+                    arr[i].borderColor="";
+                    arr[i].borderStyle="";
+                }
+            }
+            arr[val].borderColor ="green";
+            arr[val].borderStyle ="solid";
+            // update state
+            this.setState({
+                arr,
+            });
+        
+      }
 
   render() {
 
     let {handleConnectPlace} = this.props;
+    
     return (
-        <Grid container spacing={24} container alignItems="center"   >
+        <Grid>
+        {this.props.songs.length===3 &&
+            
+        <Grid container spacing={24} container alignItems="center"  >
+      
         <Grid item xs={12}>
-        <GridList cols={3} cellHeight={100} >
+            <GridList cols={3} cellHeight={100} >
           
-          {[0,1,2].map(val => (
-            <GridListTile onClick={()=>{
-
-                const { arr } = this.state;
-                for(let i = 0; i < arr.length; i++){
-                    if(arr[i].borderColor=="green"){
-                        arr[i].borderColor="";
-                        arr[i].borderStyle="";
-                    }
-                }
-                arr[val].borderColor ="green";
-                arr[val].borderStyle ="solid";
-                // update state
-                this.setState({
-                    arr,
-                });
-            }} key={val} style={{borderColor: this.state.arr[val].borderColor,borderStyle: this.state.arr[val].borderStyle}}>
-              <img src={this.props.songs[val].img} alt={this.props.songs[val].title} />
-              <GridListTileBar 
-                title={this.props.songs[val].title}
-                subtitle={<span> {this.props.songs[val].author}</span>}
-                actionIcon={
-                  <IconButton style={{color:"white"}} >
-                    {this.props.songs[val].voteCount}
-                  </IconButton>
-                }
-              />
-            </GridListTile>
-          ))}
+          {createSlots(this)}
         </GridList>
         </Grid>
         <Grid item xs={12} >
@@ -120,11 +116,34 @@ class BiddingSlot extends React.Component {
         </Grid>
         </form>
         </Grid>
-
+        
       </Grid>
+        }
+        </Grid>
     );
   }
 }
 
 
+
+function createSlots(self){
+  
+   return [0,1,2].map(val => {
+        let style = {borderColor: self.state.arr[val].borderColor,borderStyle: self.state.arr[val].borderStyle};
+        return <GridListTile onClick={self.handleOnclick} key={val} style={style}>
+          <img src={self.props.songs[val].img} alt={self.props.songs[val].title} />
+          <GridListTileBar 
+            title={self.props.songs[val].title}
+            subtitle={<span> {self.props.songs[val].author}</span>}
+            actionIcon={
+              <IconButton style={{color:"white"}} >
+                {self.props.songs[val].voteCount}
+              </IconButton>
+            }
+          />
+        </GridListTile>;
+   })
+}
+
 export default withStyles(styles)(BiddingSlot);
+
