@@ -143,4 +143,18 @@ router.get('/genres', async function(req, res, next) {
   res.status(200).json(result);
 });
 
+router.get('/p', async function(req, res, next) {
+  let genres = await models.Genre.find();
+  let result = [];
+  for( let i = 0; i < genres.length; i++){
+    if(genres[i]) {
+      result.push({
+        value: genres[i].name,
+        label: genres[i].name
+      });
+    }
+  }
+  res.status(200).json(result);
+});
+
 module.exports = router;
