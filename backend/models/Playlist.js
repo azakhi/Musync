@@ -11,6 +11,7 @@ class Playlist extends DBObjectBase {
     this.currentSongStartTime = new DBBasicTypes.DBDate(0);
     this.spotifyPlaylist = new SpotifyItem();
     this.isPlaying = new DBBasicTypes.DBBoolean(false);
+    this.snapshotId = new DBBasicTypes.DBString("");
   }
 }
 
