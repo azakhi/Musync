@@ -26,6 +26,9 @@ export const CONNECT_PLACE_URL = SERVER_DOMAIN + "/place/connect";
 export const GET_GENRES_URL = SERVER_DOMAIN + "/genres";
 export const GET_VOTING_STATUS_URL = SERVER_DOMAIN + "/place/votestatus"
 export const VOTE_URL = SERVER_DOMAIN +  "/place/voteforsong";
+export const GET_VOTING_STATUS_URL = SERVER_DOMAIN + "/place/votestatus";
+export const CONNECT_SPOTIFY_URL = SERVER_DOMAIN + "/user/connectspotify";
+export const GET_PLAYLISTS_URL = SERVER_DOMAIN + "/user/playlists";
 
 export function generateSpotifyAuthURL(stateParam) {
   const {protocol, host} = window.location;

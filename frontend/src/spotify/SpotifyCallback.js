@@ -12,14 +12,14 @@ class SpotifyCallback extends Component {
   
     const {code, redirected, accessGiven} = handleSpotifyRedirection();
     
-    const {path, error} = findNextPath(redirected, accessGiven);
+    const {path, error, spotifyType} = findNextPath(redirected, accessGiven);
     const historyObj = {
       pathname: path,
       state: { spotifyDenied: error }
     };
     
     if(redirected && accessGiven)
-      props.loginWithSpotify(code, historyObj);
+      props.loginWithSpotify(code, historyObj, spotifyType);
     else
       history.push(historyObj);
   }
@@ -64,7 +64,8 @@ function findNextPath(redirected, accessGiven) {
   const cookies = new Cookies();
   const fromPath = cookies.get("from_path");
   const nextPath = cookies.get("next_path");
-  
+  const spotifyType = cookies.get("spotify_type");
+
   const defaultPath = '/';
   let path, error;
   if(redirected && !accessGiven){
@@ -76,6 +77,7 @@ function findNextPath(redirected, accessGiven) {
   
   return {
     path: path || defaultPath,
-    error: error
+    error: error,
+    spotifyType: spotifyType
   };
 }

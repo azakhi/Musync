@@ -3,7 +3,7 @@ import axios from "axios";
 import history from "../utils/history"
 
 import {
-  CONNECT_PLACE_URL, CREATE_PLACE_URL,
+  CONNECT_PLACE_URL, CONNECT_SPOTIFY_URL, CREATE_PLACE_URL,
   GET_PLACE_URL, GET_USER_PROFILE_URL,
   GET_USER_URL,
   SPOTIFY_CALLBACK_URL, USER_LOGIN_URL,
@@ -142,11 +142,18 @@ const withAuth = (WrappedComponent, type) => {
         });
     }
   
-    loginWithSpotify(spotifyCode, historyObj) {
+    loginWithSpotify(spotifyCode, historyObj, spotifyType) {
+      let callbackUrl = USER_REGISTER_URL;
+
+      if(spotifyType === "login")
+        callbackUrl = USER_LOGIN_URL;
+      else if(spotifyType === "connect")
+        callbackUrl = CONNECT_SPOTIFY_URL;
+      
       const url = SPOTIFY_CALLBACK_URL + "?code=" + spotifyCode;
       axios.get(url, { cancelToken: this.state.source.token })
         .then(() => {
-          axios.get(USER_REGISTER_URL);
+          axios.get(callbackUrl);
         })
         .catch(error => {
           if(axios.isCancel(error)){
@@ -184,7 +191,7 @@ const withAuth = (WrappedComponent, type) => {
           history.push("/place/" + place._id);
         })
         .catch(error => {
-          console.log(error);
+          console.log(error, error.response);
         });
     }
   
@@ -193,7 +200,7 @@ const withAuth = (WrappedComponent, type) => {
       if(!isAuthenticated || (authUser && !authUser.isRegistered)){
         console.log("Authentication needed.");
         
-        history.push("/login");
+        history.push({pathname: "/login", state: { from: window.location.pathname }});
       }
     }
     

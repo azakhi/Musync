@@ -9,6 +9,7 @@ import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Chip from "@material-ui/core/Chip";
+import SongPlayer from "./SongPlayer";
 
 
 const PlaceCard = (props) => {
@@ -43,18 +44,22 @@ const PlaceCard = (props) => {
                      title={name + " image"}
                      style={{objectFit:"cover"}}/>
         }
-        
+
         <CardContent>
-          <Typography variant="h5" align="center" gutterBottom>
-            {name} <br/>
-            <Typography inline style={{verticalAlign: "10%"}}>
-              {genres.join(", ")}
-            </Typography>
+          <Typography variant="h5" align="center">
+            {name}
           </Typography>
+          <Typography variant="caption" align="center" gutterBottom>
+            {genres.join(", ")}
+          </Typography>
+          
           <Typography align="center" variant="body2">
             <FontAwesomeIcon icon="music"/>
             {" Now Playing: " + currentlyPlaying}
           </Typography>
+  
+          {isTypePlaceView && <SongPlayer songLength={500}/>}
+
         </CardContent>
         
         {

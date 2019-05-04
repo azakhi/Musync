@@ -11,7 +11,7 @@ import Typography from "@material-ui/core/Typography/index";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Footer from "../Utils/Footer";
 import {generateSpotifyAuthURL, USER_REGISTER_URL} from "../../config";
-import {generateStateParamCookie, setNextAndCurrPathCookies} from "../../utils/utils";
+import {generateStateParamCookie, setNextAndCurrPathCookies, setSpotifyTypeCookie} from "../../utils/utils";
 import {Heading} from "../Utils/Heading";
 
 
@@ -26,7 +26,8 @@ class SignUp extends Component {
     
     setNextAndCurrPathCookies(nextPath);
     const stateParam = generateStateParamCookie();
-    
+    setSpotifyTypeCookie("register");
+  
     this.state = {
       name: "",
       email: "",

@@ -17,3 +17,8 @@ export function generateStateParamCookie() {
   cookies.set('state_param', state, { path: '/spotifyCallback' });
   return state;
 }
+
+export function setSpotifyTypeCookie(type) {
+  const cookies = new Cookies();
+  cookies.set('spotify_type', type, { path: '/spotifyCallback' });
+}
