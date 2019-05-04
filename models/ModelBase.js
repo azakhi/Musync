@@ -17,16 +17,11 @@ class ModelBase {
     
     let proxy = new Proxy(this, this);
     ModelManager.register(proxy);
-    this._afterInitialize(proxy);
     return proxy;
   }
   
   _initialize() {
     assert.ok(false, "Initializer should be implemented!");
-  }
-
-  _afterInitialize(proxy) {
-    //
   }
   
   _parseObject(obj) {
@@ -95,6 +90,13 @@ class ModelBase {
   
   get isDirty() {
     return this._isDirty;
+  }
+
+  get updateInformation() {
+    return {
+      time: -1,
+      method: "",
+    };
   }
   
   async commitChanges() {

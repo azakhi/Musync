@@ -8,6 +8,10 @@ class ModelManager {
     this._models["place"] = [];
     this._models["user"] = [];
     this._models["genres"] = [];
+    this._updates = [];
+    this._updates["place"] = [];
+    this._updates["user"] = [];
+    this._updates["genres"] = [];
     this._newModels = [];
   }
 
@@ -20,45 +24,63 @@ class ModelManager {
   }
   
   register(model) {
-    assert.ok(this._models[model.collection] != undefined, "Unknown model is being registered");
+    assert.ok(this._models[model.collection] !== undefined, "Unknown model is being registered");
     if (!model._id) {
       this._newModels.push(model);
     }
     else {
-      assert.ok(this._models[model.collection][model._id.toHexString()] == undefined, "Model is being registered twice");
+      assert.ok(this._models[model.collection][model._id.toHexString()] === undefined, "Model is being registered twice");
       this._models[model.collection][model._id.toHexString()] = model;
+      if (model.updateInformation) {
+        this.registerForUpdate(model._id, model.updateInformation.time, model.collection, model.updateInformation.method);
+      }
     }
   }
 
   unregister(model) {
-    assert.ok(this._models[model.collection] != undefined, "Unknown model is being unregistered");
+    assert.ok(this._models[model.collection] !== undefined, "Unknown model is being unregistered");
     if (model._id) {
-      this._models[model.collection].splice(model._id.toHexString(), 1);
+      delete this._models[model.collection][model._id.toHexString()];
+      this.unregisterUpdate(model._id, model.collection);
     }
   }
 
   acquire(id, collection) {
-    assert.ok(this._models[collection] != undefined, "Unknown model type is being acquired");
+    assert.ok(this._models[collection] !== undefined, "Unknown model type is being acquired");
     if (id instanceof  ObjectID) {
       id = id.toHexString();
     }
 
-    if (this._models[collection][id] != undefined) {
+    if (this._models[collection][id] !== undefined) {
       return this._models[collection][id];
     }
 
     return null;
   }
 
-  registerForUpdate(id, time) {
-    // TODO: Make registration generic
-    let model = this.acquire(id, "place");
+  registerForUpdate(id, time, collection, method) {
+    let model = this.acquire(id, collection);
     time = isNaN(Number(time)) ? -1 : Number(time);
-    if (model && time > 0) {
-      setTimeout(async function (id, manager) {
-        let t = await manager.updater.constructor.updatePlaylist(id);
-        manager.registerForUpdate(id, t);
-      }, time, id, this);
+    if (model) {
+      this.unregisterUpdate(id, collection);
+      if (time > 0) {
+        let timeout = setTimeout(async function (id, collection, method, manager) {
+          let t = await manager.updater.constructor[method](id);
+          manager.registerForUpdate(id, t, collection, method);
+        }, time, id, collection, method, this);
+        this._updates[model.collection][model._id.toHexString()] = timeout;
+      }
+    }
+  }
+
+  unregisterUpdate(id, collection) {
+    if (id instanceof  ObjectID) {
+      id = id.toHexString();
+    }
+
+    if (this._updates[collection][id] !== undefined) {
+      clearTimeout(this._updates[collection][id]);
+      delete this._updates[collection][id];
     }
   }
   
