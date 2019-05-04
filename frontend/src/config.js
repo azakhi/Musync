@@ -23,6 +23,7 @@ export const GET_PLACE_URL = SERVER_DOMAIN + "/place";
 export const CREATE_PLACE_URL = SERVER_DOMAIN + "/place";
 export const GET_NEAR_PLACES_URL = SERVER_DOMAIN + "/place/closest";
 export const CONNECT_PLACE_URL = SERVER_DOMAIN + "/place/connect";
+export const GET_GENRES_URL = SERVER_DOMAIN + "/genres";
 
 export function generateSpotifyAuthURL(stateParam) {
   const {protocol, host} = window.location;

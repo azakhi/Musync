@@ -25,6 +25,7 @@ const withAuth = (WrappedComponent, type) => {
       this.loginWithSpotify = this.loginWithSpotify.bind(this);
       this.connectToPlace = this.connectToPlace.bind(this);
       this.createPlace = this.createPlace.bind(this);
+      this.checkCreatePlace = this.checkCreatePlace.bind(this);
       
       this.state = {
         authFailed: false,
@@ -43,14 +44,13 @@ const withAuth = (WrappedComponent, type) => {
     checkAuthentication() {
       axios.get(GET_USER_URL, { cancelToken: this.state.source.token })
         .then(response => {
-     
           const user = response.data;
           
           this.setState({
             authFailed: false,
-            isAuthenticated: user && user.isRegistered,
+            isAuthenticated: user.isRegistered,
             authUser: user,
-            connectedPlace: user ? user.connectedPlace : null
+            connectedPlace: user.connectedPlace
           });
           
           if(type === 'login' && user.isRegistered)
@@ -69,7 +69,11 @@ const withAuth = (WrappedComponent, type) => {
             authUser: null,
             connectedPlace: null
           });
-        });
+        })
+        .finally(() => {
+          if(type === 'createPlace')
+            this.checkCreatePlace();
+        })
     }
     
     requestPlaceInfo(placeId) {
@@ -160,7 +164,6 @@ const withAuth = (WrappedComponent, type) => {
       axios.get(USER_LOGOUT_URL, { cancelToken: this.state.source.token })
         .then(() => {
           history.push("/");
-          // window.location.reload();
         })
         .catch(error => {
           console.log(error);
@@ -177,11 +180,21 @@ const withAuth = (WrappedComponent, type) => {
     createPlace(payload) {
       axios.post(CREATE_PLACE_URL, payload, { cancelToken: this.state.source.token })
         .then(response => {
-          console.log(response)
+          const place = response.data;
+          history.push("/place/" + place._id);
         })
         .catch(error => {
-          console.log(error, error.response);
+          console.log(error);
         });
+    }
+  
+    checkCreatePlace() {
+      const {isAuthenticated, authUser} = this.state;
+      if(!isAuthenticated || (authUser && !authUser.isRegistered)){
+        console.log("Authentication needed.");
+        
+        history.push("/login");
+      }
     }
     
     cancelWithAuthCalls(error) {

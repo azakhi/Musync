@@ -81,7 +81,6 @@ async function createNewPlace(req, res) {
   
   const body = req.body;
   const {name, location, isPermanent, pin} = body;
-  console.log(body);
   if(!name || !location || !location.longitude || !location.latitude || !pin){
     res.status(400).send('Error: Missing information!');
     return;
@@ -106,7 +105,7 @@ async function createNewPlace(req, res) {
     name: name,
     owner: user._id,
     pin: pin,
-    genres: genreIds,
+    genres: !!isPermanent && genreIds,
     votes: [],
     votedSongs: [],
     songRecords: [],
