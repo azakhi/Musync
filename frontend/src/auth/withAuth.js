@@ -3,7 +3,7 @@ import axios from "axios";
 import history from "../utils/history"
 
 import {
-  CONNECT_PLACE_URL,
+  CONNECT_PLACE_URL, CREATE_PLACE_URL,
   GET_PLACE_URL, GET_USER_PROFILE_URL,
   GET_USER_URL,
   SPOTIFY_CALLBACK_URL, USER_LOGIN_URL,
@@ -24,7 +24,8 @@ const withAuth = (WrappedComponent, type) => {
       this.login = this.login.bind(this);
       this.loginWithSpotify = this.loginWithSpotify.bind(this);
       this.connectToPlace = this.connectToPlace.bind(this);
-  
+      this.createPlace = this.createPlace.bind(this);
+      
       this.state = {
         authFailed: false,
         isAuthenticated: false,
@@ -172,6 +173,16 @@ const withAuth = (WrappedComponent, type) => {
         .catch(error => console.log(error) );
     }
     
+    createPlace(payload) {
+      axios.post(CREATE_PLACE_URL, payload, { cancelToken: this.state.source.token })
+        .then(response => {
+          console.log(response)
+        })
+        .catch(error => {
+          console.log(error, error.response);
+        });
+    }
+    
     cancelWithAuthCalls(error) {
       this.state.source.cancel(error);
     }
@@ -186,6 +197,7 @@ const withAuth = (WrappedComponent, type) => {
         place: type === 'place' ? place : undefined,
         isOwner: type === 'place' && place && place.hasOwnProperty("owner"),
         user: type === 'user' ? user : undefined,
+        createPlace: type === 'createPlace' ? this.createPlace : undefined
       };
 
       return <WrappedComponent authFailed={authFailed}

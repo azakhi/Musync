@@ -20,6 +20,7 @@ export const GET_USER_URL = SERVER_DOMAIN + "/user/";
 export const GET_USER_PROFILE_URL = SERVER_DOMAIN + "/user/gethistory";
 export const SPOTIFY_CALLBACK_URL = SERVER_DOMAIN + "/callback";
 export const GET_PLACE_URL = SERVER_DOMAIN + "/place";
+export const CREATE_PLACE_URL = SERVER_DOMAIN + "/place";
 export const GET_NEAR_PLACES_URL = SERVER_DOMAIN + "/place/closest";
 export const CONNECT_PLACE_URL = SERVER_DOMAIN + "/place/connect";
 
