@@ -11,20 +11,7 @@ import Footer from "../Utils/Footer";
 import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../../config";
 import {Heading} from "../Utils/Heading";
 import Map from "./Map";
-
-
-const colourOptions = [
-    { value: 'Blues', label: 'Blues' },
-    { value: 'Classic Rock', label: 'Classic Rock'},
-    { value: 'Dance', label: 'Dance'},
-    { value: 'Funk', label: 'Funk'},
-    { value: 'Pop', label: 'Pop'},
-    { value: 'Rock', label: 'Rock'},
-    { value: 'Punk', label: 'Punk' },
-    { value: 'forest', label: 'Forest' },
-    { value: 'Soul', label: 'Soul'},
-    { value: 'Classical', label: 'Classical' },
-  ];
+import GenrePicker from "./GenrePicker";
 
 
 class PlaceSettings extends Component {
@@ -34,8 +21,6 @@ class PlaceSettings extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.placeMarkerAndPanTo = this.placeMarkerAndPanTo.bind(this);
-    
-    
   
     this.state = {
       selectedOption: [],
@@ -48,15 +33,15 @@ class PlaceSettings extends Component {
         }
     };
   }
+  
   placeMarkerAndPanTo(latLng, map,marker){
     marker.setPosition(latLng);
-   
   }
+  
   handleInputChange(event) {
     this.setState({
       [event.target.id]: event.target.value
     });
-    
   }
   
   handleSubmit(event) {
@@ -73,20 +58,11 @@ class PlaceSettings extends Component {
       location: this.state.location
     };
     axios.post(url, body);
-    
-    
-    
-    
-    
-   
   }
-  handleChange = (selectedOption,callback) => {
-    
+  
+  handleChange = (selectedOption, callback) => {
     this.setState({ selectedOption });
-    
-  
-  }
-  
+  };
   
   render() {
     const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
@@ -252,15 +228,8 @@ class PlaceSettings extends Component {
                        }}
                 />
             <br/>
-            <Select
-                defaultValue={[]}
-                isMulti
-                name="colors"
-                options={colourOptions}
-                className="basic-multi-select"
-                classNamePrefix="select"
-                onChange={this.handleChange}
-            />
+            
+            <GenrePicker onChange={this.handleChange}/>
             
             <div>
               <Button variant="text"
