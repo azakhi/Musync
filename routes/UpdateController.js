@@ -80,10 +80,10 @@ class UpdateController {
         for(const artist of track.track.artists){
           artistArray.push(artist.name);
         }
+
         let trackAlbumImages = track.track.album.images;
-        
         let song = new models.Song({
-          songUri:trackAlbumImages?trackAlbumImages[0].url:"",
+          songUri: trackAlbumImages ? trackAlbumImages[0].url : "",
           artistName: artistArray,
           name: track.track.name,
           duration: track.track.duration_ms,
