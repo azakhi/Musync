@@ -46,7 +46,6 @@ class SpotifyController{
   static async removeSong(spotifyConnection, playlist, song) {
     spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
     if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
-
     let songUri = 'spotify:track:'+song.id;
     let options = {
       url: 'https://api.spotify.com/v1/playlists/'+playlist.id+'/tracks',
@@ -58,7 +57,6 @@ class SpotifyController{
       simple: false,
       resolveWithFullResponse: true,
     };
-
     return SpotifyController.parseSpotifyResponse(await request.delete(options).catch((err) => { throw err }));
   }
 
@@ -315,6 +313,7 @@ class SpotifyController{
   }
 
   static parseSpotifyResponse(response) {
+    
     if (!response || isNaN(response.statusCode)) {
       return {
         success: false,
