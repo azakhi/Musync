@@ -89,7 +89,8 @@ async function createPlaces(req, res, next) {
     });
    
     let pl = await spotifyController.getPlaylist(spotifyConnection, "6g38Lh2W0jvyD4Qd6bfCEE");
-    console.log(pl);
+    if (pl.success) pl = pl.response;
+
     let songs = [];
     for (let track of pl.tracks.items) {
       let spotifyItem = new models.SpotifyItem({
