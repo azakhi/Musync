@@ -25,6 +25,8 @@ export const GET_NEAR_PLACES_URL = SERVER_DOMAIN + "/place/closest";
 export const CONNECT_PLACE_URL = SERVER_DOMAIN + "/place/connect";
 export const GET_GENRES_URL = SERVER_DOMAIN + "/genres";
 export const GET_VOTING_STATUS_URL = SERVER_DOMAIN + "/place/votestatus"
+export const VOTE_URL = SERVER_DOMAIN +  "/place/voteforsong";
+
 export function generateSpotifyAuthURL(stateParam) {
   const {protocol, host} = window.location;
   let url = "https://accounts.spotify.com/authorize?";

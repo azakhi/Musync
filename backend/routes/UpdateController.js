@@ -83,7 +83,7 @@ class UpdateController {
         let trackAlbumImages = track.track.album.images;
         
         let song = new models.Song({
-          songUri:trackAlbumImages?trackAlbum[0].url:"",
+          songUri:trackAlbumImages?trackAlbumImages[0].url:"",
           artistName: artistArray,
           name: track.track.name,
           duration: track.track.duration_ms,

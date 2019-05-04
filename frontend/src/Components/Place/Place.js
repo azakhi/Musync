@@ -68,8 +68,10 @@ class Place extends Component {
     let songIds = [];
     let self = this;
     let artistName = "";
+    console.log("herer");
     axios.post(url, {songName: this.state.songName} )
       .then(function (response) {
+        console.log(response);
         if( response.status === 200 ){
           let artistResults = [];
           let songResults = [];
