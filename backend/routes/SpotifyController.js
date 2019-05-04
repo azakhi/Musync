@@ -16,36 +16,32 @@ class SpotifyController{
         insert_before: insertBefore + 1,
       }),
       dataType:'json',
-      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' }
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.put(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.put(options).catch((err) => { throw err }));
   }
 
-  static async addSong(spotifyConnect,playlist,song) {
-      spotifyConnect = await SpotifyController.refreshSpotifyConnection(spotifyConnect);
-      if (!(spotifyConnect instanceof models.SpotifyConnection)) return spotifyConnect;
+  static async addSong(spotifyConnection,playlist,song) {
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
 
-      let songUri = 'spotify:track:'+song;
-      let options = {
-        url: 'https://api.spotify.com/v1/playlists/'+playlist+'/tracks',
-        body: JSON.stringify({
-            uris: [songUri]
-          }),
-        dataType:'json'
-        ,headers: { 'Authorization': 'Bearer ' + spotifyConnect.accessToken,
-        'Content-Type': 'application/json' }
-      };
+    let songUri = 'spotify:track:' + song;
+    let options = {
+      url: 'https://api.spotify.com/v1/playlists/' + playlist + '/tracks',
+      body: JSON.stringify({
+        uris: [songUri]
+      }),
+      dataType:'json',
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' },
+      simple: false,
+      resolveWithFullResponse: true,
+    };
 
-      await  request.post(options, function(error, response, body) {
-        if (!error && response.statusCode === 201) {
-        }else{
-            console.log("error");
-        }
-      });
-    }
+    return SpotifyController.parseSpotifyResponse(await request.post(options).catch((err) => { throw err }));
+  }
 
   static async removeSong(spotifyConnection, playlist, song) {
     spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
@@ -58,12 +54,12 @@ class SpotifyController{
         tracks:[{uri: songUri}]
       }),
       dataType:'json',
-      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' }
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.delete(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.delete(options).catch((err) => { throw err }));
   }
 
   static async playSong(spotifyConnection,playlist) {
@@ -76,12 +72,12 @@ class SpotifyController{
         context_uri:"spotify:playlist:"+playlist.id
       }),
       dataType:'json',
-      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' }
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.put(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.put(options).catch((err) => { throw err }));
   }
 
   static async searchSong(spotifyConnection, songName) {
@@ -94,12 +90,12 @@ class SpotifyController{
         type: 'track',
       }),
       headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken , 'Content-Type': 'application/json' },
-      json: true
+      json: true,
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getLibrary(spotifyConnection) {
@@ -109,12 +105,12 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/me/tracks',
       headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken , 'Content-Type': 'application/json' },
-      json: true
+      json: true,
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getSpotifyConnection(code, redirectUri) {
@@ -129,12 +125,14 @@ class SpotifyController{
         redirect_uri: redirectUri,
         client_id: config.spotify.clientID,
         client_secret: config.spotify.clientSecret,
-      }
+      },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.post(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    if (r.access_token) {
+    let r = SpotifyController.parseSpotifyResponse(await request.post(options).catch((err) => { throw err }));
+    if (r.success) {
+      r = r.response;
       let spotifyConnection = new models.SpotifyConnection({
         accessToken: r.access_token,
         refreshToken: r.refresh_token,
@@ -142,15 +140,19 @@ class SpotifyController{
       });
 
       let userObject = await SpotifyController.getCurrentUser(spotifyConnection);
-      if (userObject.id) {
-        spotifyConnection.userId = userObject.id;
-        return spotifyConnection;
+      if (userObject.success) {
+        spotifyConnection.userId = userObject.response.id;
+        return {
+          success: true,
+          response: spotifyConnection,
+          statusCode: 1,
+        };
       }
 
-      return { error: true, response: {spotifyConnection, userObject}};
+      return userObject;
     }
 
-    return { error: true, response: r};
+    return r;
   }
 
   static async refreshSpotifyConnection(spotifyConnection) {
@@ -173,12 +175,14 @@ class SpotifyController{
         refresh_token: spotifyConnection.refreshToken,
         client_id: config.spotify.clientID,
         client_secret: config.spotify.clientSecret,
-      }
+      },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.post(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    if (r.access_token) {
+    let r = SpotifyController.parseSpotifyResponse(await request.post(options).catch((err) => { throw err }));
+    if (r.success) {
+      r = r.response;
       let sc = new models.SpotifyConnection({
         accessToken: r.access_token,
         refreshToken: spotifyConnection.refreshToken,
@@ -189,7 +193,7 @@ class SpotifyController{
       return sc;
     }
 
-    return { error: true, response: r};
+    return r;
   }
 
   static async getCurrentUser(spotifyConnection) {
@@ -199,11 +203,11 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/me',
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getPlaylists(spotifyConnection) {
@@ -213,11 +217,11 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/users/' + spotifyConnection.userId + '/playlists',
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getPlaylist(spotifyConnection, playlistId) {
@@ -228,11 +232,11 @@ class SpotifyController{
       url: 'https://api.spotify.com/v1/playlists/' + playlistId
       + '?fields=id,name,description,uri,tracks.items(track(id,name,duration_ms,uri,artists,album(id,uri,name)))',
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async createPlaylist(spotifyConnection, name, description) {
@@ -246,15 +250,12 @@ class SpotifyController{
         description: description,
       }),
       dataType: 'json',
-      headers: {
-        'Authorization': 'Bearer ' + spotifyConnection.accessToken,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json', },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.post(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.post(options).catch((err) => { throw err }));
   }
 
   static async getSong(spotifyConnection, songId) {
@@ -264,11 +265,11 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/tracks/' + songId,
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getAlbum(spotifyConnection, albumId) {
@@ -278,11 +279,11 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/albums/' + albumId,
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getArtist(spotifyConnection, artistId) {
@@ -292,11 +293,11 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/artists/' + artistId,
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
 
   static async getCurrentlyPlaying(spotifyConnection) {
@@ -306,11 +307,28 @@ class SpotifyController{
     let options = {
       url: 'https://api.spotify.com/v1/me/player/currently-playing',
       headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
     };
 
-    let r = await request.get(options).catch((err) => { return err });
-    try {r = JSON.parse(r)} catch (e) {}
-    return r;
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
+  }
+
+  static parseSpotifyResponse(response) {
+    if (!response || isNaN(response.statusCode)) {
+      return {
+        success: false,
+        response: response,
+        statusCode: -1,
+      }
+    }
+
+    return {
+      success: response.statusCode < 400,
+      response: JSON.parse(response.body),
+      statusCode: response.statusCode,
+    };
   }
 }
+
 module.exports =  SpotifyController;
