@@ -63,7 +63,7 @@ async function createPlaces(req, res, next) {
     let placeName = placeNames[i];
     let latitude  = latitudes[i];
     let longitude = longitudes[i];
-    let spotifyInfo = {id:"21oyeba5vfcrlozzp4jiiax6a",uri:"1",name:"1",description:"1",accessToken:"BQBEQ5dwS4XFldGB7vC6fjUzDGjcuI5uy1QETUaVBgag9N3IKzfBESU5u0Y5JylnFtz8QzFL_qdtqG6Y62wXaTFeVmmDQ8Zy42ADF-AdT6I2iW3-P1lXN7GemzmeAv-PRiNijoYFBqWgxqzj4E83_zqPEFxJLm4mMzu-TCJKjfU4pv35lq0a211JVUBDWzmmu_gVtPhoF7UbmWUwtnN0dlUEsmOrk4jejhsQaFP3iLJvxyRzBK9rSVowWg8fNcesgtooJ5ZdnKCYeXs",refreshToken:"AQDxYUwvjDwWxpWl9fJpQi9sSrj9UCs7IpVSPZlS7CiC5ZPCOL_fdPIf1mQcBjSG3NjsKjY2KPqbuwiqHay7X6cxLQXKROARU0sGjQi-hunwyefl0I_QEKnDgjzNO5f7QF4oOw",expiresIn:1};
+    let spotifyInfo = {id:"11102039324",uri:"1",name:"1",description:"1",accessToken:"BQBH3CzU7z1zesvy4ciye7LaGUBlPTOltm3r2ekAmipGYsDE19tu7is7EL-V2dwiFbE0zKiBmg9HJDwuoFdcx5Xg1CPLurJUNglszyjdSOsfi7hQKDW8FGKYE_Kt753iO5P7FHCpb0MeOm2CLVd5XVPNRzu9vb3eJZmCNSMPks8l5eI4xvjswY-nPc1UWlmduryyg0Q0K7eypmuxX0PY7kGkkxHVfCQ1lRq18hl806YXUd8aX8lxhbgeLAE0",refreshToken:"AQBsIt7EhWo32QfI0Zr_-EzAIyf1EM8YiENhtWjd-nNA2mVlzNpifGHFldL-bjoXFN1NsgigcuTB8B4koHG7MfVqgAzMKLZcRrFRGtJY2ye9pIhTurc9N1ASv1G4b6Ufj982Gw",expiresIn:1};
     let isPermanent = true;
     let district ="ankara";
     let city="ankara";
@@ -88,9 +88,9 @@ async function createPlaces(req, res, next) {
       expiresIn: expiresIn
     });
    
-    let pl = await spotifyController.getPlaylist(spotifyConnection, "6g38Lh2W0jvyD4Qd6bfCEE");
+    let pl = await spotifyController.getPlaylist(spotifyConnection, "267v5TQkNWbQ3jNS8mbeTl");
     if (pl.success) pl = pl.response;
-
+   
     let songs = [];
     for (let track of pl.tracks.items) {
       let spotifyItem = new models.SpotifyItem({
@@ -103,7 +103,9 @@ async function createPlaces(req, res, next) {
         let artistName = new DBBasicTypes.DBString(artist.name);
         artistArray.push(artistName);
       }
+      
       let song = new models.Song({
+        songUri: track.track.album.images?track.track.album.images[0].url:"",
         artistName: artistArray,
         name: track.track.name,
         duration: track.track.duration_ms,

@@ -533,6 +533,7 @@ async function getOrCreateSpotifyPlaylist(spotifyConnection) {
         artistArray.push(artistName);
       }
       let song = new models.Song({
+        songUri:track.track.album.images?track.track.album.images[0].url:"",
         artistName: artistArray,
         name: track.track.name,
         duration: track.track.duration_ms,
