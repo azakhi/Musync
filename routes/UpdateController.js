@@ -13,8 +13,8 @@ class UpdateController {
    
  
     // update playlist
-    if (pl.id) {
-      console.log("girdi")
+    if (pl.success) {
+      pl = pl.response;
       let songs = [];
       for (let track of pl.tracks.items) {
         let spotifyItem = new models.SpotifyItem({
@@ -34,9 +34,6 @@ class UpdateController {
           spotifySong: spotifyItem,
         });
         songs.push(song);
-   
-    
-        
       }
       
       let spotifyPlaylist = new models.SpotifyItem({
@@ -62,10 +59,10 @@ class UpdateController {
   
     //get current playing status
     let curPlaying = await spotifyController.getCurrentlyPlaying(place.spotifyConnection);
-    if (!curPlaying) {
-      
-      return;
+    if (!curPlaying.success) {
+      return -1;
     }
+    else { curPlaying = curPlaying.response }
     
     let context = (curPlaying.context && curPlaying.context.type === "playlist" && curPlaying.context.uri)
       ? curPlaying.context.uri.split(":").pop() : "";
@@ -119,7 +116,7 @@ class UpdateController {
       }
  
       let response = await spotifyController.reorderTrack(place.spotifyConnection,currentPlaylist.spotifyPlaylist,selectedIndex,currentPlaylist.currentSong);
-      if(response.snapshot_id){
+      if(response.success){
         return 15000;
       }else{
         return 3000;
