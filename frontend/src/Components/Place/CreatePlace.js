@@ -9,6 +9,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import GenrePicker from "./GenrePicker";
 import withAuth from "../../auth/withAuth";
+import history from "../../utils/history";
 
 
 class CreatePlace extends Component {
@@ -64,17 +65,16 @@ class CreatePlace extends Component {
       const payload = {...this.state};
       payload.location = location;
       this.props.createPlace(payload);
+    }, error => {
+      console.log(error);
     });
   }
   
   getLocation(success, error) {
-    navigator.geolocation.getCurrentPosition(success);
+    navigator.geolocation.getCurrentPosition(success, error);
   }
   
   render() {
-    const {genres, isAuthenticated} = this.props;
-    
-    // console.log(this.state)
     return (
       <Grid container
             alignItems="center"
