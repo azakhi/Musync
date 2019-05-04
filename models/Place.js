@@ -31,13 +31,15 @@ class Place extends ModelBase {
   }
   
   get publicInfo() {
+    const currentlyPlaying = this.playlist.songs[this.playlist.currentSong];
+    
     return {
       _id : this._id.value,
       name: this.name.value,
       isSpotifyConnected: !!this.spotifyConnection && !!this.spotifyConnection.accessToken,
       votedSongs: this.votedSongs.value,
       votes: this.votes.value,
-      currentlyPlaying: this.playlist.songs[this.playlist.currentSong].name,
+      currentlyPlaying: currentlyPlaying && currentlyPlaying.name,
       songRecords: this.songRecords.value,
       location: this.location.value,
     };

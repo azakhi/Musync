@@ -312,6 +312,8 @@ async function getUserHistory(req, res, next) {
       for( let i = 0; i < user.visitedPlaces.length; i++){
         let visitedPlace = user.visitedPlaces[i];
         let place = await models.Place.findOne({_id: new models.ObjectID(visitedPlace.place)});
+        if(!place)
+          continue;
         
         resultPlaces.push({name: place.name, visitNum: visitedPlace.visitCount});
       }
