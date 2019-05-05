@@ -26,11 +26,12 @@ class SongPlayer extends Component {
   }
   
   incrementTimer() {
-    const {isPlaying, currentSong, currentSongStartTime} = this.props;
+    let {isPlaying, currentSong, currentSongStartTime} = this.props;
     
     if(!currentSong || currentSongStartTime === undefined || currentSongStartTime === null)
       return;
-    
+  
+    currentSongStartTime = new Date(currentSongStartTime).getTime();
     this.setState(prevState => {
       const currentTime = Math.floor((Date.now() - currentSongStartTime) / 1000);
       const songLength = currentSong.duration / 1000;
