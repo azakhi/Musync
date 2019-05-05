@@ -257,6 +257,8 @@ async function connectToPlace(req, res) {
   }
   
   let place = result.result;
+  let playlist = place.playlist;
+ 
   if (!req.query.pin && !req.body.pin) {
     res.status(400).send('Error: Pin required');
     return;
@@ -288,6 +290,58 @@ async function connectToPlace(req, res) {
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
     });
+    let ress = await spotifyController.getFavoriteTracks(place.spotifyConnection);
+    let counter = 0;
+    for (const track of ress.response.items ){
+      let containsFlag = false;
+      for (const s of playlist.songs){
+        if(s.spotifySong.id === track.id){
+          containsFlag = true;
+          break;
+        }
+      }
+      if(!containsFlag ){
+        let artists = await spotifyController.searchArtists(place.spotifyConnection, [track.artists[0].id]);
+        
+        artists = artists.response.artists;
+        let flag = false;
+        for(const genreId of place.genres){
+          let genre = await models.Genre.findOne({_id: genreId});
+          if(artists[0].genres.includes(genre.name)){
+            flag = true;
+            break;
+          }
+        }
+        if(flag&&counter < 5){
+          await spotifyController.addSong(place.spotifyConnection,playlist.spotifyPlaylist.id,track.id,(playlist.currentSong+2)%playlist.songs.length);
+          
+          let spotifyItem = new models.SpotifyItem({
+            id: track.id,
+            uri: track.uri,
+            name: track.name,
+          });
+          
+          let artistArray = [];
+
+          for(const artist of track.artists){
+            let artistName = new DBBasicTypes.DBString(artist.name);
+            artistArray.push(artistName);
+          }
+          let song = new models.Song({
+            songUri:track.album.images?track.album.images[0].url:"",
+            artistName: artistArray,
+            name: track.name,
+            duration: track.duration_ms,
+            spotifySong: spotifyItem,
+          });
+          playlist.songs.push(song);
+          place.playlist = playlist;
+          counter++;
+        }
+      }
+    }
+    
+    
   }
   else {
     if (!models.ObjectID.isValid(req.session.userId)) {
@@ -311,7 +365,7 @@ async function connectToPlace(req, res) {
       }
     }
     
-    console.log(place);
+   
     let visitedPlace = new models.VisitedPlace({
       place: place._id,
       visitCount: visitedCount,
@@ -325,6 +379,56 @@ async function connectToPlace(req, res) {
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
     });
+    let ress = await spotifyController.getFavoriteTracks(place.spotifyConnection);
+    let counter = 0;
+    for (const track of ress.response.items ){
+
+      let containsFlag = false;
+      for (const s of playlist.songs){
+        if(s.spotifySong.id === track.id){
+          containsFlag = true;
+          break;
+        }
+      }
+      if(!containsFlag ){
+        let artists = await spotifyController.searchArtists(place.spotifyConnection, [track.artists[0].id]);
+        artists = artists.response.artists;
+        let flag = false;
+        for(const genreId of place.genres){
+          let genre = await models.Genre.findOne({_id: genreId});
+          if(artists[0].genres.includes(genre.name)){
+            flag = true;
+            break;
+          }
+        }
+        if(flag&&counter < 5){
+          await spotifyController.addSong(place.spotifyConnection,playlist.spotifyPlaylist.id,track.id,(playlist.currentSong+2)%playlist.songs.length);
+          
+          let spotifyItem = new models.SpotifyItem({
+            id: track.id,
+            uri: track.uri,
+            name: track.name,
+          });
+          
+          let artistArray = [];
+
+          for(const artist of track.artists){
+            let artistName = new DBBasicTypes.DBString(artist.name);
+            artistArray.push(artistName);
+          }
+          let song = new models.Song({
+            songUri:track.album.images?track.album.images[0].url:"",
+            artistName: artistArray,
+            name: track.name,
+            duration: track.duration_ms,
+            spotifySong: spotifyItem,
+          });
+          playlist.songs.push(song);
+          place.playlist = playlist;
+          counter++;
+        }
+      }
+    }
   }
 }
 
