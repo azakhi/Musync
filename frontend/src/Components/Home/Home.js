@@ -4,7 +4,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Chip from "@material-ui/core/Chip/index";
 import CircularProgress from "@material-ui/core/CircularProgress/index";
 import Grid from "@material-ui/core/Grid/index";
-import Typography from "@material-ui/core/Typography/index";
 
 import Footer from "../Utils/Footer";
 import location from "../../location/location";
