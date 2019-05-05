@@ -103,6 +103,13 @@ class UpdateController {
       });
     }
 
+    // If there isn't enough songs in playlist, do not allow voting
+    if (place.playlist.songs.length < 4) {
+      place.votedSongs = [];
+      place.votes = [];
+      return 30 * 1000;
+    }
+
     // Check if currently playing song index has changed
     if (isCurrentlyPlayingChanged || place.playlist.currentSong >= place.playlist.songs.length || place.playlist.songs[place.playlist.currentSong].spotifySong.id !== currentlyPlaying.item.id) {
       let possibleIndexes = [];
@@ -225,38 +232,38 @@ class UpdateController {
     let remainingTime = place.playlist.songs[place.playlist.currentSong].duration - currentlyPlaying.progress_ms;
     if (remainingTime <= 10 * 1000) { // Voting has ended, update order if necessary
       if (place.votedSongs.length > 0) {
-        let maxVote = -1;
-        let winnerIndex = -1;
+        // Merge votes and indexes
+        let voteIndexPairs = [];
         for (let i = 0; i < place.votes.length; i++) {
-          if (votedSongIndexes[i] >= 0 && place.votes[i] > maxVote) {
-            maxVote = place.votes[i];
-            winnerIndex = votedSongIndexes[i];
+          voteIndexPairs.push([Number(place.votes[i]), Number(votedSongIndexes[i])]);
+        }
+
+        // Order voted songs by votes
+        voteIndexPairs.sort((a, b) => (a[0] < b[0]) ? 1 : -1);
+
+        for (let i = voteIndexPairs.length - 1; i >= 0; i--) { // Remove invalid ones
+          if (isNaN(voteIndexPairs[i][0]) || isNaN(voteIndexPairs[i][1]) || voteIndexPairs[i][1] < 0) {
+            voteIndexPairs.splice(i, 1);
           }
         }
 
-        if (winnerIndex < 0) { // Erroneous situation, update again soon to retry
+        if (voteIndexPairs.length < 1) { // Erroneous situation, update again soon to retry
           console.log("Warning: Not a valid vote found with valid voted songs in Place: " + place._id);
           return 3 * 1000;
         }
 
-        if (winnerIndex !== (place.playlist.currentSong + 1)) { // Requires update
-          let result = await spotifyController.reorderTrack(place.spotifyConnection, place.playlist.spotifyPlaylist, winnerIndex, place.playlist.currentSong);
-          if (!result.success) {
-            return  3 * 1000; // update again soon to retry
-          }
-
-          // update our copy too
-          /*
-          let isWinnerBefore = winnerIndex < place.playlist.currentSong;
-          let songs = place.playlist.songs;
-          let winner = songs.splice(winnerIndex, 1);
-          songs.splice(isWinnerBefore ? place.playlist.currentSong : place.playlist.currentSong + 1, 0, winner);
-          let updatedPlaylist = place.playlist;
-          updatedPlaylist.songs = songs;
-          updatedPlaylist.currentSong = isWinnerBefore ? updatedPlaylist.currentSong : updatedPlaylist.currentSong + 1;
-          place.playlist = updatedPlaylist;
-          */
+        // Find desired offsets
+        let currentIndexes = [];
+        let desiredOffsets = [];
+        for (let i = 0; i < voteIndexPairs.length; i++) {
+          currentIndexes.push(voteIndexPairs[i][1]);
+          desiredOffsets.push(i * 5 + 1); // Make it so that every song is voted again based on their order
         }
+
+        let successCount = await UpdateController.reorderTracks(place, currentIndexes, desiredOffsets);
+        if (successCount < 1) { // Couldn't update next song, try again soon
+          return 2 * 1000;
+        } // Any other amount of error ignored as trying to fix them is not quite necessary and complex
       }
 
       // Update again 5 seconds after new song starts
@@ -269,6 +276,46 @@ class UpdateController {
 
     // Update every 20 seconds
     return 20 * 1000;
+  }
+
+  static async reorderTracks(place, from, offset) {
+    if (from.length !== offset.length || place.playlist.currentSong < 0) {
+      return;
+    }
+
+    let playlist = place.playlist;
+    let successCount = 0;
+    for (let i = 0; i < from.length; i++) {
+      let to = (playlist.currentSong + Math.min(offset[i], playlist.songs.length - 2)) %  playlist.songs.length;
+      if (from[i] === to) {
+        successCount++;
+        continue;
+      }
+
+      // first try to update spotify
+      let result = await spotifyController.reorderTrack(place.spotifyConnection, place.playlist.spotifyPlaylist, from[i], to + 1);
+      if (!result.success) {
+        if (i === 0) { // If failed at next song, return immediately to retry
+          return 0;
+        }
+      }
+      else {
+        successCount++;
+        let songToMove = playlist.songs.splice(from[i], 1);
+        playlist.songs.splice(to, 0, songToMove);
+
+        // update current song index
+        playlist.currentSong = from[i] > playlist.currentSong && to < playlist.currentSong ? playlist.currentSong + 1
+          : from[i] < playlist.currentSong && to > playlist.currentSong ? playlist.currentSong - 1 : playlist.currentSong;
+        // update from indexes
+        for (let j = i + 1; j < from.length; j++) {
+          from[j] = from[i] > from[j] && to <= from[j] ? from[j] + 1
+            : from[i] < from[j] && to >= from[j] ? from[j] - 1 : from[j];
+        }
+      }
+    }
+    place.playlist = playlist;
+    return successCount;
   }
 }
 
