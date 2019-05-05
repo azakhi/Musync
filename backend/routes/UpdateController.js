@@ -7,12 +7,12 @@ const placeController = require('./PlaceController');
 
 class UpdateController {
   static async updatePlaylist(placeId) {
-  
     let place = ModelManager.acquire(placeId, models.Place.collection);
     if (!place) {
       return -1;
     }
 
+    let lastUpdate = place.lastUpdate ? place.lastUpdate : 0;
     if (!place.spotifyConnection || !place.spotifyConnection.accessToken) {
       return -1; // No need to update this place
     }
@@ -33,6 +33,9 @@ class UpdateController {
     // TODO: Check response in a detailed way to decide whether to keep updating
     if (!currentlyPlaying.success) {
       return 3000; // Update again soon to retry
+    }
+    else if (currentlyPlaying.statusCode === 204) { // Spotify is not open
+      return 60 * 1000;
     }
     else { currentlyPlaying = currentlyPlaying.response }
 
@@ -59,6 +62,18 @@ class UpdateController {
 
     let isCurrentlyPlayingChanged = place.playlist.currentSong < 0 || place.playlist.currentSong >= place.playlist.songs.length
       || place.playlist.songs[place.playlist.currentSong].spotifySong.id !== currentlyPlaying.item.id;
+
+    // Update song start time if not changed
+    if (!isCurrentlyPlayingChanged) {
+      let updatedPlaylist = place.playlist;
+      updatedPlaylist.currentSongStartTime = new Date(Date.now() - currentlyPlaying.progress_ms);
+      place.playlist = updatedPlaylist;
+
+      // No need to do full update if it is not last 15 seconds and we updated recently
+      if ((place.playlist.songs[place.playlist.currentSong].duration - currentlyPlaying.progress_ms) > 15 * 1000 && (Date.now() - lastUpdate) < 20 * 1000) {
+        return 5 * 1000;
+      }
+    }
 
     // Update playlist and determine changes if there is any
     let originalPlaylist = await spotifyController.getPlaylist(place.spotifyConnection, place.playlist.spotifyPlaylist.id);
@@ -269,13 +284,14 @@ class UpdateController {
       // Update again 5 seconds after new song starts
       return remainingTime + 5 * 1000;
     }
-    else if (remainingTime <= 30 * 1000) {
+    else if (remainingTime <= 15 * 1000) {
       // Update in last 10 seconds
       return remainingTime - 9 * 1000;
     }
 
-    // Update every 20 seconds
-    return 20 * 1000;
+    place.lastUpdate = Date.now();
+    // Update every 5 seconds
+    return 5 * 1000;
   }
 
   static async reorderTracks(place, from, offset) {
