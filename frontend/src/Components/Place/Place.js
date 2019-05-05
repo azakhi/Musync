@@ -107,7 +107,8 @@ class Place extends Component {
   
     const {place, isOwner, connectedPlace} = this.props;
     const isConnected = isOwner || ( place && (place._id === connectedPlace) );
-
+    const {authUser} = this.props;
+    
     return (
       <Grid container
             alignItems="center"
@@ -129,7 +130,7 @@ class Place extends Component {
         </Grid>
         
         <Grid item xs={12} md={8} style={{textAlign: 'center'}}>
-          <BiddingSlot placeId={this.state.id}/>
+          <BiddingSlot placeId={this.state.id} userPoints={authUser ? authUser.points : 0}/>
           
           <Typography align="center" variant="h5" gutterBottom>
             Play Queue
