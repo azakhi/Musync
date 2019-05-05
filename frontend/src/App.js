@@ -19,7 +19,7 @@ class App extends Component {
       <main>
         <Switch>
           <Route exact path='/' component={Home}/>
-          <Route exact path='/place/settings' component={PlaceSettings}/>
+          <Route exact path='/place/settings/:id' component={PlaceSettings}/>
           <Route exact path='/place/:id' component={Place}/>
           <Route exact path='/user/settings' component={UserSettings}/>
           <Route exact path='/user/:id' component={User}/>

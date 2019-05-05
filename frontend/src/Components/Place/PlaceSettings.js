@@ -1,17 +1,17 @@
 import React, {Component} from "react";
-import Select from 'react-select';
 import axios from "axios";
 
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Button from "@material-ui/core/Button/index";
 import Grid from "@material-ui/core/Grid/index";
 import Typography from "@material-ui/core/Typography/index";
 import TextField from "@material-ui/core/TextField/index";
 import Footer from "../Utils/Footer";
-import {generateSpotifyAuthURL, SERVER_DOMAIN} from "../../config";
-import {Heading} from "../Utils/Heading";
+import {SERVER_DOMAIN} from "../../config";
 import Map from "./Map";
 import GenrePicker from "./GenrePicker";
+import withAuth from "../../auth/withAuth";
+import history from "../../utils/history";
+import Navbar from "../Utils/Navbar";
 
 
 class PlaceSettings extends Component {
@@ -21,20 +21,39 @@ class PlaceSettings extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.placeMarkerAndPanTo = this.placeMarkerAndPanTo.bind(this);
-  
+    
     this.state = {
       selectedOption: [],
+      placeInitialized: false,
       name: "",
+      pin: "",
       location:{
         latitude:"",
         longitude:"",
         city:"",
         country:""
-        }
+      }
     };
   }
   
-  placeMarkerAndPanTo(latLng, map,marker){
+  componentDidMount() {
+    const {match} = this.props;
+    const placeId = match.params.id;
+    
+    this.props.requestPlaceInfo(placeId);
+  }
+  
+  componentWillReceiveProps(nextProps, nextContext) {
+    if(!this.state.placeInitialized){
+      this.setState({
+        name: nextProps.place.name,
+        selectedOptions: nextProps.place.genres ? nextProps.place.genres : [],
+        placeInitialized: true
+      })
+    }
+  }
+  
+  placeMarkerAndPanTo(latLng, map, marker){
     marker.setPosition(latLng);
   }
   
@@ -45,6 +64,12 @@ class PlaceSettings extends Component {
   }
   
   handleSubmit(event) {
+    event.preventDefault();
+    
+    const {place} = this.props;
+    if(!place)
+      return;
+    
     const url = SERVER_DOMAIN + "/place/change";
     let genres = [];
     for(const item of this.state.selectedOption){
@@ -52,7 +77,7 @@ class PlaceSettings extends Component {
     }
     
     const body = {
-      placeId: "5cc1b6629373121b2f0e11ae",
+      placeId: place._id,
       name: this.state.name,
       genres: genres,
       location: this.state.location
@@ -60,16 +85,18 @@ class PlaceSettings extends Component {
     axios.post(url, body);
   }
   
-  handleChange = (selectedOption, callback) => {
+  handleChange (selectedOption) {
     this.setState({ selectedOption });
   };
   
-  render() {
-    const {loading, error, errorMsg, success, stateParam, spotifyDenied} = this.state;
-    const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
-    const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
-    const spotifyAuthURL = generateSpotifyAuthURL(stateParam);
   
+  render() {
+    const {place} = this.props;
+    const location = {
+      lat: place ? place.location.latitude : 36,
+      lng: place? place.location.longitude : 36
+    };
+    
     return (
       <Grid container
             alignItems="center"
@@ -78,173 +105,176 @@ class PlaceSettings extends Component {
             spacing={32}>
         <br/>
         
-        <Heading />
+        <Navbar />
         
-        
-        <Grid item xs={12} style={{textAlign: 'center'}}>
-        
+        <Grid item xs={10} style={{textAlign: 'center'}}>
+          
           <Typography variant="h5"
                       color="textPrimary">
             Settings
           </Typography>
           
-
-          <input id="pac-input" className="controls" type="text" placeholder="Search Box"></input>
-        <Map
-          id="myMap"
-          options={{
-            center: { lat: 41.0082, lng: 28.9784 },
-            zoom: 8
-          }}
-          onMapLoad={map => {
-          var markers = [];
-            var marker = new window.google.maps.Marker({
-              position: { lat: 41.0082, lng: 28.9784 },
-              map: map,
-              title: 'Hello Istanbul!'
-            });
-
-            markers.push(marker);
-            var input = document.getElementById('pac-input');
-            var searchBox = new window.google.maps.places.SearchBox(input);
-            map.controls[window.google.maps.ControlPosition.TOP_RIGHT].push(input);
-    
-            // Bias the SearchBox results towards current map's viewport.
-            map.addListener('bounds_changed', ()=> {
-              searchBox.setBounds(map.getBounds());
-            });
-            // Listen for the event fired when the user selects a prediction and retrieve
-            // more details for that place.
-            searchBox.addListener('places_changed', async function() {
-              var places = searchBox.getPlaces();
-              if (places.length == 0) {
-                return;
-              }
-              // Clear out the old markers.
-              markers.forEach(function(marker) {
-                marker.setMap(null);
+          <TextField id="name"
+                     label="Name"
+                     value={this.state.name}
+                     onChange={this.handleInputChange}
+                     style={{ margin: 8 }}
+                     placeholder="Change name..."/>
+          <br/>
+          
+          <TextField id="pin"
+                     label="Pin"
+                     value={this.state.pin}
+                     onChange={this.handleInputChange}
+                     style={{ margin: 8 }}
+                     placeholder="Change pin..."/>
+          <br/>
+          
+          <GenrePicker onChange={this.handleChange}/>
+  
+          <Typography variant="body1"
+                      color="textPrimary" align="left">
+            Change location
+          </Typography>
+          
+          <Map
+            id="myMap"
+            options={{
+              center: location,
+              zoom: 15,
+              disableDefaultUI: true
+            }}
+            onMapLoad={map => {
+              let markers = [];
+              let marker = new window.google.maps.Marker({
+                position: location,
+                map: map,
+                title: 'Hello Istanbul!'
               });
-              markers = [];
-              // For each place, get the icon, name and location.
-              var bounds = new window.google.maps.LatLngBounds();
-              places.forEach(function(place) {
-                if (!place.geometry) {
-                  console.log("Returned place contains no geometry");
+      
+              markers.push(marker);
+              let input = document.getElementById('pac-input');
+              let searchBox = new window.google.maps.places.SearchBox(input);
+              map.controls[window.google.maps.ControlPosition.TOP_RIGHT].push(input);
+      
+              // Bias the SearchBox results towards current map's viewport.
+              map.addListener('bounds_changed', ()=> {
+                searchBox.setBounds(map.getBounds());
+              });
+              // Listen for the event fired when the user selects a prediction and retrieve
+              // more details for that place.
+              searchBox.addListener('places_changed', async () => {
+                let places = searchBox.getPlaces();
+                if (places.length === 0) {
                   return;
                 }
-                // Create a marker for each place.
-                markers.push(new window.google.maps.Marker({
-                  map: map,
-                  title: place.name,
-                  position: place.geometry.location
-                }));
-                if (place.geometry.viewport) {
-                  // Only geocodes have viewport.
-                  bounds.union(place.geometry.viewport);
-                } else {
-                  bounds.extend(place.geometry.location);
-                }
-              });
-            
-              var geocoder = new window.google.maps.Geocoder();
-              var country = "";
-              var city = "";
-              await geocoder.geocode({
-                'latLng': markers[0].position
-              }, function(results, status) {
-                if (status == window.google.maps.GeocoderStatus.OK) {
-                  if (results[0]) {
-                    
-                    for(const comp of results[0].address_components){
-                      if (comp.types[0] === "administrative_area_level_1"){
-                        city = comp.long_name;
-                        
-                      }
-                      if (comp.types[0] === "country"){
-                        country = comp.long_name;
-                      }
-                    }
-                    var loc_state = markers[0].position;
-                  
-                    this.setState({location:{
-                      latitude:loc_state.lat(),
-                      longitude:loc_state.lng(),
-                      city:city,
-                      country:country
-                      }});
+                // Clear out the old markers.
+                markers.forEach(function(marker) {
+                  marker.setMap(null);
+                });
+                markers = [];
+                // For each place, get the icon, name and location.
+                let bounds = new window.google.maps.LatLngBounds();
+                places.forEach(function(place) {
+                  if (!place.geometry) {
+                    console.log("Returned place contains no geometry");
+                    return;
                   }
-                }
-              }.bind(this))
-          
+                  // Create a marker for each place.
+                  markers.push(new window.google.maps.Marker({
+                    map: map,
+                    title: place.name,
+                    position: place.geometry.location
+                  }));
+                  if (place.geometry.viewport) {
+                    // Only geocodes have viewport.
+                    bounds.union(place.geometry.viewport);
+                  } else {
+                    bounds.extend(place.geometry.location);
+                  }
+                });
+        
+                let geocoder = new window.google.maps.Geocoder();
+                let country = "";
+                let city = "";
+                await geocoder.geocode({
+                  'latLng': markers[0].position
+                }, (results, status) => {
+                  if (status === window.google.maps.GeocoderStatus.OK) {
+                    if (results[0]) {
               
-            map.fitBounds(bounds);
-            }.bind(this));
-            map.addListener('click', async (e) => {
-              await this.placeMarkerAndPanTo(e.latLng, map,markers[0]);
-              var geocoder = new window.google.maps.Geocoder();
-              var country = "";
-              var city = "";
-            geocoder.geocode({
-                'latLng': markers[0].position
-              },  function(results, status) {
-                if (status == window.google.maps.GeocoderStatus.OK) {
-                  if (results[0]) {
-                    
-                    for(const comp of results[0].address_components){
-                      if (comp.types[0] === "administrative_area_level_1"){
-                        city = comp.long_name;
-                      }
-                      if (comp.types[0] === "country"){
-                        country = comp.long_name;
-                      }
-                    }
-                    var loc_state = markers[0].position;
+                      for(const comp of results[0].address_components){
+                        if (comp.types[0] === "administrative_area_level_1"){
+                          city = comp.long_name;
                   
-                    this.setState({location:{
-                      latitude:loc_state.lat(),
-                      longitude:loc_state.lng(),
-                      city:city,
-                      country:country
-                      }});
+                        }
+                        if (comp.types[0] === "country"){
+                          country = comp.long_name;
+                        }
+                      }
+                      let loc_state = markers[0].position;
+              
+                      this.setState({
+                        location:{
+                          latitude: loc_state.lat(),
+                          longitude: loc_state.lng(),
+                          city: city,
+                          country: country
+                        }});
+                    }
                   }
-                }
-              }.bind(this));
-            });
-          }}
-      />
-          
-          <form onSubmit={this.handleSubmit}>
-            <TextField required
-                       id="name"
-                       label="Name"
-                       onChange={this.handleInputChange}
-                       style={{ margin: 8 }}
-                       placeholder="name"
-                       
-                       fullWidth
-                       margin="normal"
-                       InputLabelProps={{
-                         shrink: true,
-                       }}
-                />
-            <br/>
-            
-            <GenrePicker onChange={this.handleChange}/>
-            
-            <div>
-              <Button variant="text"
-                      color="primary"
-                      type="submit"
-                      disabled={loading}>
-                Apply
-              </Button>
-              <br/>
-             
-            </div>
-          </form>
-          
-          
+                });
+                map.fitBounds(bounds);
+              });
+              map.addListener('click', async (e) => {
+                await this.placeMarkerAndPanTo(e.latLng, map,markers[0]);
+                const geocoder = new window.google.maps.Geocoder();
+                let country = "";
+                let city = "";
+                geocoder.geocode({
+                  'latLng': markers[0].position
+                },  (results, status) => {
+                  if (status === window.google.maps.GeocoderStatus.OK) {
+                    if (results[0]) {
+              
+                      for(const comp of results[0].address_components){
+                        if (comp.types[0] === "administrative_area_level_1"){
+                          city = comp.long_name;
+                        }
+                        if (comp.types[0] === "country"){
+                          country = comp.long_name;
+                        }
+                      }
+                      const loc_state = markers[0].position;
+              
+                      this.setState({location:{
+                          latitude:loc_state.lat(),
+                          longitude:loc_state.lng(),
+                          city:city,
+                          country:country
+                        }});
+                    }
+                  }
+                });
+              });
+            }}
+          />
+          <input id="pac-input" className="controls" type="text" placeholder="Search Box"/>
+  
           <br/>
+          <Button variant="contained"
+                  color="primary"
+                  onClick={this.handleSubmit}>
+            Apply
+          </Button>
+          <br/>
+          <Button variant="text"
+                  color="primary"
+                  onClick={() => history.goBack()}>
+            Go back
+          </Button>
+          
+          
         </Grid>
         
         <Footer />
@@ -253,4 +283,4 @@ class PlaceSettings extends Component {
     );
   }
 }
-export default PlaceSettings;
+export default withAuth(PlaceSettings);

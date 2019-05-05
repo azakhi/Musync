@@ -119,7 +119,7 @@ class User extends Component {
           </Grid>
         }
         
-        <Footer style={{position: "fixed", bottom: "5%"}}/>
+        <Footer style={{position: "fixed", bottom: "1%"}}/>
       
       </Grid>
     );

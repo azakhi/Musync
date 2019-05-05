@@ -40,7 +40,7 @@ const withAuth = (WrappedComponent, type) => {
     componentDidMount() {
       this.checkAuthentication();
     }
-  
+    
     checkAuthentication() {
       axios.get(GET_USER_URL, { cancelToken: this.state.source.token })
         .then(response => {
@@ -55,6 +55,11 @@ const withAuth = (WrappedComponent, type) => {
           
           if(type === 'login' && user.isRegistered)
             history.push('/');
+          else if(type === 'user_settings' && !user.isRegistered)
+            history.push({
+              pathname: "/login",
+              state: { from: "/user/settings" }
+            });
         })
         .catch(error => {
           if(axios.isCancel(error)){
@@ -69,6 +74,12 @@ const withAuth = (WrappedComponent, type) => {
             authUser: null,
             connectedPlace: null
           });
+          
+          if(type === 'user_settings')
+            history.push({
+              pathname: "/login",
+              state: { from: "/user/settings" }
+            });
         })
         .finally(() => {
           if(type === 'createPlace')
@@ -94,7 +105,7 @@ const withAuth = (WrappedComponent, type) => {
           history.push("/");
         });
     }
-  
+    
     requestUserInfo(userId) {
       const url = GET_USER_PROFILE_URL + `?userId=${userId}`;
       axios.get(url, { cancelToken: this.state.source.token })
@@ -109,7 +120,7 @@ const withAuth = (WrappedComponent, type) => {
             console.log(error);
             return;
           }
-        
+          
           this.cancelWithAuthCalls("User does not exist.");
           history.push("/");
         });
@@ -141,10 +152,10 @@ const withAuth = (WrappedComponent, type) => {
           });
         });
     }
-  
+    
     loginWithSpotify(spotifyCode, historyObj, spotifyType) {
       let callbackUrl = USER_REGISTER_URL;
-
+      
       if(spotifyType === "login")
         callbackUrl = USER_LOGIN_URL;
       else if(spotifyType === "connect")
@@ -176,7 +187,7 @@ const withAuth = (WrappedComponent, type) => {
           console.log(error);
         });
     }
-  
+    
     connectToPlace(placeId, pin) {
       const url = CONNECT_PLACE_URL + `?placeId=${placeId}&pin=${pin}`;
       axios.get(url,{ cancelToken: this.state.source.token })
@@ -194,7 +205,7 @@ const withAuth = (WrappedComponent, type) => {
           console.log(error, error.response);
         });
     }
-  
+    
     checkCreatePlace() {
       const {isAuthenticated, authUser} = this.state;
       if(!isAuthenticated || (authUser && !authUser.isRegistered)){
@@ -213,14 +224,12 @@ const withAuth = (WrappedComponent, type) => {
         connectedPlace, place, errorMsg, loginAttempted, user} = this.state;
       
       const otherProps = {
-        requestPlaceInfo: type === 'place' ? this.requestPlaceInfo : undefined,
         requestUserInfo: type === 'user' ? this.requestUserInfo : undefined,
-        place: type === 'place' ? place : undefined,
         isOwner: type === 'place' && place && place.hasOwnProperty("owner"),
         user: type === 'user' ? user : undefined,
         createPlace: type === 'createPlace' ? this.createPlace : undefined
       };
-
+      
       return <WrappedComponent authFailed={authFailed}
                                isAuthenticated={isAuthenticated}
                                authUser={authUser}
@@ -229,6 +238,8 @@ const withAuth = (WrappedComponent, type) => {
                                logout={this.logout}
                                loginWithSpotify={this.loginWithSpotify}
                                connectToPlace={this.connectToPlace}
+                               requestPlaceInfo={this.requestPlaceInfo}
+                               place={place}
                                errorMsg={errorMsg}
                                loginAttempted={loginAttempted}
                                {...otherProps}

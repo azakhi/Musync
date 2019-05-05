@@ -141,7 +141,7 @@ class Place extends Component {
   
           {
             isOwner &&
-            <Button href="/place/settings"
+            <Button href={`/place/settings/${this.state.id}`}
                     variant="contained"
                     color="primary"
                     style={buttonStyle}>
