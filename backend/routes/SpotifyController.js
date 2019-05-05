@@ -341,7 +341,7 @@ class SpotifyController{
     }
 
     let bodyParsed = response.body;
-    try { bodyParsed = JSON.parse(bodyParsed); }
+    try { bodyParsed = response.statusCode !== 204 ? JSON.parse(bodyParsed) : null; }
     catch (e) { console.log("Warning: Couldn't parse Spotify response: " + bodyParsed); }
     return {
       success: response.statusCode < 400,
