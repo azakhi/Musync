@@ -74,13 +74,14 @@ class Place extends Component {
     const url = SERVER_DOMAIN + "/searchsong";
     axios.post(url, {songName: this.state.searchTerm} )
       .then((response) => {
+        console.log(response.data)
         let searchResults = response.data;
         this.setState({
           searchResults: searchResults,
           searchLoading: false
         })
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error.response.data);
         this.setState({
           searchLoading: false
@@ -171,7 +172,9 @@ class Place extends Component {
                 fullWidth
                 onChange={this.handleInputChange} />
               
-              <SearchList songs={this.state.searchResults} onAddPlaylist={this.handleClose}/>
+              <SearchList songs={this.state.searchResults}
+                          genres={place && place.genres}
+                          onAddPlaylist={this.handleClose}/>
             
               <DialogActions>
                 {this.state.searchLoading && <CircularProgress size={24}/>}
