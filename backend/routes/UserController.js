@@ -328,7 +328,7 @@ async function getUserHistory(req, res, next) {
     if (user) {
       for( let i = 0; i < user.visitedPlaces.length; i++){
         let visitedPlace = user.visitedPlaces[i];
-        let place = await models.Place.findOne({_id: new models.ObjectID(visitedPlace.place)});
+        let place = await models.Place.findOne({_id: visitedPlace.place});
         if(!place)
           continue;
         
@@ -339,10 +339,13 @@ async function getUserHistory(req, res, next) {
         let requestedSong = user.requestedSongs[i];
         resultSongs.push({name: requestedSong.name, artistName: requestedSong.artistName, placeName: ""});
       }
-      user.visitedPlaces = resultPlaces;
-      user.requestedSongs = resultSongs;
       
-      res.status(200).json(user);
+      res.status(200).json({
+        name: user.name,
+        points: user.points,
+        visitedPlaces: resultPlaces,
+        requestedSongs: resultSongs,
+      });
     }
     else {
       res.status(400).send("Invalid user id.");
