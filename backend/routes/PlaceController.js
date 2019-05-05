@@ -311,12 +311,11 @@ async function connectToPlace(req, res) {
     let visitedCount = 1;
     let visitedPlaces = user.visitedPlaces;
     for(let i = 0; i <  visitedPlaces.length; i++){
-      if(place._id === visitedPlaces[i].place._id){
+      if(place._id === visitedPlaces[i].place){
         visitedCount = visitedPlaces[i].visitCount + 1;
         visitedPlaces.splice(i,1);
       }
     }
-    
    
     let visitedPlace = new models.VisitedPlace({
       place: place._id,
