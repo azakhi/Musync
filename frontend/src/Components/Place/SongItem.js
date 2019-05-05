@@ -5,27 +5,41 @@ import IconButton from "@material-ui/core/IconButton";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
+import Link from "@material-ui/core/Link";
 
 
 const SongItem = (props) => {
-  const {song} = props;
+  const {song, onClick, showButton, type} = props;
   if(!song)
     return;
   
-  const {id, name, artist} = song;
+  const {name} = song;
+  let artists;
+  let songUri = "";
+  if(type === "playlist"){
+    artists = song.artistName;
+    songUri = song.spotifySong.uri;
+  }
+  else if(type === "search_list"){
+    artists = song.artists.map(artist => artist.name);
+  }
   
   return (
-    <ListItem key={id} disableGutters divider>
-      <IconButton color="secondary" onClick={()=> console.log("Add " + name)}>
-        <FontAwesomeIcon  icon="plus" size="xs"/>
-      </IconButton>
+    <ListItem disableGutters divider onClick={onClick}>
+      {
+        showButton &&
+        <Link color="secondary"
+              href={songUri} style={{marginLeft: "5%"}}>
+          <FontAwesomeIcon  icon="plus"/>
+        </Link>
+      }
       
       <ListItemText>
         <Typography variant="body2" align="left" >
           {name}
         </Typography>
         <Typography variant="caption" align="left" >
-          {artist}
+          {artists && artists.join(', ')}
         </Typography>
       </ListItemText>
     </ListItem>

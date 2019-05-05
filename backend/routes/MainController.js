@@ -43,6 +43,7 @@ router.get('/cpts', async function(req, res, next) {
 
   res.send("Done");
 });
+
 router.get('/test3',async function(req, res, next){
 let place = await models.Place.findOne({_id: new models.ObjectID(req.query.placeId)});
 let votes = [0,0,0];
@@ -83,43 +84,110 @@ router.post('/berk', async function(req, res, next) {
 });
 
 router.post('/searchsong', async function(req, res, next) {
-  let connectedPlaceId = req.session.connectedPlace;
-  let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
+  if(!req.session || !req.session.userId){
+    res.status(400).send('Error: Need authentication.');
+    return;
+  }
+  
+  if(!req.session.connectedPlace){
+    res.status(400).send('Error: Connect to place.');
+    return;
+  }
+
+  if(!req.body.songName){
+    res.status(400).send('Error: Missing information.');
+    return;
+  }
+  
   let songName = req.body.songName;
-  let spotifyConnection = place.spotifyConnection;
-  let result = await spotifyController.searchSong(spotifyConnection, songName );
-  res.json(result.response);
+  let spotifyConnection;
+  if(req.session.isSpotifyRegistered){
+    let userId = req.session.userId;
+    let user = await models.User.findOne({_id: new models.ObjectID(userId)});
+    spotifyConnection = user.spotifyConnection;
+  }
+  else{
+    let connectedPlaceId = req.session.connectedPlace;
+    let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
+    spotifyConnection = place.spotifyConnection;
+  }
+  
+  let songsWithoutGenres = await spotifyController.searchSong(spotifyConnection, songName);
+  songsWithoutGenres = songsWithoutGenres.response.tracks.items;
+  
+  let artistIds = songsWithoutGenres.map(song => {
+    if(song.artists && song.artists.length > 0)
+      return song.artists[0].id;
+  });
+  
+  artistIds = [...new Set(artistIds)].slice(0, 20);
+  
+  let artists = await spotifyController.searchArtists(spotifyConnection, artistIds);
+  artists = artists.response.artists;
+  
+  for(let artist of artists){
+    const artistId = artist.id;
+    
+    for(let song of songsWithoutGenres){
+      if(!song.artists || song.artists.length < 1)
+        continue;
+      
+      const songArtistId = song.artists[0].id;
+      if(artistId !== songArtistId)
+        continue;
+      
+      song.genres = artist.genres;
+    }
+  }
+  
+  res.json(songsWithoutGenres);
 });
 
 router.post('/addsong', async function(req, res, next) {
+  if(!req.session || !req.session.userId){
+    res.status(400).send('Error: Need authentication.');
+    return;
+  }
+  
+  if(!req.session.connectedPlace){
+    res.status(400).send('Error: Connect to place.');
+    return;
+  }
+  
+  if(!req.body.song || !req.body.song.id){
+    res.status(400).send('Error: Missing information.');
+    return;
+  }
+  
   let userId = req.session.userId;
   let user = await models.User.findOne({_id: new models.ObjectID(userId)});
 
-  let songId = req.body.songId; //spotify item ID
-  let artistArray = [];
-  artistArray.push(req.body.artistName);
+  let song = req.body.song;
+  let artistArray = song.artists.map(artist => artist.name);
 
-  let song = new models.Song({
-    name: req.body.songName,
-    artistName: artistArray
+  let songObj = new models.Song({
+    name: song.name,
+    artistName: artistArray,
+    duration: song.duration_ms
   });
-  let err = {};
-  try {
-    await song.commitChanges();
-  } catch(e) {err = e};
-
+  
   if(user){
     let songList = user.requestedSongs;
-    songList.push(song);
+    songList.push(songObj);
     user.requestedSongs = songList;
   }
 
   let connectedPlaceId = req.session.connectedPlace;
   let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
+  let playlist = place.playlist;
+  playlist.songs.push(songObj);
+  place.playlist = playlist;
+  
   let spotifyConnection = place.spotifyConnection;
-  let playlistId = place.playlist.spotifyPlaylist.id;
-  await spotifyController.addSong(spotifyConnection, playlistId, songId );
-  res.json({});
+  let playlistId = playlist.spotifyPlaylist.id;
+  await spotifyController.addSong(spotifyConnection, playlistId, song.id);
+  
+  res.status(200).json({ success: true });
 });
 
 router.get('/allplaces', async function(req, res, next) {

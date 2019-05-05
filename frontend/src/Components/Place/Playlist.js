@@ -36,44 +36,26 @@ class Playlist extends Component {
     
     const url = SERVER_DOMAIN + "/place/playlist?placeId=" + placeId;
     axios.get(url).then((response) => {
+      let songs = response.data.songs;
       
-      let data = response.data;
-      let songs = data.songs;
-      let songArr = [];
-      
-      for(let i = 0; i < songs.length; i++){
-        songArr.push({
-          name:songs[i].name,
-          artist:songs[i].artistName[0],
-          length:songs[i].duration
-        });
-      }
-      this.setState({songs:songArr});
+      this.setState({
+        songs: songs
+      });
     });
   };
   
   render() {
     const {songs} = this.state;
-  
     return (
       <List dense style={{height: "70vh", overflow: "auto"}}>
-        {renderPlaylist(songs)}
+        {songs.map(song =>
+          <SongItem song={song}
+                    showButton={true}
+                    type="playlist"
+                    key={song.spotifySong.id}/>)}
       </List>
     );
   }
-}
-
-function renderPlaylist(songs) {
-  let counter = 0;
-  return songs.map(song => {
-    counter++;
-    song.id = 'song_' + counter;
-    return renderSong(song);
-  });
-}
-
-function renderSong(song) {
-  return <SongItem key={song.id} song={song}/>;
 }
 
 export default Playlist;
