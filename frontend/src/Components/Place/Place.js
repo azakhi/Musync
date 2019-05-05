@@ -29,6 +29,7 @@ class Place extends Component {
     this.getSearchResults = this.getSearchResults.bind(this);
     this.handleClickOpen = this.handleClickOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.onCurrentSongChange = this.onCurrentSongChange.bind(this);
     
     this.state = {
       isConnected: false,
@@ -39,7 +40,8 @@ class Place extends Component {
       open: false,
       searchResults: [],
       searchTerm: "",
-      searchLoading: false
+      searchLoading: false,
+      currentSong: null
     };
   }
 
@@ -88,6 +90,15 @@ class Place extends Component {
       });
   };
   
+  onCurrentSongChange(currentSong) {
+    if(!currentSong)
+      return;
+
+    this.setState({
+      currentSong: currentSong
+    });
+  }
+  
   render() {
     const buttonStyle = {
       display: "inline-block",
@@ -112,7 +123,8 @@ class Place extends Component {
             place &&
             <PlaceCard place={place}
                        type={PlaceCardTypes.PlaceView}
-                       isConnected={isConnected} />
+                       isConnected={isConnected}
+                       onCurrentSongChange={this.onCurrentSongChange}/>
           }
         </Grid>
         
@@ -123,7 +135,7 @@ class Place extends Component {
             Play Queue
           </Typography>
 
-          <Playlist placeId={this.state.id}/>
+          <Playlist placeId={this.state.id} currentSong={this.state.currentSong}/>
 
           <br/>
 

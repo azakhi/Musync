@@ -42,6 +42,10 @@ class PlaceCard extends Component {
     const url = GET_PLAYBACK_INFO_URL + "?placeId=" + this.props.place._id;
     axios.get(url)
       .then(response => {
+        const {onCurrentSongChange} = this.props;
+        if(typeof onCurrentSongChange === "function")
+          onCurrentSongChange(response.data.currentSong);
+        
         this.setState({
           ...response.data
         });

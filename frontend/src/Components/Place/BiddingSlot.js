@@ -42,7 +42,6 @@ class BiddingSlot extends React.Component {
     clearInterval(this.state.refreshIntervalId);
   }
   
-
   handleInputChange(event) {
     this.setState({
       amount: event.target.value
@@ -54,7 +53,7 @@ class BiddingSlot extends React.Component {
       selectedItem: val
     });
   }
-
+  
   handleSubmit(event){
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     axios.get(url)
@@ -71,9 +70,9 @@ class BiddingSlot extends React.Component {
           errorMessage:error.response.data
         });
       });
-
-  }  
-
+    
+  }
+  
   updateVoteStatus() {
     axios.post(GET_VOTING_STATUS_URL, {placeId: this.props.placeId} )
       .then((response) => {
@@ -91,7 +90,7 @@ class BiddingSlot extends React.Component {
           });
         }
         this.setState({songs: songs});
-   
+        
       })
       .catch(function (error) {
         console.log(error);
@@ -107,7 +106,7 @@ class BiddingSlot extends React.Component {
       <Grid style = {{marginBottom:"5%"}}>
         {
           (songs && songs.length === 3) &&
-        
+          
           <Grid container spacing={24} justify="center">
             
             <Typography variant="h5" align="center">
@@ -121,36 +120,36 @@ class BiddingSlot extends React.Component {
             </Grid>
             
             <Grid item xs={12} >
-            
-                <Grid  container alignItems="center" justify="center" >
-                  
-                 
-                    <TextField
-                      id="votePoints"
-                      label="Points"
-                      onChange={this.handleInputChange}
-                      variant="outlined" margin="dense"/>
-                
               
-                    <Button variant="text"
-                            color="primary"
-                            onClick={this.handleSubmit} >                   
-                      Vote
-                    </Button>
-                    
-             
+              <Grid  container alignItems="center" justify="center" >
                 
-
-                  {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
-                                    icon={successIcon}
-                                    color="primary"
-                                    variant="outlined"/>}
-
-                  {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}label={errorMessage}
-                                      icon={errorIcon}
-                                      color="secondary"
-                                      variant="outlined"/>}
-                </Grid>              
+                
+                <TextField
+                  id="votePoints"
+                  label="Points"
+                  onChange={this.handleInputChange}
+                  variant="outlined" margin="dense"/>
+                
+                
+                <Button variant="text"
+                        color="primary"
+                        onClick={this.handleSubmit} >
+                  Vote
+                </Button>
+                
+                
+                
+                
+                {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
+                                         icon={successIcon}
+                                         color="primary"
+                                         variant="outlined"/>}
+                
+                {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}label={errorMessage}
+                                       icon={errorIcon}
+                                       color="secondary"
+                                       variant="outlined"/>}
+              </Grid>
             </Grid>
           </Grid>
           
@@ -178,12 +177,14 @@ function createSlots(self){
                     style={style} >
         <img src={self.state.songs[val].img}
              alt={self.state.songs[val].title}/>
-             
+        
         <GridListTileBar title={self.state.songs[val].title}
                          subtitle={<span> {self.state.songs[val].author}</span>}
                          actionIcon={
-                           <IconButton style={{color:"white"}} >
-                             {self.state.songs[val].voteCount}
+                           <IconButton>
+                             <Typography style={{color:"white"}} variant="h6">
+                               {self.state.songs[val].votingCount}
+                             </Typography>
                            </IconButton> } />
       </GridListTile>
     );
