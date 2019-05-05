@@ -11,6 +11,7 @@ import SpotifyCallback from "./spotify/SpotifyCallback";
 import NotFound from "./Components/Utils/NotFound";
 import PlaceSettings from './Components/Place/PlaceSettings';
 import UserSettings from './Components/User/UserSettings';
+import Places from './Components/Places/Places';
 
 class App extends Component {
   render() {
@@ -26,6 +27,7 @@ class App extends Component {
           <Route exact path='/login' component={Login}/>
           <Route exact path='/create-place' component={CreatePlace}/>
           <Route exact path='/spotifyCallback' component={SpotifyCallback}/>
+          <Route exact path='/allplaces' component={Places}/>
           <Route path='/' component={NotFound}/>
         </Switch>
       </main>
