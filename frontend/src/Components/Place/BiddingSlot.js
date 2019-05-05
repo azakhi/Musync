@@ -76,6 +76,7 @@ class BiddingSlot extends React.Component {
   updateVoteStatus() {
     axios.post(GET_VOTING_STATUS_URL, {placeId: this.props.placeId} )
       .then((response) => {
+        console.log(response.data);
         let songs = [];
         let data = response.data;
         let votes = data.votes;
@@ -172,7 +173,7 @@ function createSlots(self){
                     key={val}
                     style={style} >
         <img src={self.state.songs[val].img}
-             alt={self.state.songs[val].title} />
+             alt={self.state.songs[val].title}/>
              
         <GridListTileBar title={self.state.songs[val].title}
                          subtitle={<span> {self.state.songs[val].author}</span>}

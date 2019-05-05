@@ -11,7 +11,6 @@ class SearchList extends Component {
   constructor(props){
     super(props);
     this.addToPlaylist = this.addToPlaylist.bind(this);
-    this.filterSongsByGenres = this.filterSongsByGenres.bind(this);
   }
   
   addToPlaylist(song) {
@@ -27,7 +26,6 @@ class SearchList extends Component {
   
   render() {
     const {songs} = this.props;
-    console.log(songs);
     return (
       <List dense>
         {songs.map(song =>

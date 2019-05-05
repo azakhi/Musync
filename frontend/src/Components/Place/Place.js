@@ -74,8 +74,6 @@ class Place extends Component {
     const url = SERVER_DOMAIN + "/searchsong";
     axios.post(url, {songName: this.state.searchTerm} )
       .then((response) => {
-        console.log(response.data);
-  
         let searchResults = response.data;
         this.setState({
           searchResults: searchResults,

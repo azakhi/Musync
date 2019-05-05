@@ -8,15 +8,16 @@ class SongPlayer extends Component {
   constructor(props) {
     super(props);
     this.incrementTimer = this.incrementTimer.bind(this);
-    
+  
     this.state = {
       currentTime: 0,
-      songLength: props.songLength,
+      songLength: 100,
       value: 0
     };
   }
   
   componentDidMount() {
+    this.incrementTimer();
     this.time = setInterval(this.incrementTimer, 1000);
   }
   
@@ -25,16 +26,20 @@ class SongPlayer extends Component {
   }
   
   incrementTimer() {
+    const {isPlaying, currentSong, currentSongStartTime} = this.props;
+    
+    if(!currentSong || currentSongStartTime === undefined || currentSongStartTime === null)
+      return;
+    
     this.setState(prevState => {
-      let {currentTime, songLength} = prevState;
-      currentTime++;
+      const currentTime = Math.floor((Date.now() - currentSongStartTime) / 1000);
+      const songLength = currentSong.duration / 1000;
       const value = (currentTime * 100) / songLength;
-      if(value >= 100)
-        clearInterval(this.time);
       
       return {
-        currentTime: currentTime,
-        value: value
+        currentTime: isPlaying ? currentTime : prevState.currentTime,
+        value: isPlaying ? value : prevState.value,
+        songLength: Math.floor(songLength)
       }
     })
   }
@@ -50,7 +55,7 @@ class SongPlayer extends Component {
         <Grid item xs={8}>
           <LinearProgress variant="determinate"
                           value={this.state.value}
-                          style={{marginTop:"3%"}} />
+                          style={{marginTop:"4%"}} />
         </Grid>
         <Grid item xs={2}>
           <Typography align="center">

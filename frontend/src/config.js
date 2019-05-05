@@ -28,6 +28,8 @@ export const VOTE_URL = SERVER_DOMAIN +  "/place/voteforsong";
 export const GET_VOTING_STATUS_URL = SERVER_DOMAIN + "/place/votestatus";
 export const CONNECT_SPOTIFY_URL = SERVER_DOMAIN + "/user/connectspotify";
 export const GET_PLAYLISTS_URL = SERVER_DOMAIN + "/user/playlists";
+export const GET_PLAYBACK_INFO_URL = SERVER_DOMAIN + "/place/playback";
+
 
 export function generateSpotifyAuthURL(stateParam) {
   const {protocol, host} = window.location;
