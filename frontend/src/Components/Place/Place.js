@@ -103,12 +103,11 @@ class Place extends Component {
             direction="column"
             justify="center"
             spacing={32}>
-
         <br/>
 
         <Navbar isPlaceHeader={true}/>
 
-        <Grid container item xs={11}>
+        <Grid container item xs={11} md={8} justify="center">
           {
             place &&
             <PlaceCard place={place}
@@ -117,7 +116,7 @@ class Place extends Component {
           }
         </Grid>
         
-        <Grid item xs={12} style={{textAlign: 'center'}}>
+        <Grid item xs={12} md={8} style={{textAlign: 'center'}}>
           <BiddingSlot placeId={this.state.id}/>
           
           <Typography align="center" variant="h5" gutterBottom>

@@ -17,7 +17,7 @@ export const NearPlaces = (props) => {
                                handleConnectPlace={handleConnectPlace}/>;
   
   return (
-    <Grid container item xs={11} justify="center">
+    <Grid container item xs={11} md={8} justify="center">
       {mainPlaceCard}
       
       {

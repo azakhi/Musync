@@ -10,6 +10,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import {GET_VOTING_STATUS_URL, VOTE_URL} from "../../config";
 import axios from "axios";
 import Chip from "@material-ui/core/Chip/index";
+import Typography from "@material-ui/core/Typography";
 
 
 class BiddingSlot extends React.Component {
@@ -107,7 +108,11 @@ class BiddingSlot extends React.Component {
         {
           (songs && songs.length === 3) &&
         
-          <Grid container spacing={24} alignItems="center" >
+          <Grid container spacing={24} justify="center">
+            
+            <Typography variant="h5" align="center">
+              Select next song!
+            </Typography>
             
             <Grid item xs={12}>
               <GridList cols={3} cellHeight={140} >
