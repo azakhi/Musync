@@ -91,7 +91,7 @@ class PlaceCard extends Component {
               {name}
             </Typography>
             <Typography variant="caption" align="center" gutterBottom>
-              {genres.join(", ")}
+              {genres.map(genre => capitalizeFirstLetter(genre)).join(", ")}
             </Typography>
 
             <Typography align="center" variant="body2">
@@ -130,3 +130,12 @@ export const PlaceCardTypes = {
 };
 
 export default PlaceCard;
+
+
+// Taken from here and changed a bit:
+// https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
+function capitalizeFirstLetter(string) {
+  let words = string.split(" ");
+  words = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+  return words.join(" ");
+}

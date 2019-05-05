@@ -9,9 +9,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import GenrePicker from "./GenrePicker";
 import withAuth from "../../auth/withAuth";
-import history from "../../utils/history";
 import PlaylistPicker from "./PlaylistPicker";
-import Divider from "@material-ui/core/Divider";
 
 
 class CreatePlace extends Component {

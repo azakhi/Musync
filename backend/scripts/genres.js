@@ -1,4 +1,4 @@
-export const genres = ["pop","dance pop","rap","pop rap","rock",
+const genres = ["pop","dance pop","rap","pop rap","rock",
   "post-teen pop","hip hop","trap music","r&b","latin","modern rock",
   "tropical house","electropop","edm","southern hip hop","latin pop",
   "pop rock","tropical","post-grunge","album rock","alternative metal",
@@ -36,3 +36,5 @@ export const genres = ["pop","dance pop","rap","pop rap","rock",
   "rock-and-roll","grime","shimmer pop","british soul","speed metal","indiecoustica","deep house",
   "turkish rock","new jack swing","otacore","indonesian pop","girl group","britpop","freak folk",
   "grunge","chillwave","synthpop","australian dance"];
+
+module.exports = genres;

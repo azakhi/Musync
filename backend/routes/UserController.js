@@ -121,20 +121,16 @@ async function registerUser(req, res, next) {
 }
 
 async function loginWithSpotify(req, res, next) {
-  if (req.session && req.session.userId && models.ObjectID.isValid(req.session.userId)) {
-    res.json({ // No need to send anything else. Let frontend redirect
-      success: true,
-    });
-    return;
-  }
+  let storedSpotifyConnection = req.session.spotifyConnection;
+  clearSession(req);
 
-  if (!req.session || !req.session.spotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection))) {
+  if (!req.session || !storedSpotifyConnection || !models.SpotifyConnection.isValidValue(JSON.parse(storedSpotifyConnection))) {
     res.status(400).send('Error: No valid connection information');
     return;
   }
 
   let user = null;
-  let spotifyUserId = JSON.parse(req.session.spotifyConnection).userId;
+  let spotifyUserId = JSON.parse(storedSpotifyConnection).userId;
   if (spotifyUserId) {
     user = await models.User.findOne({"spotifyConnection.userId": spotifyUserId});
   }
@@ -143,7 +139,6 @@ async function loginWithSpotify(req, res, next) {
     user.lastLogin = Date.now();
     req.session.userId = user._id.toHexString();
     req.session.isSpotifyRegistered = true;
-    req.session.spotifyConnection = false; // No need to keep storing it.
     res.json({ // No need to send anything else. Let frontend redirect
       success: true,
     });
@@ -154,12 +149,7 @@ async function loginWithSpotify(req, res, next) {
 }
 
 async function loginWithCredentials(req, res, next) {
-  if (req.session && req.session.userId && models.ObjectID.isValid(req.session.userId)) {
-    res.json({ // No need to send anything else. Let frontend redirect
-      success: true,
-    });
-    return;
-  }
+  clearSession(req);
 
   const {email, password} = req.body;
 
@@ -279,7 +269,7 @@ async function connectSpotify(req, res, next) {
   }
 
   if (!req.session || !req.session.spotifyConnection
-  || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection)) || !req.session.spotifyConnection.userId) {
+  || !models.SpotifyConnection.isValidValue(JSON.parse(req.session.spotifyConnection)) || !JSON.parse(req.session.spotifyConnection).userId) {
     res.status(400).send('Error: No valid connection information');
     return;
   }
@@ -318,6 +308,15 @@ async function getUserPlaylists(req, res, next) {
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
+}
+
+function clearSession(req) {
+  if (!req.session) return;
+
+  delete req.session.userId;
+  delete req.session.isSpotifyRegistered;
+  delete req.session.spotifyConnection;
+  delete req.session.connectedPlace;
 }
 
 async function getUserHistory(req, res, next) {

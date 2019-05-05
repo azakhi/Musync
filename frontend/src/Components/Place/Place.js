@@ -80,7 +80,7 @@ class Place extends Component {
           searchLoading: false
         })
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error.response.data);
         this.setState({
           searchLoading: false
@@ -95,7 +95,7 @@ class Place extends Component {
     };
   
     const {place, isOwner, connectedPlace} = this.props;
-    const isConnected = isOwner || place && place._id === connectedPlace;
+    const isConnected = isOwner || ( place && (place._id === connectedPlace) );
 
     return (
       <Grid container
@@ -171,7 +171,9 @@ class Place extends Component {
                 fullWidth
                 onChange={this.handleInputChange} />
               
-              <SearchList songs={this.state.searchResults} onAddPlaylist={this.handleClose}/>
+              <SearchList songs={this.state.searchResults}
+                          genres={place && place.genres}
+                          onAddPlaylist={this.handleClose}/>
             
               <DialogActions>
                 {this.state.searchLoading && <CircularProgress size={24}/>}
