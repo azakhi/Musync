@@ -313,7 +313,6 @@ class SpotifyController{
   }
 
   static parseSpotifyResponse(response) {
-    
     if (!response || isNaN(response.statusCode)) {
       return {
         success: false,
