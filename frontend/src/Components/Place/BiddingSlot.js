@@ -49,7 +49,6 @@ class BiddingSlot extends React.Component {
   }
   
   handleOnClick(val){
-    console.log(val);
     this.setState({
       selectedItem: val
     });
@@ -57,7 +56,6 @@ class BiddingSlot extends React.Component {
 
   handleSubmit(event){
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
-    console.log(url);
     axios.get(url)
       .then((response) => {
         this.setState({
@@ -100,8 +98,6 @@ class BiddingSlot extends React.Component {
   };
   
   render() {
-    console.log(this.state);
-    
     const {songs,errorMessage,successMessage} = this.state;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
@@ -176,7 +172,7 @@ function createSlots(self){
                     key={val}
                     style={style} >
         <img src={self.state.songs[val].img}
-             alt={self.state.songs[val].title} />
+             alt={self.state.songs[val].title}/>
              
         <GridListTileBar title={self.state.songs[val].title}
                          subtitle={<span> {self.state.songs[val].author}</span>}
