@@ -4,7 +4,6 @@ const ModelManager = require("../models/ModelManager");
 const spotifyController = require('./SpotifyController');
 const placeController = require('./PlaceController');
 
-
 class UpdateController {
   static async updatePlaylist(placeId) {
     let place = ModelManager.acquire(placeId, models.Place.collection);
