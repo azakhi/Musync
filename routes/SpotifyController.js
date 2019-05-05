@@ -240,7 +240,7 @@ class SpotifyController{
   }
 
   static async getPlaylist(spotifyConnection, playlistId) {
-    console.log("get pla")
+    
     spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
     if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
 
@@ -252,7 +252,7 @@ class SpotifyController{
       resolveWithFullResponse: true,
     };
     const r = await request.get(options).catch((err) => { throw err });
-    console.log(r);
+    
     return SpotifyController.parseSpotifyResponse(r);
   }
 
