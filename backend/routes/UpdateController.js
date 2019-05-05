@@ -292,7 +292,7 @@ class UpdateController {
       }
 
       // first try to update spotify
-      let result = await spotifyController.reorderTrack(place.spotifyConnection, place.playlist.spotifyPlaylist, from[i], to + 1);
+      let result = await spotifyController.reorderTrack(place.spotifyConnection, place.playlist.spotifyPlaylist, from[i], from[i] > to ? to : to + 1);
       if (!result.success) {
         if (i === 0) { // If failed at next song, return immediately to retry
           return 0;
