@@ -1,6 +1,7 @@
 import React from "react";
 import { withScriptjs, withGoogleMap, GoogleMap } from "react-google-maps";
 import PlaceMarker from "./PlaceMarker";
+import location from "../../location/location";
 
 const Map2 = withScriptjs(withGoogleMap((props) =>{
 
@@ -17,13 +18,13 @@ const Map2 = withScriptjs(withGoogleMap((props) =>{
 
   const mapOptions = {
     mapTypeControl: false,
-    //styles: [{ stylers: [{ 'saturation': -100 }, { 'gamma': 0.8 }, { 'lightness': 4 }, { 'visibility': 'on' }] }]
   };
 
   return (
-      <GoogleMap options={mapOptions}
-        defaultZoom={5}
-        center={ { lat:  39, lng: 32 } }
+      <GoogleMap
+        options={mapOptions}
+        defaultZoom={10}
+        center={ props.initialCenter }
         >
         {markers}
       </GoogleMap>
