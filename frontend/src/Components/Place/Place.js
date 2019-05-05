@@ -19,13 +19,17 @@ import Playlist from "./Playlist";
 import SearchList from "./SearchList";
 import {SERVER_DOMAIN} from "../../config";
 import withAuth from "../../auth/withAuth";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 
 class Place extends Component {
   constructor(props) {
     super(props);
     this.handleInputChange = this.handleInputChange.bind(this);
-
+    this.getSearchResults = this.getSearchResults.bind(this);
+    this.handleClickOpen = this.handleClickOpen.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    
     this.state = {
       isConnected: false,
       isOwner: false,
@@ -34,8 +38,8 @@ class Place extends Component {
       place: null,
       open: false,
       searchResults: [],
-      songName: "",
-      resultIds: []
+      searchTerm: "",
+      searchLoading: false
     };
   }
 
@@ -53,57 +57,37 @@ class Place extends Component {
     });
   }
 
-  handleClickOpen = () => {
+  handleClickOpen() {
     this.setState({ open: true });
   };
 
-  handleClose = () => {
+  handleClose() {
     this.setState({ searchResults: [] });
     this.setState({ open: false });
   };
   
-  getSearchResults = () => {
+  getSearchResults() {
+    this.setState({
+      searchLoading: true
+    });
+    
     const url = SERVER_DOMAIN + "/searchsong";
-    let results = [];
-    let songIds = [];
-    let self = this;
-    let artistName = "";
-    console.log("herer");
-    axios.post(url, {songName: this.state.songName} )
-      .then(function (response) {
-        console.log(response);
-        if( response.status === 200 ){
-          let artistResults = [];
-          let songResults = [];
-          
-          for(var i = 0; i < response.data.tracks.items.length; i++){
-            artistName = "";
-            for(var j = 0; j < response.data.tracks.items[i].artists.length; j++){
-              artistName += response.data.tracks.items[i].artists[j].name + ", ";
-            }
-            artistName = artistName.substring(0, artistName.length - 2);
-        
-            results.push({id: response.data.tracks.items[i].id, name:response.data.tracks.items[i].name, artist: artistName, length: response.data.tracks.items[i].duration_ms / 1000 });
-            songIds.push(response.data.tracks.items[i].id);
-          }
-       
-          self.setState({searchResults: results});
-          self.setState({resultIds: songIds});
-        }
-        else{
-          console.log("Response not 200");
-        }
+    axios.post(url, {songName: this.state.searchTerm} )
+      .then((response) => {
+        let searchResults = response.data;
+        this.setState({
+          searchResults: searchResults,
+          searchLoading: false
+        })
       })
       .catch(function (error) {
-        console.log(error);
+        console.log(error.response.data);
+        this.setState({
+          searchLoading: false
+        })
       });
-    //this.setState({ searchResults: [
-    //  {name: "Ashes to Ashes", artist: "David Bowie", length: 3.48},
-    //  {name: "Deutschland", artist: "Rammstein", length: 6.04},
-    //  {name: "Under Pressure", artist: "Queen", length: 3.22},
-    //] });
   };
-
+  
   render() {
     const buttonStyle = {
       display: "inline-block",
@@ -169,39 +153,40 @@ class Place extends Component {
 
         <Footer/>
         
-        <Dialog
-            open={this.state.open}
-            onClose={this.handleClose}
-            aria-labelledby="form-dialog-title"
-          >
-            <DialogContent>
-              <DialogContentText>
-                Search for a song
-              </DialogContentText>
+        <Dialog open={this.state.open}
+                onClose={this.handleClose}
+                aria-labelledby="form-dialog-title" >
+          <DialogContent>
+            <DialogContentText>
+              Search for a song
+            </DialogContentText>
+          
             <form onSubmit={this.getSearchResults}>
               <TextField
                 autoFocus
                 margin="dense"
-                id="songName"
+                id="searchTerm"
                 label=""
                 type="text"
                 fullWidth
-                onChange={this.handleInputChange}
-              />
-              <SearchList songs={this.state.searchResults} ids={this.state.resultIds}/>
-            <DialogActions>
-
-              <Button  onClick={this.getSearchResults}  color="primary">
-                Search
-              </Button>
-              <Button onClick={this.handleClose} color="primary">
-                Cancel
-              </Button>
-            </DialogActions>
+                onChange={this.handleInputChange} />
+              
+              <SearchList songs={this.state.searchResults} onAddPlaylist={this.handleClose}/>
+            
+              <DialogActions>
+                {this.state.searchLoading && <CircularProgress size={24}/>}
+                
+                <Button  onClick={this.getSearchResults} color="primary" variant="contained">
+                  Search
+                </Button>
+                <Button onClick={this.handleClose} color="primary">
+                  Cancel
+                </Button>
+              </DialogActions>
             </form>
-            </DialogContent>
+          </DialogContent>
 
-          </Dialog>
+        </Dialog>
       </Grid>
     );
   }
