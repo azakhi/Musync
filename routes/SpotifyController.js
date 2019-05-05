@@ -13,7 +13,7 @@ class SpotifyController{
       url: 'https://api.spotify.com/v1/playlists/' + playlist.id + '/tracks',
       body: JSON.stringify({
         range_start: rangeStart,
-        insert_before: insertBefore + 1,
+        insert_before: insertBefore,
       }),
       dataType:'json',
       headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' },
