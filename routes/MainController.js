@@ -88,7 +88,7 @@ router.post('/searchsong', async function(req, res, next) {
     res.status(400).send('Error: Need authentication.');
     return;
   }
-  
+
   if(!req.session.connectedPlace){
     res.status(400).send('Error: Connect to place.');
     return;
@@ -98,7 +98,7 @@ router.post('/searchsong', async function(req, res, next) {
     res.status(400).send('Error: Missing information.');
     return;
   }
-  
+
   let songName = req.body.songName;
   let spotifyConnection;
   if(req.session.isSpotifyRegistered){
@@ -111,35 +111,35 @@ router.post('/searchsong', async function(req, res, next) {
     let place = await models.Place.findOne({_id: new models.ObjectID(connectedPlaceId)});
     spotifyConnection = place.spotifyConnection;
   }
-  
+
   let songsWithoutGenres = await spotifyController.searchSong(spotifyConnection, songName);
   songsWithoutGenres = songsWithoutGenres.response.tracks.items;
-  
+
   let artistIds = songsWithoutGenres.map(song => {
     if(song.artists && song.artists.length > 0)
       return song.artists[0].id;
   });
-  
+
   artistIds = [...new Set(artistIds)].slice(0, 20);
-  
+
   let artists = await spotifyController.searchArtists(spotifyConnection, artistIds);
   artists = artists.response.artists;
-  
+
   for(let artist of artists){
     const artistId = artist.id;
-    
+
     for(let song of songsWithoutGenres){
       if(!song.artists || song.artists.length < 1)
         continue;
-      
+
       const songArtistId = song.artists[0].id;
       if(artistId !== songArtistId)
         continue;
-      
+
       song.genres = artist.genres;
     }
   }
-  
+
   res.json(songsWithoutGenres);
 });
 
@@ -148,17 +148,17 @@ router.post('/addsong', async function(req, res, next) {
     res.status(400).send('Error: Need authentication.');
     return;
   }
-  
+
   if(!req.session.connectedPlace){
     res.status(400).send('Error: Connect to place.');
     return;
   }
-  
+
   if(!req.body.song || !req.body.song.id){
     res.status(400).send('Error: Missing information.');
     return;
   }
-  
+
   let userId = req.session.userId;
   let user = await models.User.findOne({_id: new models.ObjectID(userId)});
 
@@ -170,7 +170,7 @@ router.post('/addsong', async function(req, res, next) {
     artistName: artistArray,
     duration: song.duration_ms
   });
-  
+
   if(user){
     let songList = user.requestedSongs;
     songList.push(songObj);
@@ -182,19 +182,35 @@ router.post('/addsong', async function(req, res, next) {
   let playlist = place.playlist;
   playlist.songs.push(songObj);
   place.playlist = playlist;
-  
+
   let spotifyConnection = place.spotifyConnection;
   let playlistId = playlist.spotifyPlaylist.id;
   await spotifyController.addSong(spotifyConnection, playlistId, song.id);
-  
+
   res.status(200).json({ success: true });
 });
 
+async function getGenreNames(place) {
+  let genres = [];
+  let genresIds = place.genres;
+  for (let i = 0; i < genresIds.length;i++){
+    let genre = await models.Genre.findOne({_id: genresIds[i]});
+    genres.push(genre.name);
+  }
+  return genres;
+}
+
 router.get('/allplaces', async function(req, res, next) {
   let places = await models.Place.find();
+  let results = [];
+
   for( let i = 0; i < places.length; i++){
-    console.log(places[i].name);
+    let genreName = await getGenreNames(places[i]);
+    let result = places[i].publicInfo;
+    result.genres = genreName;
+    results.push(result);
   }
+  res.status(200).json(results);
 });
 
 router.get('/genres', async function(req, res, next) {
