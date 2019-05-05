@@ -74,7 +74,6 @@ class Place extends Component {
     const url = SERVER_DOMAIN + "/searchsong";
     axios.post(url, {songName: this.state.searchTerm} )
       .then((response) => {
-        console.log(response.data)
         let searchResults = response.data;
         this.setState({
           searchResults: searchResults,
@@ -96,7 +95,7 @@ class Place extends Component {
     };
   
     const {place, isOwner, connectedPlace} = this.props;
-    const isConnected = isOwner || place && place._id === connectedPlace;
+    const isConnected = isOwner || ( place && (place._id === connectedPlace) );
 
     return (
       <Grid container
