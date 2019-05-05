@@ -329,50 +329,15 @@ async function getPlaybackInfo(req, res) {
   }
   
   result = result.result;
-  if (!result.spotifyConnection || !result.spotifyConnection.accessToken) {
-    res.status(400).send('Error: No spotify account is connected to Place');
-    return;
-  }
-  
   if (!result.playlist || !result.playlist.spotifyPlaylist || !result.playlist.spotifyPlaylist.id) {
     res.status(400).send('Error: Place does not have a playlist');
     return;
   }
-  
-  let playlist = result.playlist;
-  
-  let curPlaying = await spotifyController.getCurrentlyPlaying(result.spotifyConnection);
-  if (!curPlaying.success) {
-    res.status(400).send('Error: Could not get playback info');
-    return;
-  }
-  else { curPlaying = curPlaying.response }
-  
-  let context = (curPlaying.context && curPlaying.context.type === "playlist" && curPlaying.context.uri)
-    ? curPlaying.context.uri.split(":").pop() : "";
-  
-  playlist.isPlaying = curPlaying.is_playing && curPlaying.currently_playing_type === "track" && context === playlist.spotifyPlaylist.id;
-  
-  if (playlist.isPlaying && curPlaying.item) {
-    let currentSong = -1;
-    for (let i = 0; i < playlist.songs.length; i++) {
-      if (playlist.songs[i].spotifySong.id === curPlaying.item.id) {
-        currentSong = i;
-        break;
-      }
-    }
-    
-    playlist.currentSong = currentSong;
-    if (currentSong >= 0 && curPlaying.timestamp && curPlaying.progress_ms) {
-      playlist.currentSongStartTime = Date.now() - curPlaying.progress_ms;
-    }
-  }
-  
-  result.playlist = playlist;
+
   res.json({
-    isPlaying: playlist.isPlaying,
-    currentSong: playlist.currentSong >= 0 ? playlist.songs[playlist.currentSong] : null,
-    currentSongStartTime: new Date(playlist.currentSongStartTime),
+    isPlaying: result.playlist.isPlaying,
+    currentSong: result.playlist.currentSong >= 0 ? result.playlist.songs[result.playlist.currentSong] : null,
+    currentSongStartTime: new Date(result.playlist.currentSongStartTime),
   });
 }
 
