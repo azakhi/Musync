@@ -1,7 +1,6 @@
 import React from "react";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import IconButton from "@material-ui/core/IconButton";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
@@ -9,7 +8,7 @@ import Link from "@material-ui/core/Link";
 
 
 const SongItem = (props) => {
-  const {song, onClick, showButton, type} = props;
+  let {song, onClick, showButton, type, disabled} = props;
   if(!song)
     return;
   
@@ -24,8 +23,14 @@ const SongItem = (props) => {
     artists = song.artists.map(artist => artist.name);
   }
   
+  let style = {};
+  if(disabled){
+    onClick = () => {};
+    style = { opacity: 0.5 }
+  }
+  
   return (
-    <ListItem disableGutters divider onClick={onClick}>
+    <ListItem disableGutters divider onClick={onClick} style={style}>
       {
         showButton &&
         <Link color="secondary"

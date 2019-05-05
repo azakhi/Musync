@@ -11,8 +11,18 @@ class UpdateController {
     if (!place) {
       return -1;
     }
+    
+    if (isNaN(Number(place.lastUpdate))) {
+      let playlist = place.playlist;
+      playlist.currentSong = -1;
+      place.playlist = playlist;
+      place.votedSongs = [];
+      place.votes = [];
+      place.lastUpdate = 0;
+    }
 
-    let lastUpdate = place.lastUpdate ? place.lastUpdate : 0;
+    let lastUpdate = place.lastUpdate;
+    
     if (!place.spotifyConnection || !place.spotifyConnection.accessToken) {
       return -1; // No need to update this place
     }

@@ -113,9 +113,12 @@ async function createNewPlace(req, res) {
   
   let songs = [];
   for (let track of pl.tracks.items) {
+    if(!track.track.id || !track.track.name)
+      continue;
+    
     let spotifyItem = new models.SpotifyItem({
       id: track.track.id,
-      uri: track.track.uri,
+      uri: track.track.uri ? track.track.uri : "",
       name: track.track.name,
     });
     
@@ -253,7 +256,7 @@ async function connectToPlace(req, res) {
     return;
   }
   
-  place = result.result;
+  let place = result.result;
   if (!req.query.pin && !req.body.pin) {
     res.status(400).send('Error: Pin required');
     return;
@@ -267,8 +270,11 @@ async function connectToPlace(req, res) {
   
   if (!req.session.userId) { // Create unregistered user for this session
     let visitedPlace = new models.VisitedPlace({
-      place: place._id
+      date: Date.now(),
+      place: place._id,
+      visitCount: 1
     });
+    
     let user = new models.User({
       isRegistered: false,
       visitedPlaces: [visitedPlace],
@@ -298,16 +304,17 @@ async function connectToPlace(req, res) {
     }
     let visitedCount = 1;
     let visitedPlaces = user.visitedPlaces;
-    for(let i = 0; i <  user.visitedPlaces.length; i++){
-      if(place._id === user.visitedPlaces[i]._id){
-        visitedCount = user.visitedPlaces[i].visitCount + 1;
+    for(let i = 0; i <  visitedPlaces.length; i++){
+      if(place._id === visitedPlaces[i].place._id){
+        visitedCount = visitedPlaces[i].visitCount + 1;
         visitedPlaces.splice(i,1);
       }
     }
     
+    console.log(place);
     let visitedPlace = new models.VisitedPlace({
       place: place._id,
-      visitCount: visitedCount
+      visitCount: visitedCount,
     });
     
     visitedPlaces.push(visitedPlace);
