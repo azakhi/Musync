@@ -69,7 +69,7 @@ class BiddingSlot extends React.Component {
       .then(() => {
         this.setState((prevState) => {
           return {
-            amount: 0,
+            amount: "",
             userPoints: prevState.userPoints - prevState.amount,
             successMessage: "You have succesfully bidded " + prevState.amount + " points",
             errorMessage: null
@@ -79,6 +79,7 @@ class BiddingSlot extends React.Component {
       .catch((error)=>{
         console.log(error);
         this.setState({
+          amount: "",
           successMessage: null,
           errorMessage:error.response.data
         });

@@ -21,6 +21,7 @@ class PlaceSettings extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.placeMarkerAndPanTo = this.placeMarkerAndPanTo.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     
     this.state = {
       selectedOption: [],
@@ -28,8 +29,8 @@ class PlaceSettings extends Component {
       name: "",
       pin: "",
       location:{
-        latitude:"",
-        longitude:"",
+        latitude: 36,
+        longitude: 36,
         city:"",
         country:""
       }
@@ -44,11 +45,17 @@ class PlaceSettings extends Component {
   }
   
   componentWillReceiveProps(nextProps, nextContext) {
-    if(!this.state.placeInitialized){
+    if(!this.state.placeInitialized && nextProps.place){
+      console.log(nextProps);
+      let options = [];
+      if(nextProps.place.genres)
+        options = nextProps.place.genres.map(genre => {return {value: genre, label: genre} });
+      
       this.setState({
         name: nextProps.place.name,
-        selectedOptions: nextProps.place.genres ? nextProps.place.genres : [],
-        placeInitialized: true
+        selectedOption: options,
+        placeInitialized: true,
+        location: nextProps.place.location
       })
     }
   }
@@ -86,15 +93,16 @@ class PlaceSettings extends Component {
   }
   
   handleChange (selectedOption) {
-    this.setState({ selectedOption });
+    this.setState({
+      selectedOption: selectedOption
+    });
   };
   
   
   render() {
-    const {place} = this.props;
     const location = {
-      lat: place ? place.location.latitude : 36,
-      lng: place? place.location.longitude : 36
+      lat: this.state.location.latitude,
+      lng: this.state.location.longitude
     };
     
     return (
@@ -130,7 +138,7 @@ class PlaceSettings extends Component {
                      placeholder="Change pin..."/>
           <br/>
           
-          <GenrePicker onChange={this.handleChange}/>
+          <GenrePicker onChange={this.handleChange} value={this.state.selectedOption}/>
   
           <Typography variant="body1"
                       color="textPrimary" align="left">
@@ -213,7 +221,6 @@ class PlaceSettings extends Component {
                         }
                       }
                       let loc_state = markers[0].position;
-              
                       this.setState({
                         location:{
                           latitude: loc_state.lat(),
@@ -246,7 +253,7 @@ class PlaceSettings extends Component {
                         }
                       }
                       const loc_state = markers[0].position;
-              
+                      console.log(loc_state.lat());
                       this.setState({location:{
                           latitude:loc_state.lat(),
                           longitude:loc_state.lng(),
