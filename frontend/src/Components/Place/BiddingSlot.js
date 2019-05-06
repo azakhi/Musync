@@ -54,10 +54,10 @@ class BiddingSlot extends React.Component {
     });
   }
   
-  handleSubmit(event){
+  handleSubmit(){
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     axios.get(url)
-      .then((response) => {
+      .then(() => {
         this.setState({
           successMessage: "You have succesfully bidded "+this.state.amount+" points",
           errorMessage: null
@@ -99,6 +99,7 @@ class BiddingSlot extends React.Component {
   
   render() {
     const {songs,errorMessage,successMessage} = this.state;
+    const {userPoints} = this.props;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
     
@@ -123,7 +124,6 @@ class BiddingSlot extends React.Component {
               
               <Grid  container alignItems="center" justify="center" >
                 
-                
                 <TextField
                   id="votePoints"
                   label="Points"
@@ -137,15 +137,17 @@ class BiddingSlot extends React.Component {
                   Vote
                 </Button>
                 
-                
-                
+                <Typography variant="caption">
+                  {`You have remaining ${userPoints} points spend wisely.`}
+                </Typography>
                 
                 {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
                                          icon={successIcon}
                                          color="primary"
                                          variant="outlined"/>}
                 
-                {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}label={errorMessage}
+                {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}
+                                       label={errorMessage}
                                        icon={errorIcon}
                                        color="secondary"
                                        variant="outlined"/>}

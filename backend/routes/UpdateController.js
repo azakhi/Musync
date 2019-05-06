@@ -327,7 +327,7 @@ class UpdateController {
       }
       else {
         successCount++;
-        let songToMove = playlist.songs.splice(from[i], 1);
+        let songToMove = playlist.songs.splice(from[i], 1).pop();
         playlist.songs.splice(to, 0, songToMove);
 
         // update current song index
