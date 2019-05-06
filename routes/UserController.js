@@ -170,7 +170,7 @@ async function registerUser(req, res, next) {
   }
 
   let user = new models.User({
-    name: name ? name : "",
+    name: name ? name : spotifyConnection.userId,
     isRegistered: true,
     spotifyConnection: spotifyConnection ? spotifyConnection : new models.SpotifyConnection(),
     //TODO: Better email check
