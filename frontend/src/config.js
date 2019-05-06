@@ -30,6 +30,7 @@ export const CONNECT_SPOTIFY_URL = SERVER_DOMAIN + "/user/connectspotify";
 export const GET_PLAYLISTS_URL = SERVER_DOMAIN + "/user/playlists";
 export const GET_PLAYBACK_INFO_URL = SERVER_DOMAIN + "/place/playback";
 export const MAP_API_KEY = "";
+export const GET_RECOMMENDED_PLACES = SERVER_DOMAIN +"/user/recommendedplaces";
 
 
 export function generateSpotifyAuthURL(stateParam) {
