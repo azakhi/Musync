@@ -18,7 +18,7 @@ class DBManager {
     const user = encodeURIComponent(config.db.user);
     const password = encodeURIComponent(config.db.pass);
 
-    const url = user ? `mongodb://${user}:${password}@${config.db.host}:${config.db.port}/` : `mongodb://${config.db.host}:${config.db.port}/`;
+    const url = user ? `mongodb+srv://${user}:${password}@${config.db.host}/` : `mongodb://${config.db.host}/`;
     this._mongoClient = new MongoClient(url, { useNewUrlParser: true });
     
     this._mongoClient.connect(function(err) {
