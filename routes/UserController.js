@@ -18,6 +18,84 @@ router.get('/logout', logoutUser);
 router.get('/connectspotify', connectSpotify);
 router.get('/gethistory', getUserHistory);
 router.get('/playlists', getUserPlaylists);
+router.get('/recommendedplaces',getRecommendedPlaces);
+async function getGenreNames(place) {
+  let genres = [];
+  let genresIds = place.genres;
+  for (let i = 0; i < genresIds.length;i++){
+    let genre = await models.Genre.findOne({_id: genresIds[i]});
+    genres.push(genre.name);
+  }
+  return genres;
+}
+async function getRecommendedPlaces(req,res,next){
+  if (req.query.userId) {
+    if (!models.ObjectID.isValid(req.query.userId)) {
+      res.status(400).send('Error: Invalid user id');
+    }
+  
+  let user = await models.User.findOne({_id: new models.ObjectID(req.query.userId)});
+
+  let preferredGenres = [];
+
+  for(const visitedPlace of user.visitedPlaces){
+    let visPlace = await models.Place.findOne({_id:visitedPlace.place});
+    for (const genre of visPlace.genres){
+      preferredGenres.push(genre);
+    }
+  }
+  preferredGenres = [...new Set(preferredGenres)];
+  
+  let places = await models.Place.find();
+  let result = [];
+  
+
+  for(const place of places){
+    let flag = false;
+    
+    for(const visPlace of user.visitedPlaces){
+      if(visPlace.place.toHexString() === place._id.toHexString()){
+       
+        flag = true;
+        break;
+      }
+    }
+    if(!flag){
+      
+      let genres = place.genres;
+      
+      for(const genre of genres){
+        
+        let flagI = false;
+        for(const pGenre of preferredGenres){
+          if(pGenre.toHexString()===genre.toHexString())
+          {
+            flagI = true;
+          }
+        }
+
+        if(flagI){
+          let genreName = await getGenreNames(place);
+          let newGenres = [];
+          for(const gName of genreName){
+            newGenres.push(gName);
+          }
+          
+          let resultItem = place.publicInfo;
+          resultItem.genres = newGenres;
+          
+          result.push(resultItem);
+          break;
+        }
+      }
+    }
+  }
+
+  res.json({result:result});
+  
+
+  }
+}
 
 async function checkConnection(req, res, next) {
   res.json({
