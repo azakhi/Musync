@@ -79,7 +79,7 @@ class PlaceCard extends Component {
                                  style={{marginBottom: "3%"}}/>;
 
     return (
-      <Grid item xs={12} md={8} key={place._id}>
+      <Grid item xs={12} md={10} lg={8} key={place._id}>
         <Card square elevation={isTypePrimary ? 2 : 1} >
           {
             (showMedia && image) &&
