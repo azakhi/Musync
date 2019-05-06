@@ -8,7 +8,7 @@ import Link from "@material-ui/core/Link";
 
 
 const SongItem = (props) => {
-  let {song, onClick, showButton, type, disabled} = props;
+  let {song, onClick, showButton, type, disabled, highlighted} = props;
   if(!song)
     return;
   
@@ -28,9 +28,13 @@ const SongItem = (props) => {
     onClick = () => {};
     style = { opacity: 0.5 }
   }
-  
+  else if(highlighted){
+    style={
+      backgroundColor: "#e8f5e9"
+    }
+  }
   return (
-    <ListItem disableGutters divider onClick={onClick} style={style}>
+    <ListItem disableGutters onClick={onClick} style={style}>
       {
         showButton &&
         <Link color="secondary"

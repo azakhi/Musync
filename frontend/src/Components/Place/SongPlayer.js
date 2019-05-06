@@ -33,9 +33,10 @@ class SongPlayer extends Component {
   
     currentSongStartTime = new Date(currentSongStartTime).getTime();
     this.setState(prevState => {
-      const currentTime = Math.floor((Date.now() - currentSongStartTime) / 1000);
+      let currentTime = Math.floor((Date.now() - currentSongStartTime) / 1000);
       const songLength = currentSong.duration / 1000;
       const value = (currentTime * 100) / songLength;
+      currentTime = Math.floor(Math.min(currentTime, songLength));
       
       return {
         currentTime: isPlaying ? currentTime : prevState.currentTime,

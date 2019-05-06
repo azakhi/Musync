@@ -1,9 +1,8 @@
 import React from "react";
 import Map2 from "./Map2";
-import {SERVER_DOMAIN} from "../../config";
+import {MAP_API_KEY, SERVER_DOMAIN} from "../../config";
 import axios from "axios/index"
 import Grid from "@material-ui/core/Grid/index";
-import Navbar from "../Utils/Navbar";
 import Footer from "../Utils/Footer";
 import Typography from "@material-ui/core/Typography/index";
 import {Heading} from "../Utils/Heading";
@@ -73,9 +72,9 @@ export default class DoctorsMapContainer extends React.Component {
 
 			<Grid item xs={12} >
 			<Map2
-				places={this.state.places}
+				places={places}
 				initialCenter={userLocation}
-				googleMapURL={'https://maps.googleapis.com/maps/api/js?key=KEY&v=3.exp&libraries=geometry,drawing,places'}
+				googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&v=3.exp&libraries=geometry,drawing,places`}
 				loadingElement={<div align="center" style={{ height: `100%` }} />}
 				containerElement={<div align="center" style={{ height: `100%`, width: `100%` }} />}
 				mapElement={<div align="center" style={{ height: '50vh', width:'80vw' }} />}

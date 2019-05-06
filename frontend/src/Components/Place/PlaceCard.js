@@ -42,6 +42,10 @@ class PlaceCard extends Component {
     const url = GET_PLAYBACK_INFO_URL + "?placeId=" + this.props.place._id;
     axios.get(url)
       .then(response => {
+        const {onCurrentSongChange} = this.props;
+        if(typeof onCurrentSongChange === "function")
+          onCurrentSongChange(response.data.currentSong);
+        
         this.setState({
           ...response.data
         });
@@ -71,11 +75,12 @@ class PlaceCard extends Component {
 
     const connectMessage = <Chip label={`Connect to ${name} to start requesting songs!`}
                                  color="primary"
-                                 variant="outlined" style={{marginLeft: "10%", marginBottom: "3%"}}/>;
+                                 variant="outlined"
+                                 style={{marginBottom: "3%"}}/>;
 
     return (
-      <Grid item xs={12} key={place._id}>
-        <Card square elevation={isTypePrimary ? 2 : 1}>
+      <Grid item xs={12} md={8} key={place._id}>
+        <Card square elevation={isTypePrimary ? 2 : 1} >
           {
             (showMedia && image) &&
             <CardMedia component="img"
@@ -115,7 +120,9 @@ class PlaceCard extends Component {
             </CardActions>
           }
 
-          {(!isConnected && isTypePlaceView) && connectMessage}
+          <Grid container justify="center">
+            {(!isConnected && isTypePlaceView) && connectMessage}
+          </Grid>
         </Card>
       </Grid>
     );

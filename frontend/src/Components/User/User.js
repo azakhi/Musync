@@ -36,8 +36,8 @@ class User extends Component {
       margin: "5px"
     };
     
-    const { user, isAuthenticated, authUser } = this.props;
-    const isProfileOwner = (isAuthenticated && user && authUser._id === user._id);
+    const { user, isAuthenticated, authUser, match} = this.props;
+    const isProfileOwner = (isAuthenticated && user && authUser._id === match.params.id);
     
     return (
       <Grid container
@@ -51,7 +51,7 @@ class User extends Component {
         
         {
           user &&
-          <Grid container item xs={12} style={{marginLeft: "5%"}}>
+          <Grid container item xs={12} md={9} style={{marginLeft: "5%"}} justify="center">
             <Grid item xs={10}>
               <Typography variant="h5">
                 <FontAwesomeIcon icon="user"/>

@@ -12,6 +12,7 @@ import Navbar from "../Utils/Navbar";
 import withAuth from "../../auth/withAuth";
 import Divider from "@material-ui/core/Divider";
 import Chip from "@material-ui/core/Chip";
+import {setSpotifyTypeCookie} from "../../utils/utils";
 
 
 class UserSettings extends Component {
@@ -19,7 +20,10 @@ class UserSettings extends Component {
     super(props);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    
+
+    setSpotifyTypeCookie("connect");
+  
+  
     this.state = {
       name: "",
       email: "",

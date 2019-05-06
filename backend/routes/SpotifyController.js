@@ -24,16 +24,20 @@ class SpotifyController{
     return SpotifyController.parseSpotifyResponse(await request.put(options).catch((err) => { throw err }));
   }
 
-  static async addSong(spotifyConnection,playlist,song) {
+  static async addSong(spotifyConnection,playlist,song, position) {
     spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
     if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
 
     let songUri = 'spotify:track:' + song;
+    let body = position === undefined ? JSON.stringify({
+      uris: [songUri]
+    }):JSON.stringify({
+      uris: [songUri],
+      position:position
+    });
     let options = {
       url: 'https://api.spotify.com/v1/playlists/' + playlist + '/tracks',
-      body: JSON.stringify({
-        uris: [songUri]
-      }),
+      body: body,
       dataType:'json',
       headers: { 'Authorization': 'Bearer ' + spotifyConnection.accessToken, 'Content-Type': 'application/json' },
       simple: false,
@@ -288,6 +292,20 @@ class SpotifyController{
 
     return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
   }
+  static async getFavoriteTracks(spotifyConnection){
+    spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
+    if (!(spotifyConnection instanceof models.SpotifyConnection)) return spotifyConnection;
+
+    let options = {
+      url: 'https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=short_term' ,
+      headers: { Authorization: 'Bearer ' + spotifyConnection.accessToken },
+      simple: false,
+      resolveWithFullResponse: true,
+    };
+
+    return SpotifyController.parseSpotifyResponse(await request.get(options).catch((err) => { throw err }));
+
+  }
 
   static async getAlbum(spotifyConnection, albumId) {
     spotifyConnection = await SpotifyController.refreshSpotifyConnection(spotifyConnection);
@@ -339,10 +357,13 @@ class SpotifyController{
         statusCode: -1,
       }
     }
-
+    
     let bodyParsed = response.body;
-    try { bodyParsed = response.statusCode !== 204 ? JSON.parse(bodyParsed) : null; }
-    catch (e) { console.log("Warning: Couldn't parse Spotify response: " + bodyParsed); }
+    if(typeof bodyParsed === "string"){
+      try { bodyParsed = response.statusCode !== 204 ? JSON.parse(bodyParsed) : null; }
+      catch (e) { console.log("Warning: Couldn't parse Spotify response: " + bodyParsed); }
+    }
+    
     return {
       success: response.statusCode < 400,
       response: bodyParsed,

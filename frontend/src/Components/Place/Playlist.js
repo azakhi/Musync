@@ -37,6 +37,7 @@ class Playlist extends Component {
     const url = SERVER_DOMAIN + "/place/playlist?placeId=" + placeId;
     axios.get(url).then((response) => {
       let songs = response.data.songs;
+      songs = songs.filter(song => !!song.spotifySong.id);
       
       this.setState({
         songs: songs
@@ -44,15 +45,34 @@ class Playlist extends Component {
     });
   };
   
+  scrollIntoView(id, highlighted) {
+    
+    if(!highlighted)
+      return;
+  
+    const target = document.getElementById(id);
+    // el.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+    target.parentNode.scrollTop = target.offsetTop;
+    console.log(target, target.parentNode);
+  }
+  
   render() {
     const {songs} = this.state;
+    const {currentSong} = this.props;
+    
     return (
       <List dense style={{height: "70vh", overflow: "auto"}}>
-        {songs.map(song =>
-          <SongItem song={song}
-                    showButton={true}
-                    type="playlist"
-                    key={song.spotifySong.id}/>)}
+        {songs.map(song => {
+          const highlighted = (currentSong && currentSong.spotifySong.id === song.spotifySong.id);
+          return <SongItem song={song}
+                           showButton={true}
+                           type="playlist"
+                           key={song.spotifySong.id}
+                           highlighted={highlighted}
+                           id={song.spotifySong.id}
+                           onLoad={() => this.scrollIntoView(song.spotifySong.id, highlighted)}/>
+        })}
+        
       </List>
     );
   }

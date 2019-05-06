@@ -29,6 +29,7 @@ class Place extends Component {
     this.getSearchResults = this.getSearchResults.bind(this);
     this.handleClickOpen = this.handleClickOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.onCurrentSongChange = this.onCurrentSongChange.bind(this);
     
     this.state = {
       isConnected: false,
@@ -39,7 +40,8 @@ class Place extends Component {
       open: false,
       searchResults: [],
       searchTerm: "",
-      searchLoading: false
+      searchLoading: false,
+      currentSong: null
     };
   }
 
@@ -88,6 +90,15 @@ class Place extends Component {
       });
   };
   
+  onCurrentSongChange(currentSong) {
+    if(!currentSong)
+      return;
+
+    this.setState({
+      currentSong: currentSong
+    });
+  }
+  
   render() {
     const buttonStyle = {
       display: "inline-block",
@@ -96,35 +107,36 @@ class Place extends Component {
   
     const {place, isOwner, connectedPlace} = this.props;
     const isConnected = isOwner || ( place && (place._id === connectedPlace) );
-
+    const {authUser} = this.props;
+    
     return (
       <Grid container
             alignItems="center"
             direction="column"
             justify="center"
             spacing={32}>
-
         <br/>
 
         <Navbar isPlaceHeader={true}/>
 
-        <Grid container item xs={11}>
+        <Grid container item xs={11} md={8} justify="center">
           {
             place &&
             <PlaceCard place={place}
                        type={PlaceCardTypes.PlaceView}
-                       isConnected={isConnected} />
+                       isConnected={isConnected}
+                       onCurrentSongChange={this.onCurrentSongChange}/>
           }
         </Grid>
         
-        <Grid item xs={12} style={{textAlign: 'center'}}>
-          <BiddingSlot placeId={this.state.id}/>
+        <Grid item xs={12} md={8} style={{textAlign: 'center'}}>
+          <BiddingSlot placeId={this.state.id} userPoints={authUser ? authUser.points : 0}/>
           
           <Typography align="center" variant="h5" gutterBottom>
             Play Queue
           </Typography>
 
-          <Playlist placeId={this.state.id}/>
+          <Playlist placeId={this.state.id} currentSong={this.state.currentSong}/>
 
           <br/>
 

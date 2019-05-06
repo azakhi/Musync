@@ -52,7 +52,7 @@ const Navbar = (props) => {
   return (
     <Grid container
           item
-          xs={12}
+          xs={12} md={10}
           alignItems="center"
           justify="space-between">
       

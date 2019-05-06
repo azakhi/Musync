@@ -4,7 +4,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import Chip from "@material-ui/core/Chip/index";
 import CircularProgress from "@material-ui/core/CircularProgress/index";
 import Grid from "@material-ui/core/Grid/index";
-import Typography from "@material-ui/core/Typography/index";
 
 import Footer from "../Utils/Footer";
 import location from "../../location/location";
@@ -13,6 +12,7 @@ import ButtomLinks from "./ButtomLinks";
 import {NearPlaces} from "./NearPlaces";
 import ConnectPlaceDialog from "./ConnectPlaceDialog";
 import withAuth from "../../auth/withAuth";
+import Link from "@material-ui/core/Link";
 
 
 class Home extends Component {
@@ -91,6 +91,7 @@ class Home extends Component {
       connectPlaceId, connectPlaceName, connectPlaceState} = this.state;
     const {authUser, isAuthenticated} = this.props;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
+    const userIcon = <FontAwesomeIcon icon={"user"}/>;
 
     return (
       <Grid container
@@ -103,9 +104,12 @@ class Home extends Component {
         
         {
           (isAuthenticated && authUser) &&
-          <Typography align="center" variant="subtitle1" color="textPrimary">
-            {`Welcome back ${authUser.name}!`}
-          </Typography>
+          <Link href={"/user/" + authUser._id}>
+            <Chip label={`Welcome back ${authUser.name}!`}
+                  icon={userIcon}
+                  color="primary"
+                  variant="outlined"/>
+          </Link>
         }
         
         {

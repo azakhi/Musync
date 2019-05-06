@@ -10,6 +10,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome/index";
 import {GET_VOTING_STATUS_URL, VOTE_URL} from "../../config";
 import axios from "axios";
 import Chip from "@material-ui/core/Chip/index";
+import Typography from "@material-ui/core/Typography";
 
 
 class BiddingSlot extends React.Component {
@@ -41,7 +42,6 @@ class BiddingSlot extends React.Component {
     clearInterval(this.state.refreshIntervalId);
   }
   
-
   handleInputChange(event) {
     this.setState({
       amount: event.target.value
@@ -53,11 +53,11 @@ class BiddingSlot extends React.Component {
       selectedItem: val
     });
   }
-
-  handleSubmit(event){
+  
+  handleSubmit(){
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     axios.get(url)
-      .then((response) => {
+      .then(() => {
         this.setState({
           successMessage: "You have succesfully bidded "+this.state.amount+" points",
           errorMessage: null
@@ -70,9 +70,9 @@ class BiddingSlot extends React.Component {
           errorMessage:error.response.data
         });
       });
-
-  }  
-
+    
+  }
+  
   updateVoteStatus() {
     axios.post(GET_VOTING_STATUS_URL, {placeId: this.props.placeId} )
       .then((response) => {
@@ -90,7 +90,7 @@ class BiddingSlot extends React.Component {
           });
         }
         this.setState({songs: songs});
-   
+        
       })
       .catch(function (error) {
         console.log(error);
@@ -99,6 +99,7 @@ class BiddingSlot extends React.Component {
   
   render() {
     const {songs,errorMessage,successMessage} = this.state;
+    const {userPoints} = this.props;
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
     
@@ -106,8 +107,12 @@ class BiddingSlot extends React.Component {
       <Grid style = {{marginBottom:"5%"}}>
         {
           (songs && songs.length === 3) &&
-        
-          <Grid container spacing={24} alignItems="center" >
+          
+          <Grid container spacing={24} justify="center">
+            
+            <Typography variant="h5" align="center">
+              Select next song!
+            </Typography>
             
             <Grid item xs={12}>
               <GridList cols={3} cellHeight={140} >
@@ -116,36 +121,37 @@ class BiddingSlot extends React.Component {
             </Grid>
             
             <Grid item xs={12} >
-            
-                <Grid  container alignItems="center" justify="center" >
-                  
-                 
-                    <TextField
-                      id="votePoints"
-                      label="Points"
-                      onChange={this.handleInputChange}
-                      variant="outlined" margin="dense"/>
-                
               
-                    <Button variant="text"
-                            color="primary"
-                            onClick={this.handleSubmit} >                   
-                      Vote
-                    </Button>
-                    
-             
+              <Grid  container alignItems="center" justify="center" >
                 
-
-                  {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
-                                    icon={successIcon}
-                                    color="primary"
-                                    variant="outlined"/>}
-
-                  {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}label={errorMessage}
-                                      icon={errorIcon}
-                                      color="secondary"
-                                      variant="outlined"/>}
-                </Grid>              
+                <TextField
+                  id="votePoints"
+                  label="Points"
+                  onChange={this.handleInputChange}
+                  variant="outlined" margin="dense"/>
+                
+                
+                <Button variant="text"
+                        color="primary"
+                        onClick={this.handleSubmit} >
+                  Vote
+                </Button>
+                
+                <Typography variant="caption">
+                  {`You have remaining ${userPoints} points spend wisely.`}
+                </Typography>
+                
+                {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
+                                         icon={successIcon}
+                                         color="primary"
+                                         variant="outlined"/>}
+                
+                {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}
+                                       label={errorMessage}
+                                       icon={errorIcon}
+                                       color="secondary"
+                                       variant="outlined"/>}
+              </Grid>
             </Grid>
           </Grid>
           
@@ -173,12 +179,14 @@ function createSlots(self){
                     style={style} >
         <img src={self.state.songs[val].img}
              alt={self.state.songs[val].title}/>
-             
+        
         <GridListTileBar title={self.state.songs[val].title}
                          subtitle={<span> {self.state.songs[val].author}</span>}
                          actionIcon={
-                           <IconButton style={{color:"white"}} >
-                             {self.state.songs[val].voteCount}
+                           <IconButton>
+                             <Typography style={{color:"white"}} variant="h6">
+                               {self.state.songs[val].votingCount}
+                             </Typography>
                            </IconButton> } />
       </GridListTile>
     );
