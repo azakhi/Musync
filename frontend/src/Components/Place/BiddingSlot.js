@@ -25,6 +25,7 @@ class BiddingSlot extends React.Component {
       songs: [],
       amount: "",
       selectedItem: 0,
+      userPoints: null
     };
   }
   
@@ -40,6 +41,14 @@ class BiddingSlot extends React.Component {
   
   componentWillUnmount() {
     clearInterval(this.state.refreshIntervalId);
+  }
+  
+  componentWillReceiveProps(nextProps, nextContext) {
+    if(this.state.userPoints !== nextProps.userPoints){
+      this.setState({
+        userPoints: nextProps.userPoints
+      })
+    }
   }
   
   handleInputChange(event) {
@@ -58,9 +67,13 @@ class BiddingSlot extends React.Component {
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     axios.get(url)
       .then(() => {
-        this.setState({
-          successMessage: "You have succesfully bidded "+this.state.amount+" points",
-          errorMessage: null
+        this.setState((prevState) => {
+          return {
+            amount: 0,
+            userPoints: prevState.userPoints - prevState.amount,
+            successMessage: "You have succesfully bidded " + prevState.amount + " points",
+            errorMessage: null
+          }
         });
       })
       .catch((error)=>{
@@ -69,8 +82,15 @@ class BiddingSlot extends React.Component {
           successMessage: null,
           errorMessage:error.response.data
         });
+      })
+      .finally(() => {
+        setTimeout(()=>{
+          this.setState({
+            successMessage: null,
+            errorMessage: null
+          })
+        }, 3000);
       });
-    
   }
   
   updateVoteStatus() {
@@ -98,8 +118,9 @@ class BiddingSlot extends React.Component {
   };
   
   render() {
-    const {songs,errorMessage,successMessage} = this.state;
-    const {userPoints} = this.props;
+    const {songs,errorMessage,successMessage, userPoints} = this.state;
+    const displayPoint = userPoints ? Math.floor(userPoints) : 0;
+    
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
     
@@ -111,7 +132,7 @@ class BiddingSlot extends React.Component {
           <Grid container spacing={24} justify="center">
             
             <Typography variant="h5" align="center">
-              Select next song!
+              Select the next song!
             </Typography>
             
             <Grid item xs={12}>
@@ -123,12 +144,14 @@ class BiddingSlot extends React.Component {
             <Grid item xs={12} >
               
               <Grid  container alignItems="center" justify="center" >
-                
                 <TextField
                   id="votePoints"
                   label="Points"
                   onChange={this.handleInputChange}
-                  variant="outlined" margin="dense"/>
+                  value={this.state.amount}
+                  variant="outlined"
+                  margin="dense"
+                  type="number"/>
                 
                 
                 <Button variant="text"
@@ -138,7 +161,7 @@ class BiddingSlot extends React.Component {
                 </Button>
                 
                 <Typography variant="caption">
-                  {`You have remaining ${userPoints} points spend wisely.`}
+                  {`You have remaining ${displayPoint} points spend wisely.`}
                 </Typography>
                 
                 {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}

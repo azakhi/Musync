@@ -115,9 +115,12 @@ class User extends Component {
                 Recommended Places
               </Typography>
               
-              <List dense>
-                {getRecommendedPlaces(this.state.recommendedPlaces,this.state.userLocation)}
-              </List>
+              {
+                isProfileOwner &&
+                <List dense>
+                  {getRecommendedPlaces(this.state.recommendedPlaces,this.state.userLocation)}
+                </List>
+              }
             </Grid>
           </Grid>
         }
