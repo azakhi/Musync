@@ -20,6 +20,7 @@ class BiddingSlot extends React.Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.updateVoteStatus = this.updateVoteStatus.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChipDelete = this.handleChipDelete.bind(this);
     
     this.state = {
       songs: [],
@@ -44,7 +45,7 @@ class BiddingSlot extends React.Component {
   }
   
   componentWillReceiveProps(nextProps, nextContext) {
-    if(this.state.userPoints !== nextProps.userPoints){
+    if(!this.state.userPoints){
       this.setState({
         userPoints: nextProps.userPoints
       })
@@ -64,6 +65,9 @@ class BiddingSlot extends React.Component {
   }
   
   handleSubmit(){
+    if(!this.state.amount)
+      return;
+    
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     axios.get(url)
       .then(() => {
@@ -84,14 +88,6 @@ class BiddingSlot extends React.Component {
           errorMessage:error.response.data
         });
       })
-      .finally(() => {
-        setTimeout(()=>{
-          this.setState({
-            successMessage: null,
-            errorMessage: null
-          })
-        }, 3000);
-      });
   }
   
   updateVoteStatus() {
@@ -118,6 +114,15 @@ class BiddingSlot extends React.Component {
       });
   };
   
+  handleChipDelete(isSuccess) {
+    this.setState(prevState => {
+      return {
+        successMessage: isSuccess ? null : prevState.successMessage,
+        errorMessage: !isSuccess ? null : prevState.errorMessage,
+      };
+    })
+  }
+  
   render() {
     const {songs,errorMessage,successMessage, userPoints} = this.state;
     const displayPoint = userPoints ? Math.floor(userPoints) : 0;
@@ -142,9 +147,9 @@ class BiddingSlot extends React.Component {
               </GridList>
             </Grid>
             
-            <Grid item xs={12} >
+            <Grid container item justify="center" xs={9} md={6} lg={4} direction="column">
               
-              <Grid  container alignItems="center" justify="center" >
+              <Grid container alignContent="center" justify="center">
                 <TextField
                   id="votePoints"
                   label="Points"
@@ -154,29 +159,30 @@ class BiddingSlot extends React.Component {
                   margin="dense"
                   type="number"/>
                 
-                
                 <Button variant="text"
                         color="primary"
                         onClick={this.handleSubmit} >
                   Vote
                 </Button>
-                
-                <Typography variant="caption">
-                  {`You have remaining ${displayPoint} points spend wisely.`}
-                </Typography>
-                
-                {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
-                                         icon={successIcon}
-                                         color="primary"
-                                         variant="outlined"/>}
-                
-                {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}
-                                       label={errorMessage}
-                                       icon={errorIcon}
-                                       color="secondary"
-                                       variant="outlined"/>}
               </Grid>
+              
+              <Typography variant="caption" gutterBottom style={{marginBottom: "5%"}}>
+                {`You have remaining ${displayPoint} points spend wisely.`}
+              </Typography>
+  
+              {successMessage && <Chip label={successMessage}
+                                       icon={successIcon}
+                                       color="primary"
+                                       variant="outlined"
+                                       onDelete={() => this.handleChipDelete(true)}/>}
+              
+              {errorMessage && <Chip label={errorMessage}
+                                     icon={errorIcon}
+                                     color="secondary"
+                                     variant="outlined"
+                                     onDelete={() => this.handleChipDelete(false)}/>}
             </Grid>
+          
           </Grid>
           
         }

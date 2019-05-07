@@ -99,10 +99,13 @@ class PlaceCard extends Component {
               {genres.map(genre => capitalizeFirstLetter(genre)).join(", ")}
             </Typography>
 
-            <Typography align="center" variant="body2">
-              <FontAwesomeIcon icon="music"/>
-              {currentSong && ` ${currentSong.artistName[0]} - ${currentSong.name}`}
-            </Typography>
+            {
+              currentSong &&
+              <Typography align="center" variant="body2">
+                <FontAwesomeIcon icon={["fab", "itunes-note"]} style={{marginRight: "5px"}}/>
+                {currentSong.artistName[0] + " - " + currentSong.name}
+              </Typography>
+            }
 
             {isTypePlaceView && <SongPlayer {...this.state}/>}
 
