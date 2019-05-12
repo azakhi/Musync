@@ -81,7 +81,7 @@ async function createNewPlace(req, res) {
   
   const body = req.body;
   const {name, location, isPermanent, pin, playlist} = body;
-  if(!name || !location || !location.longitude || !location.latitude || !pin || !playlist){
+  if(!name || !location || !location.longitude || !location.latitude || !pin){
     res.status(400).send('Error: Missing information!');
     return;
   }
@@ -106,43 +106,48 @@ async function createNewPlace(req, res) {
     res.status(400).send("Error: You must use a different Spotify account!");
     return;
   }
-  
-  let pl = await spotifyController.getPlaylist(user.spotifyConnection, playlist);
-  if(pl.success)
-    pl = pl.response;
-  
-  let songs = [];
-  for (let track of pl.tracks.items) {
-    if(!track.track.id || !track.track.name)
-      continue;
-    
-    let spotifyItem = new models.SpotifyItem({
-      id: track.track.id,
-      uri: track.track.uri ? track.track.uri : "",
-      name: track.track.name,
-    });
-    
-    let artistArray = [];
-    for(const artist of track.track.artists){
-      let artistName = new DBBasicTypes.DBString(artist.name);
-      artistArray.push(artistName);
-    }
-    
-    let song = new models.Song({
-      artistName: artistArray,
-      name: track.track.name,
-      duration: track.track.duration_ms,
-      spotifySong: spotifyItem,
-    });
-    songs.push(song);
+
+  let pl = null;
+  if (playlist) {
+    pl = await spotifyController.getPlaylist(user.spotifyConnection, playlist);
   }
-  
-  let spotifyPlaylist = new models.SpotifyItem({
-    id: pl.id,
-    uri: pl.uri,
-    name: pl.name,
-    description: pl.description,
-  });
+
+  let spotifyPlaylist = new models.SpotifyItem();
+  let songs = [];
+  if (pl && pl.success) {
+    pl = pl.response;
+    for (let track of pl.tracks.items) {
+      if (!track.track.id || !track.track.name)
+        continue;
+
+      let spotifyItem = new models.SpotifyItem({
+        id: track.track.id,
+        uri: track.track.uri ? track.track.uri : "",
+        name: track.track.name,
+      });
+
+      let artistArray = [];
+      for (const artist of track.track.artists) {
+        let artistName = new DBBasicTypes.DBString(artist.name);
+        artistArray.push(artistName);
+      }
+
+      let song = new models.Song({
+        artistName: artistArray,
+        name: track.track.name,
+        duration: track.track.duration_ms,
+        spotifySong: spotifyItem,
+      });
+      songs.push(song);
+    }
+
+    spotifyPlaylist = new models.SpotifyItem({
+      id: pl.id,
+      uri: pl.uri,
+      name: pl.name,
+      description: pl.description,
+    });
+  }
   
   let playlistObj = new models.Playlist({
     songs: songs,
@@ -160,7 +165,7 @@ async function createNewPlace(req, res) {
     name: name,
     owner: user._id,
     pin: pin,
-    genres: !!isPermanent && genreIds,
+    genres: isPermanent ? genreIds : [],
     votes: [],
     votedSongs: [],
     songRecords: [],
