@@ -24,7 +24,6 @@ export default class DoctorsMapContainer extends React.Component {
 		axios.get(url, {
   })
   .then(function (response) {
-  	console.log(response.data);
 		self.setState({places: response.data});
   })
   .catch(function (error) {

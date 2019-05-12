@@ -18,7 +18,7 @@ const Navbar = (props) => {
   
   const profileLink =
     <Grid item xs={4}>
-      <Typography align="center">
+      <Typography align="center" color="primary">
         <Link href={isAuthenticated ? "/user/" + authUser._id : ""} color="inherit">
           Profile
           <FontAwesomeIcon icon="user" size="2x" style={iconStyle}/>
@@ -28,7 +28,7 @@ const Navbar = (props) => {
   
   const loginLink =
     <Grid item xs={4}>
-      <Typography align="center">
+      <Typography align="center" color="primary">
         <Link href="/login" color="inherit">
           Login
         </Link>
@@ -37,7 +37,7 @@ const Navbar = (props) => {
     
   const backLink =
     <Grid item xs={4} onClick={() => history.goBack()}>
-      <Typography align="center">
+      <Typography align="center" color="primary">
         <FontAwesomeIcon icon="chevron-left" size="2x" style={iconStyle}/>
         Back
       </Typography>
@@ -56,8 +56,8 @@ const Navbar = (props) => {
           alignItems="center"
           justify="space-between">
       
-      <Grid item xs={6} onClick={() => history.push('/')}>
-        <Typography variant="h4" align="center">
+      <Grid item xs={6} onClick={() => history.push('/')} style={{cursor: "pointer"}}>
+        <Typography variant="h4" align="center" color="primary">
           <FontAwesomeIcon icon={["fab", "itunes-note"]}
                            style={{marginRight: "7px"}}
                            size="sm"/>

@@ -46,7 +46,6 @@ class PlaceSettings extends Component {
   
   componentWillReceiveProps(nextProps, nextContext) {
     if(!this.state.placeInitialized && nextProps.place){
-      console.log(nextProps);
       let options = [];
       if(nextProps.place.genres)
         options = nextProps.place.genres.map(genre => {return {value: genre, label: genre} });
@@ -253,7 +252,6 @@ class PlaceSettings extends Component {
                         }
                       }
                       const loc_state = markers[0].position;
-                      console.log(loc_state.lat());
                       this.setState({location:{
                           latitude:loc_state.lat(),
                           longitude:loc_state.lng(),
