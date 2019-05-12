@@ -10,7 +10,9 @@ export const Heading = () => {
   return (
     <Grid item xs={10} onClick={() => history.push('/')}>
       <Typography variant="h2" align="center">
-        <FontAwesomeIcon icon="guitar"/>
+        <FontAwesomeIcon icon={["fab", "itunes-note"]}
+                         style={{marginRight: "7px"}}
+                         size="sm"/>
         Musync
       </Typography>
     

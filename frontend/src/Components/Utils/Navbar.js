@@ -58,7 +58,9 @@ const Navbar = (props) => {
       
       <Grid item xs={6} onClick={() => history.push('/')}>
         <Typography variant="h4" align="center">
-          <FontAwesomeIcon icon="guitar"/>
+          <FontAwesomeIcon icon={["fab", "itunes-note"]}
+                           style={{marginRight: "7px"}}
+                           size="sm"/>
           Musync
         </Typography>
       </Grid>
