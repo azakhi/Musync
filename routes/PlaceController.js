@@ -455,6 +455,11 @@ async function voteForSong(req, res) {
     res.status(400).send('Error: Missing information');
     return;
   }
+  
+  if (isNaN(points) || points < 0) {
+    res.status(400).send('Error: Invalid points value');
+    return;
+  }
 
   let result = await getConnectedPlace(req);
   if (!result.result) {
