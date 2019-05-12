@@ -320,7 +320,7 @@ async function connectToPlace(req, res) {
       return;
     }
     let visitedCount = 1;
-    let point = 0;
+    let point = place.initialPoint;
     let visitedPlaces = user.visitedPlaces;
     for(let i = 0; i <  visitedPlaces.length; i++){
       if(place._id.toHexString() === visitedPlaces[i].place.toHexString()){
