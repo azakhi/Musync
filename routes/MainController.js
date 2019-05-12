@@ -185,7 +185,7 @@ router.post('/addsong', async function(req, res, next) {
 
   let spotifyConnection = place.spotifyConnection;
   let playlistId = playlist.spotifyPlaylist.id;
-  await spotifyController.addSong(spotifyConnection, playlistId, song.id);
+  await spotifyController.addSong(spotifyConnection, playlistId, song.id, (playlist.currentSong + 4) % playlist.songs.length);
 
   res.status(200).json({ success: true });
 });
