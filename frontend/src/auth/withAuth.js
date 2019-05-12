@@ -110,7 +110,6 @@ const withAuth = (WrappedComponent, type) => {
       const url = GET_USER_PROFILE_URL + `?userId=${userId}`;
       axios.get(url, { cancelToken: this.state.source.token })
         .then(response => {
-          console.log(response);
           this.setState({
             user: response.data
           });

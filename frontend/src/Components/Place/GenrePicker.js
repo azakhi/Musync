@@ -44,6 +44,7 @@ class GenrePicker extends Component {
                 placeholder="Select genres..."
                 name="genres"
                 onChange={this.props.onChange}
+                value={this.props.value}
                 options={options} />
         <br/>
       </Grid>

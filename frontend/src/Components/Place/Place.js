@@ -48,8 +48,6 @@ class Place extends Component {
   componentDidMount() {
     const { requestPlaceInfo, match } = this.props;
     const placeId = match.params.id;
-    setInterval(this.updateVoteStatus, 5000);
-    setInterval(this.getPlaylist, 5000);
     requestPlaceInfo(placeId);
   }
   
@@ -129,8 +127,8 @@ class Place extends Component {
           }
         </Grid>
         
-        <Grid item xs={12} md={8} style={{textAlign: 'center'}}>
-          <BiddingSlot placeId={this.state.id} userPoints={authUser ? authUser.points : 0}/>
+        <Grid item xs={11} md={8} style={{textAlign: 'center'}}>
+          <BiddingSlot placeId={this.state.id} userPoints={authUser && authUser.points}/>
           
           <Typography align="center" variant="h5" gutterBottom>
             Play Queue

@@ -20,11 +20,13 @@ class BiddingSlot extends React.Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.updateVoteStatus = this.updateVoteStatus.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChipDelete = this.handleChipDelete.bind(this);
     
     this.state = {
       songs: [],
       amount: "",
       selectedItem: 0,
+      userPoints: null
     };
   }
   
@@ -42,6 +44,14 @@ class BiddingSlot extends React.Component {
     clearInterval(this.state.refreshIntervalId);
   }
   
+  componentWillReceiveProps(nextProps, nextContext) {
+    if(!this.state.userPoints){
+      this.setState({
+        userPoints: nextProps.userPoints
+      })
+    }
+  }
+  
   handleInputChange(event) {
     this.setState({
       amount: event.target.value
@@ -55,22 +65,29 @@ class BiddingSlot extends React.Component {
   }
   
   handleSubmit(){
+    if(!this.state.amount)
+      return;
+    
     let url = VOTE_URL +"?points="+ this.state.amount+"&songIndex="+this.state.selectedItem;
     axios.get(url)
       .then(() => {
-        this.setState({
-          successMessage: "You have succesfully bidded "+this.state.amount+" points",
-          errorMessage: null
+        this.setState((prevState) => {
+          return {
+            amount: "",
+            userPoints: prevState.userPoints - prevState.amount,
+            successMessage: "You have succesfully bidded " + prevState.amount + " points",
+            errorMessage: null
+          }
         });
       })
       .catch((error)=>{
         console.log(error);
         this.setState({
+          amount: "",
           successMessage: null,
           errorMessage:error.response.data
         });
-      });
-    
+      })
   }
   
   updateVoteStatus() {
@@ -97,9 +114,19 @@ class BiddingSlot extends React.Component {
       });
   };
   
+  handleChipDelete(isSuccess) {
+    this.setState(prevState => {
+      return {
+        successMessage: isSuccess ? null : prevState.successMessage,
+        errorMessage: !isSuccess ? null : prevState.errorMessage,
+      };
+    })
+  }
+  
   render() {
-    const {songs,errorMessage,successMessage} = this.state;
-    const {userPoints} = this.props;
+    const {songs,errorMessage,successMessage, userPoints} = this.state;
+    const displayPoint = userPoints ? Math.floor(userPoints) : 0;
+    
     const errorIcon = <FontAwesomeIcon icon={"exclamation-triangle"}/>;
     const successIcon = <FontAwesomeIcon icon={"check-circle"}/>;
     
@@ -111,7 +138,7 @@ class BiddingSlot extends React.Component {
           <Grid container spacing={24} justify="center">
             
             <Typography variant="h5" align="center">
-              Select next song!
+              Select the next song!
             </Typography>
             
             <Grid item xs={12}>
@@ -120,39 +147,42 @@ class BiddingSlot extends React.Component {
               </GridList>
             </Grid>
             
-            <Grid item xs={12} >
+            <Grid container item justify="center" xs={9} md={6} lg={4} direction="column">
               
-              <Grid  container alignItems="center" justify="center" >
-                
+              <Grid container alignContent="center" justify="center">
                 <TextField
                   id="votePoints"
                   label="Points"
                   onChange={this.handleInputChange}
-                  variant="outlined" margin="dense"/>
-                
+                  value={this.state.amount}
+                  variant="outlined"
+                  margin="dense"
+                  type="number"/>
                 
                 <Button variant="text"
                         color="primary"
                         onClick={this.handleSubmit} >
                   Vote
                 </Button>
-                
-                <Typography variant="caption">
-                  {`You have remaining ${userPoints} points spend wisely.`}
-                </Typography>
-                
-                {successMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}} label={successMessage}
-                                         icon={successIcon}
-                                         color="primary"
-                                         variant="outlined"/>}
-                
-                {errorMessage && <Chip style = {{marginBottom:"5%",marginTop:"2%"}}
-                                       label={errorMessage}
-                                       icon={errorIcon}
-                                       color="secondary"
-                                       variant="outlined"/>}
               </Grid>
+              
+              <Typography variant="caption" gutterBottom style={{marginBottom: "5%"}}>
+                {`You have remaining ${displayPoint} points spend wisely.`}
+              </Typography>
+  
+              {successMessage && <Chip label={successMessage}
+                                       icon={successIcon}
+                                       color="primary"
+                                       variant="outlined"
+                                       onDelete={() => this.handleChipDelete(true)}/>}
+              
+              {errorMessage && <Chip label={errorMessage}
+                                     icon={errorIcon}
+                                     color="secondary"
+                                     variant="outlined"
+                                     onDelete={() => this.handleChipDelete(false)}/>}
             </Grid>
+          
           </Grid>
           
         }
@@ -169,7 +199,7 @@ function createSlots(self){
     let style = {borderColor: "", borderStyle: ""};
     if(self.state.selectedItem === val)
       style = {
-        borderColor: "green",
+        borderColor: "yellow",
         borderStyle: "solid"
       };
     

@@ -56,7 +56,6 @@ class User extends Component {
     axios.get(url+"?userId="+userId).then((response)=>{
 
       this.setState({recommendedPlaces: response.data.result});
-      console.log(this.state);
     });
 
   };
@@ -84,14 +83,14 @@ class User extends Component {
           user &&
           <Grid container item xs={12} md={9} style={{marginLeft: "5%"}} justify="center">
             <Grid item xs={10}>
-              <Typography variant="h5">
+              <Typography variant="h6">
                 <FontAwesomeIcon icon="user"/>
                 {` ${user.name} · ${Math.ceil(user.points)} points`}
               </Typography>
             </Grid>
             
             <Grid item xs={10} style={{marginTop: "3%"}}>
-              <Typography variant="body2">
+              <Typography variant="body2" color="primary">
                 Visited Places
               </Typography>
               
@@ -101,7 +100,7 @@ class User extends Component {
             </Grid>
             
             <Grid item xs={10} style={{marginTop: "3%"}}>
-              <Typography variant="body2">
+              <Typography variant="body2" color="primary">
                 Song Requests
               </Typography>
               
@@ -111,13 +110,16 @@ class User extends Component {
             </Grid>
             
             <Grid item xs={10} style={{marginTop: "3%"}}>
-              <Typography variant="body2">
+              <Typography variant="body2" color="primary">
                 Recommended Places
               </Typography>
               
-              <List dense>
-                {getRecommendedPlaces(this.state.recommendedPlaces,this.state.userLocation)}
-              </List>
+              {
+                isProfileOwner &&
+                <List dense>
+                  {getRecommendedPlaces(this.state.recommendedPlaces,this.state.userLocation)}
+                </List>
+              }
             </Grid>
           </Grid>
         }
@@ -143,6 +145,7 @@ class User extends Component {
   
             <Typography gutterBottom align="center" style={{marginTop: "10px"}}>
               <Link component={RouterLink}
+                    color="secondary"
                     to="/logout"
                     onClick={() => this.props.logout()}
                     children="Logout" />
@@ -150,7 +153,7 @@ class User extends Component {
           </Grid>
         }
         
-        <Footer style={{position: "fixed", bottom: "1%"}}/>
+        <Footer />
       
       </Grid>
     );

@@ -17,12 +17,14 @@ export const NearPlaces = (props) => {
                                handleConnectPlace={handleConnectPlace}/>;
   
   return (
-    <Grid container item xs={11} md={8} justify="center">
-      {mainPlaceCard}
+    <Grid container item xs={12} md={6} lg={8} justify="center">
+      <Grid container item xs={11} md={10} lg={8} justify="center">
+        {mainPlaceCard}
+      </Grid>
       
       {
         mainPlace &&
-        <Grid container item xs={10} spacing={16} justify="center">
+        <Grid container item xs={10} md={8} lg={6} spacing={16} justify="center">
           <br/>
           <Typography gutterBottom align="center" style={{marginTop: "10%"}}>
             Are you not in {mainPlace.name}? Try these ones

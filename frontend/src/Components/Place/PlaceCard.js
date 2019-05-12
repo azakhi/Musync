@@ -79,7 +79,7 @@ class PlaceCard extends Component {
                                  style={{marginBottom: "3%"}}/>;
 
     return (
-      <Grid item xs={12} md={8} key={place._id}>
+      <Grid item xs={12} md={10} lg={8} key={place._id}>
         <Card square elevation={isTypePrimary ? 2 : 1} >
           {
             (showMedia && image) &&
@@ -99,10 +99,13 @@ class PlaceCard extends Component {
               {genres.map(genre => capitalizeFirstLetter(genre)).join(", ")}
             </Typography>
 
-            <Typography align="center" variant="body2">
-              <FontAwesomeIcon icon="music"/>
-              {currentSong && ` ${currentSong.artistName[0]} - ${currentSong.name}`}
-            </Typography>
+            {
+              currentSong &&
+              <Typography align="center" variant="body2">
+                <FontAwesomeIcon icon={["fab", "itunes-note"]} style={{marginRight: "5px"}}/>
+                {currentSong.artistName[0] + " - " + currentSong.name}
+              </Typography>
+            }
 
             {isTypePlaceView && <SongPlayer {...this.state}/>}
 

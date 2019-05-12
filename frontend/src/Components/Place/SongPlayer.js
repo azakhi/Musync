@@ -2,13 +2,14 @@ import React, {Component} from "react";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 
 class SongPlayer extends Component {
   constructor(props) {
     super(props);
     this.incrementTimer = this.incrementTimer.bind(this);
-  
+    
     this.state = {
       currentTime: 0,
       songLength: 100,
@@ -30,7 +31,7 @@ class SongPlayer extends Component {
     
     if(!currentSong || currentSongStartTime === undefined || currentSongStartTime === null)
       return;
-  
+    
     currentSongStartTime = new Date(currentSongStartTime).getTime();
     this.setState(prevState => {
       let currentTime = Math.floor((Date.now() - currentSongStartTime) / 1000);
@@ -48,25 +49,29 @@ class SongPlayer extends Component {
   
   render() {
     return (
-      <Grid container>
-        <Grid item xs={2}>
-          <Typography align="center">
-            {formatTime(this.state.currentTime)}
-          </Typography>
-        </Grid>
+      <Grid container justify="center" alignContent="center">
+        <Typography align="left">
+          {formatTime(this.state.currentTime)}
+        </Typography>
+        
         <Grid item xs={8}>
           <LinearProgress variant="determinate"
-                          value={this.state.value}
-                          style={{marginTop:"4%"}} />
-        </Grid>
-        <Grid item xs={2}>
-          <Typography align="center">
-            {formatTime(this.state.songLength)}
-          </Typography>
+                          value={this.state.value} style={{margin: "8px"}}/>
         </Grid>
         
+        <Typography align="right">
+          {formatTime(this.state.songLength)}
+        </Typography>
         
-        
+        {
+          !this.props.isPlaying &&
+          <Grid item xs={8}>
+            <Typography align="center">
+              <FontAwesomeIcon icon="pause" size="1x" style={{marginRight: "5px"}}/>
+              Paused
+            </Typography>
+          </Grid>
+        }
       </Grid>
     );
   }
