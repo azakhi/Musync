@@ -280,7 +280,8 @@ async function connectToPlace(req, res) {
     let visitedPlace = new models.VisitedPlace({
       date: Date.now(),
       place: place._id,
-      visitCount: 1
+      visitCount: 1,
+      points: place.initialPoint,
     });
     
     let user = new models.User({
@@ -299,8 +300,13 @@ async function connectToPlace(req, res) {
 
     
   }
+  else if (req.session.connectedPlace && req.session.connectedPlace === place._id.toHexString()) { // Connecting to same place
+    res.json({ // No need to send anything else. Let frontend redirect
+      success: true,
+    });
+  }
   else {
-    
+
     if (!models.ObjectID.isValid(req.session.userId)) {
       req.session.destroy();
       res.status(400).send('Error: Authentication is invalid. Please login again');
@@ -314,10 +320,17 @@ async function connectToPlace(req, res) {
       return;
     }
     let visitedCount = 1;
+    let point = 0;
     let visitedPlaces = user.visitedPlaces;
     for(let i = 0; i <  visitedPlaces.length; i++){
-      if(place._id === visitedPlaces[i].place){
+      if(place._id.toHexString() === visitedPlaces[i].place.toHexString()){
         visitedCount = visitedPlaces[i].visitCount + 1;
+        if ((Date.now() - visitedPlaces[i].date.getTime()) < 24 * 60 * 60 * 1000) { // Reconnect in same day
+          point = visitedPlaces[i].points;
+        }
+        else {
+          point = place.initialPoint*(visitedCount/10+1);
+        }
         visitedPlaces.splice(i,1);
       }
     }
@@ -329,7 +342,7 @@ async function connectToPlace(req, res) {
     
     visitedPlaces.push(visitedPlace);
     user.visitedPlaces = visitedPlaces;  
-    user.points = place.initialPoint*(visitedCount/10+1);
+    user.points = point;
     
     req.session.connectedPlace = place._id.toHexString();
     res.json({ // No need to send anything else. Let frontend redirect
@@ -481,6 +494,15 @@ async function voteForSong(req, res) {
   votes[req.query.songIndex] += points;
   place.votes = votes;
   user.points = user.points - points;
+  let visitedPlaces = user.visitedPlaces;
+  for(let i = 0; i <  visitedPlaces.length; i++){
+    if(place._id.toHexString() === visitedPlaces[i].place.toHexString()){
+      visitedPlaces[i].points = user.points;
+      break;
+    }
+  }
+  user.visitedPlaces = visitedPlaces;
+
   res.json({
     success: true,
   });

@@ -7,6 +7,7 @@ class VisitedPlace extends DBObjectBase {
     this.date = new DBBasicTypes.DBDate(Date.now());
     this.place = new DBBasicTypes.DBObjectID(null);
     this.visitCount = new DBBasicTypes.DBNumber(1, 0);
+    this.points = new DBBasicTypes.DBNumber(0, 0);
   }
 }
 
