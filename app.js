@@ -31,7 +31,7 @@ app.use(session({
   maxAge: Date.now() + (60 * 60 * 1000),
 }));
 app.use(cors({
-  origin: ['http://localhost:3000'],
+  origin: ['https://musync-app.herokuapp.com'],
   methods: ['GET', 'POST'],
   credentials: true
 }));
