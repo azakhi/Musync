@@ -199,7 +199,7 @@ function createSlots(self){
     let style = {borderColor: "", borderStyle: ""};
     if(self.state.selectedItem === val)
       style = {
-        borderColor: "green",
+        borderColor: "yellow",
         borderStyle: "solid"
       };
     

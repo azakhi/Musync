@@ -127,7 +127,7 @@ class Place extends Component {
           }
         </Grid>
         
-        <Grid item xs={12} md={8} style={{textAlign: 'center'}}>
+        <Grid item xs={11} md={8} style={{textAlign: 'center'}}>
           <BiddingSlot placeId={this.state.id} userPoints={authUser && authUser.points}/>
           
           <Typography align="center" variant="h5" gutterBottom>

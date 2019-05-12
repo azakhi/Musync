@@ -38,12 +38,12 @@ const SongItem = (props) => {
   }
   return (
     <ListItem disableGutters onClick={onClick} style={style}>
-      <ListItemAvatar>
-        {
-          (song && song.songUri) &&
+      {
+        (song && song.songUri) &&
+        <ListItemAvatar>
           <Avatar alt={song.name} src={song.songUri} style={{ borderRadius: 0 }}/>
-        }
-      </ListItemAvatar>
+        </ListItemAvatar>
+      }
       
       <ListItemText>
         <Typography variant="body2" align="left" >
@@ -53,7 +53,7 @@ const SongItem = (props) => {
           {artists && artists.join(', ')}
         </Typography>
       </ListItemText>
-  
+      
       <ListItemSecondaryAction>
         {
           showButton &&

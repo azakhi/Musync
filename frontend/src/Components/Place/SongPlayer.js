@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 
 class SongPlayer extends Component {
@@ -48,7 +49,7 @@ class SongPlayer extends Component {
   
   render() {
     return (
-      <Grid container justify="center">
+      <Grid container justify="center" alignContent="center">
         <Typography align="left">
           {formatTime(this.state.currentTime)}
         </Typography>
@@ -62,6 +63,15 @@ class SongPlayer extends Component {
           {formatTime(this.state.songLength)}
         </Typography>
         
+        {
+          !this.props.isPlaying &&
+          <Grid item xs={8}>
+            <Typography align="center">
+              <FontAwesomeIcon icon="pause" size="1x" style={{marginRight: "5px"}}/>
+              Paused
+            </Typography>
+          </Grid>
+        }
       </Grid>
     );
   }

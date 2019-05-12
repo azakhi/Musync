@@ -46,7 +46,6 @@ class Playlist extends Component {
   };
   
   scrollIntoView(id, highlighted) {
-    
     if(!highlighted)
       return;
   
@@ -62,12 +61,12 @@ class Playlist extends Component {
     
     return (
       <List dense style={{height: "70vh", overflow: "auto"}}>
-        {songs.map(song => {
+        {songs.map((song, index) => {
           const highlighted = (currentSong && currentSong.spotifySong.id === song.spotifySong.id);
           return <SongItem song={song}
                            showButton={true}
                            type="playlist"
-                           key={song.spotifySong.id}
+                           key={song.spotifySong.id + index}
                            highlighted={highlighted}
                            id={song.spotifySong.id}
                            onLoad={() => this.scrollIntoView(song.spotifySong.id, highlighted)}/>
